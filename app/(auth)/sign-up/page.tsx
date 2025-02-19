@@ -3,22 +3,33 @@
 import React, { useState, FC, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import Head from "next/head";
+import { register } from "@/app/services/authService";
+import { useRouter } from "next/navigation";
 
 interface FormData {
   name: string;
+  first_name: string;
+  last_name: string;
   email: string;
   password: string;
   confirmPassword: string;
+  phone: string;
+  address: string;
 }
 
 const SignUp: FC = () => {
   const [formData, setFormData] = useState<FormData>({
     name: "",
+    first_name: "",
+    last_name: "",
     email: "",
     password: "",
     confirmPassword: "",
+    phone: "",
+    address: "",
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
+  const router = useRouter();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
@@ -31,10 +42,8 @@ const SignUp: FC = () => {
   const validateForm = (): boolean => {
     const newErrors: Partial<FormData> = {};
 
-    if (!formData.name) {
-      newErrors.name = "Name is required";
-    }
-
+    if (!formData.first_name) newErrors.first_name = "First name is required";
+    if (!formData.last_name) newErrors.last_name = "Last name is required";
     if (!formData.email) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
@@ -57,12 +66,29 @@ const SignUp: FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (validateForm()) {
-      // Handle registration logic here
-      console.log("Registration submitted:", formData);
-      // Redirect or show success message
+    console.log("Form submitted", formData);
+    if (!validateForm()) {
+      console.log("Form is invalid");
+      return;
+    }
+
+    try {
+      console.log("Registering user", formData);
+      await register(
+        formData.name,
+        formData.email,
+        formData.password,
+        formData.first_name,
+        formData.last_name,
+        formData.phone,
+        formData.address
+      );
+      console.log("Registration successful");
+      router.push("/sign-in");
+    } catch (error) {
+      console.error("Registration failed", error);
     }
   };
 
@@ -103,6 +129,52 @@ const SignUp: FC = () => {
 
           <div>
             <label
+              htmlFor="first_name"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              First Name
+            </label>
+            <input
+              type="text"
+              id="first_name"
+              name="first_name"
+              value={formData.first_name}
+              onChange={handleChange}
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                errors.first_name ? "border-red-500" : "border-gray-300"
+              }`}
+              placeholder="Your first name"
+            />
+            {errors.first_name && (
+              <p className="mt-1 text-red-500 text-sm">{errors.first_name}</p>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="last_name"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              Last Name
+            </label>
+            <input
+              type="text"
+              id="last_name"
+              name="last_name"
+              value={formData.last_name}
+              onChange={handleChange}
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                errors.last_name ? "border-red-500" : "border-gray-300"
+              }`}
+              placeholder="Your last name"
+            />
+            {errors.last_name && (
+              <p className="mt-1 text-red-500 text-sm">{errors.last_name}</p>
+            )}
+          </div>
+
+          <div>
+            <label
               htmlFor="email"
               className="block text-gray-700 font-medium mb-2"
             >
@@ -121,6 +193,52 @@ const SignUp: FC = () => {
             />
             {errors.email && (
               <p className="mt-1 text-red-500 text-sm">{errors.email}</p>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="phone"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              Phone
+            </label>
+            <input
+              type="text"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                errors.phone ? "border-red-500" : "border-gray-300"
+              }`}
+              placeholder="Your phone number"
+            />
+            {errors.phone && (
+              <p className="mt-1 text-red-500 text-sm">{errors.phone}</p>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="address"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              Address
+            </label>
+            <input
+              type="text"
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                errors.address ? "border-red-500" : "border-gray-300"
+              }`}
+              placeholder="Your address"
+            />
+            {errors.address && (
+              <p className="mt-1 text-red-500 text-sm">{errors.address}</p>
             )}
           </div>
 
