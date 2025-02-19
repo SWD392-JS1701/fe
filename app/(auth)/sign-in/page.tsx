@@ -31,7 +31,7 @@ const SignIn: FC = () => {
 
     try {
       const data = await login(formData.email, formData.password);
-      localStorage.setItem("access_token", data.access_token);
+      localStorage.setItem("access_token", JSON.stringify(data));
       router.push("/");
     } catch (err: any) {
       setError(err.message);

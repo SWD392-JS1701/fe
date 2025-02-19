@@ -55,7 +55,8 @@ export const login = async (email: string, password: string) => {
     }
 
     const data = await response.json();
-    return data; // { access_token: "..." }
+    localStorage.setItem("access_token", JSON.stringify(data));
+    return data;
   } catch (error) {
     console.error("Login API Error:", error);
     throw new Error("Failed to fetch. Please try again.");
