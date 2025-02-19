@@ -3,6 +3,8 @@
 import React, { useState, FC, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import Head from "next/head";
+import { login } from "@/app/services/authService";
+import { useRouter } from "next/navigation";
 
 interface FormData {
   email: string;
@@ -10,45 +12,28 @@ interface FormData {
 }
 
 const SignIn: FC = () => {
-  const [formData, setFormData] = useState<FormData>({
-    email: "",
-    password: "",
-  });
-  const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const validateForm = (): boolean => {
-    const newErrors: Partial<FormData> = {};
-
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (validateForm()) {
-      // Handle login logic here
-      console.log("Login submitted:", formData);
-      // Redirect or show success message
+    setError(null);
+    setLoading(true);
+
+    try {
+      const data = await login(formData.email, formData.password);
+      localStorage.setItem("access_token", data.access_token);
+      router.push("/");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -79,13 +64,11 @@ const SignIn: FC = () => {
                 value={formData.email}
                 onChange={handleChange}
                 className={`w-full px-4 py-2 border text-black rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                  errors.email ? "border-red-500" : "border-gray-300"
+                  error ? "border-red-500" : "border-gray-300"
                 }`}
                 placeholder="your@email.com"
               />
-              {errors.email && (
-                <p className="mt-1 text-red-500 text-sm">{errors.email}</p>
-              )}
+              {error && <p className="mt-1 text-red-500 text-sm">{error}</p>}
             </div>
 
             <div>
@@ -102,29 +85,22 @@ const SignIn: FC = () => {
                 value={formData.password}
                 onChange={handleChange}
                 className={`w-full px-4 py-2 border text-black rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                  errors.password ? "border-red-500" : "border-gray-300"
+                  error ? "border-red-500" : "border-gray-300"
                 }`}
                 placeholder="********"
               />
-              {errors.password && (
-                <p className="mt-1 text-red-500 text-sm">{errors.password}</p>
-              )}
-              <div className="mt-2 text-right">
-                <Link
-                  href="/forgot-password"
-                  className="text-sm text-purple-600 hover:text-purple-800"
-                >
-                  Forgot password?
-                </Link>
-              </div>
+              {error && <p className="mt-1 text-red-500 text-sm">{error}</p>}
             </div>
 
             <button
               type="submit"
               className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition duration-200"
+              disabled={loading}
             >
-              Log In
+              {loading ? "Logging in..." : "Log In"}
             </button>
+
+            {error && <p className="mt-2 text-red-500 text-center">{error}</p>}
 
             <div className="text-center mt-4">
               <p className="text-gray-600">
