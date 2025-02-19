@@ -1,6 +1,6 @@
 import About from "@/components/About";
 import Hero from "@/components/Hero";
-import Products from "@/components/Products";
+import Products from "@/app/page/products/page";
 import Head from "next/head";
 
 const page = () => {
