@@ -1,60 +1,60 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { getAllProducts, Product } from "@/app/services/productService";
+
 const Products = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const getProducts = async () => {
+      const data = await getAllProducts();
+      setProducts(data);
+      setLoading(false);
+    };
+
+    getProducts();
+  }, []);
+
   return (
     <section id="products" className="container mx-auto px-6 py-16">
       <h2 className="text-3xl font-bold text-purple-800 mb-12 text-center">
         Our Products
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Product Card 1 */}
-        <div className="bg-white p-6 rounded-lg shadow-lg">
-          <img
-            src="/cleanser.jpg"
-            alt="Cleanser"
-            className="w-full h-48 object-cover rounded-t-lg"
-          />
-          <h3 className="text-xl font-bold text-purple-800 mt-4">
-            Gentle Cleanser
-          </h3>
-          <p className="text-gray-600 mt-2">
-            Perfect for daily use to remove impurities.
-          </p>
-          <button className="mt-4 bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition duration-300">
-            Add to Cart
-          </button>
+
+      {loading ? (
+        <p className="text-center text-gray-500">Loading products...</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {products.length > 0 ? (
+            products.map((product) => (
+              <div
+                key={product._id}
+                className="bg-white p-6 rounded-lg shadow-lg"
+              >
+                <img
+                  src={product.image_url}
+                  alt={product.name}
+                  className="w-full h-48 object-cover rounded-t-lg"
+                />
+                <h3 className="text-xl font-bold text-purple-800 mt-4">
+                  {product.name}
+                </h3>
+                <p className="text-gray-600 mt-2">{product.description}</p>
+                <p className="text-gray-700 font-semibold mt-2">
+                  ${product.price.toFixed(2)}
+                </p>
+                <button className="mt-4 bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition duration-300">
+                  Add to Cart
+                </button>
+              </div>
+            ))
+          ) : (
+            <p className="text-center text-gray-500">No products found.</p>
+          )}
         </div>
-        {/* Product Card 2 */}
-        <div className="bg-white p-6 rounded-lg shadow-lg">
-          <img
-            src="/moisturizer.jpg"
-            alt="Moisturizer"
-            className="w-full h-48 object-cover rounded-t-lg"
-          />
-          <h3 className="text-xl font-bold text-purple-800 mt-4">
-            Hydrating Moisturizer
-          </h3>
-          <p className="text-gray-600 mt-2">
-            Keeps your skin hydrated all day long.
-          </p>
-          <button className="mt-4 bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition duration-300">
-            Add to Cart
-          </button>
-        </div>
-        {/* Product Card 3 */}
-        <div className="bg-white p-6 rounded-lg shadow-lg">
-          <img
-            src="/serum.jpg"
-            alt="Serum"
-            className="w-full h-48 object-cover rounded-t-lg"
-          />
-          <h3 className="text-xl font-bold text-purple-800 mt-4">
-            Anti-Aging Serum
-          </h3>
-          <p className="text-gray-600 mt-2">Reduces fine lines and wrinkles.</p>
-          <button className="mt-4 bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition duration-300">
-            Add to Cart
-          </button>
-        </div>
-      </div>
+      )}
     </section>
   );
 };
