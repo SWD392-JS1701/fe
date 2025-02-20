@@ -32,7 +32,7 @@ const Navbar: FC = () => {
 
           <div className="flex items-center space-x-6">
             <div className="relative group">
-              <Link href="/page/profile">
+              <Link href="/profile">
                 <div className="cursor-pointer p-2">
                   <svg
                     className="w-6 h-6 text-gray-800"
@@ -77,7 +77,7 @@ const Navbar: FC = () => {
                         Shop My Routine
                       </Link>
                       <Link
-                        href="/page/quiz"
+                        href="/quiz"
                         className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
                       >
                         Retake the Quiz
@@ -155,7 +155,7 @@ const Navbar: FC = () => {
             { href: "/shop", label: "SHOP", icon: <FaShoppingBag /> },
             { href: "/brands", label: "BRANDS" },
             { href: "/library", label: "SKIN CARE LIBRARY" },
-            { href: "/page/profile", label: "VIEW MY SKIN TYPE RESULTS" },
+            { href: "/profile", label: "VIEW MY SKIN TYPE RESULTS" },
           ].map((item, index) => (
             <div
               key={index}
