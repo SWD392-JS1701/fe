@@ -1,4 +1,5 @@
 import { API_URL } from "@/config";
+import axios from "axios";
 
 export const register = async (
   username: string,
@@ -10,55 +11,39 @@ export const register = async (
   address: string
 ) => {
   try {
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "*/*",
-      },
-      body: JSON.stringify({
-        username,
-        email,
-        password,
-        first_name,
-        last_name,
-        phone_number,
-        address,
-      }),
+    const response = await axios.post(`${API_URL}/auth/register`, {
+      username,
+      email,
+      password,
+      first_name,
+      last_name,
+      phone_number,
+      address,
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || "Registration failed");
-    }
-
-    return data;
-  } catch (error) {
+    return response.data;
+  } catch (error: any) {
     console.error("Register API Error:", error);
-    throw new Error("Failed to register. Please try again.");
+    throw new Error(
+      error.response?.data?.message || "Failed to register. Please try again."
+    );
   }
 };
 
 export const login = async (email: string, password: string) => {
   try {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "*/*",
-      },
-      body: JSON.stringify({ email, password }),
+    const response = await axios.post(`${API_URL}/auth/login`, {
+      email,
+      password,
     });
 
-    if (!response.ok) {
-      throw new Error(`Login failed: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    localStorage.setItem("access_token", JSON.stringify(data));
+    const data = response.data;
+    localStorage.setItem("access_token", data.access_token); // Save access_token to localStorage
     return data;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Login API Error:", error);
-    throw new Error("Failed to fetch. Please try again.");
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch. Please try again."
+    );
   }
 };

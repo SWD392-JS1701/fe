@@ -109,7 +109,7 @@ const SignUp: FC = () => {
               htmlFor="name"
               className="block text-gray-700 font-medium mb-2"
             >
-              Full Name
+              User Name
             </label>
             <input
               type="text"
