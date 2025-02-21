@@ -1,6 +1,6 @@
 import About from "@/components/About";
 import Hero from "@/components/Hero";
-import Products from "@/app/page/products/page";
+//import Products from "./(page)/products/page";
 import Head from "next/head";
 
 const page = () => {
@@ -17,7 +17,7 @@ const page = () => {
 
       <Hero />
 
-      <Products />
+      {/*<Products />*/}
 
       <About />
     </div>
