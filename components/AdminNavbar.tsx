@@ -3,7 +3,7 @@ import Link from "next/link";
 
 const AdminNavbar = () => {
   return (
-    <nav className="bg-white shadow-md p-4 w-full">
+    <nav className="bg-white shadow-md p-4 w-full border rounded-xl">
       <div className="max-w-[1400px] mx-auto flex justify-between items-center">
         {/* Logo */}
         <div className="text-xl font-bold text-gray-800">GlowUp</div>
