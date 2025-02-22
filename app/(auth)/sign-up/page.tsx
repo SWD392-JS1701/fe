@@ -75,7 +75,6 @@ const SignUp: FC = () => {
     }
 
     try {
-      console.log("Registering user", formData);
       await register(
         formData.name,
         formData.email,
@@ -85,7 +84,6 @@ const SignUp: FC = () => {
         formData.phone,
         formData.address
       );
-      console.log("Registration successful");
       router.push("/sign-in");
     } catch (error) {
       console.error("Registration failed", error);
