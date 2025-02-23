@@ -1,3 +1,5 @@
+"use client";
+
 import React, { FC } from "react";
 import Head from "next/head";
 import Link from "next/link";
@@ -37,7 +39,6 @@ const UserProfile: FC<UserProfileProps> = ({ user }) => {
       </Head>
 
       <div className="bg-pink-50">
-        {/* Main Content */}
         <main className="container mx-auto py-10 px-4 bg-white">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Left Sidebar - User Info & Navigation */}
@@ -100,7 +101,7 @@ const UserProfile: FC<UserProfileProps> = ({ user }) => {
                     <span className="text-black">Reorder products</span>
                   </Link>
                   <Link
-                    href="/subscriptions"
+                    href="/subscription"
                     className="flex items-center p-4 border-b border-gray-200 hover:bg-gray-50"
                   >
                     <FaFileAlt className="mr-3 text-gray-500" />
@@ -117,107 +118,109 @@ const UserProfile: FC<UserProfileProps> = ({ user }) => {
               </div>
             </div>
 
-            {/* Right Content - Dashboard & Profile Details */}
+            {/* Right Content - Profile Details with Stats */}
             <div className="md:col-span-3">
-              {/* Dashboard Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="border border-gray-200 rounded-lg p-6 flex bg-white">
-                  <div className="mr-4">
-                    <FaDollarSign className="text-2xl text-black" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-black">
-                      Total spent
-                    </h3>
-                    <p className="text-lg font-bold text-black">
-                      ${user.totalSpent.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="border border-gray-200 rounded-lg p-6 flex bg-white">
-                  <div className="mr-4">
-                    <FaShoppingCart className="text-2xl text-black" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-black">All orders</h3>
-                    <p className="text-lg font-bold text-black">
-                      {user.orderCount}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="border border-gray-200 rounded-lg p-6 flex bg-white">
-                  <div className="mr-4">
-                    <FaMapMarked className="text-2xl text-black" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-black">Addresses</h3>
-                    <p className="text-lg font-bold text-black">
-                      {user.addressCount}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Profile Information */}
               <div className="border border-gray-200 rounded-lg p-6 bg-white">
+                {/* Dashboard Stats - Now part of profile information */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 border-b border-gray-200 pb-8">
+                  <div className="flex items-center border border-black-200 rounded-lg p-4">
+                    <div className="mr-4">
+                      <FaDollarSign className="text-2xl text-black" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-black">
+                        Total spent
+                      </h3>
+                      <p className="text-lg font-bold text-black">
+                        ${user.totalSpent.toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center border border-black-200 rounded-lg p-4">
+                    <div className="mr-4">
+                      <FaShoppingCart className="text-2xl text-black" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-black">
+                        All orders
+                      </h3>
+                      <p className="text-lg font-bold text-black">
+                        {user.orderCount}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center border border-black-200 rounded-lg p-4">
+                    <div className="mr-4">
+                      <FaMapMarked className="text-2xl text-black" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-black">
+                        Addresses
+                      </h3>
+                      <p className="text-lg font-bold text-black">
+                        {user.addressCount}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Profile Information */}
+
                 <div className="flex justify-between items-center mb-8">
                   <h2 className="text-2xl font-bold text-black">My profile</h2>
                   <button className="text-gray-500 hover:text-gray-700">
                     <FaEdit className="text-3xl" />
                   </button>
                 </div>
-
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600 mb-1">
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-12 items-center">
+                    <h3 className="col-span-3 text-sm font-bold text-gray-600">
                       First name
                     </h3>
-                    <p className="text-gray-800">{user.firstName}</p>
-                    <div className="mt-2 border-b border-gray-200"></div>
+                    <p className="col-span-9 text-gray-800">{user.firstName}</p>
                   </div>
 
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600 mb-1">
+                  <div className="grid grid-cols-12 items-center">
+                    <h3 className="col-span-3 text-sm font-bold text-gray-600 py-2.5">
                       Last name
                     </h3>
-                    <p className="text-gray-800">
+                    <p className="col-span-9 text-gray-800">
                       {user.lastName || "noLastName"}
                     </p>
-                    <div className="mt-2 border-b border-gray-200"></div>
                   </div>
 
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600 mb-1">
+                  <div className="grid grid-cols-12 items-center">
+                    <h3 className="col-span-3 text-sm font-bold text-gray-600 py-2.5">
                       Email
                     </h3>
-                    <p className="text-gray-800">{user.email}</p>
-                    <div className="mt-2 border-b border-gray-200"></div>
+                    <p className="col-span-9 text-gray-800">{user.email}</p>
                   </div>
 
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600 mb-1">
+                  <div className="grid grid-cols-12 items-center">
+                    <h3 className="col-span-3 text-sm font-bold text-gray-600 py-2.5">
                       Skin Type
                     </h3>
-                    <p className="text-gray-800">{user.skinType}</p>
-                    <div className="mt-2 border-b border-gray-200"></div>
+                    <p className="col-span-9 text-gray-800">{user.skinType}</p>
                   </div>
 
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600 mb-1">
+                  <div className="grid grid-cols-12 items-center">
+                    <h3 className="col-span-3 text-sm font-bold text-gray-600 py-2.5">
                       Sensitivity
                     </h3>
-                    <p className="text-gray-800">{user.sensitivity}</p>
-                    <div className="mt-2 border-b border-gray-200"></div>
+                    <p className="col-span-9 text-gray-800">
+                      {user.sensitivity}
+                    </p>
                   </div>
 
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-600 mb-1">
+                  <div className="grid grid-cols-12 items-center">
+                    <h3 className="col-span-3 text-sm font-bold text-gray-600 py-2.5">
                       Email subscription
                     </h3>
-                    <p className="text-gray-800">{user.emailSubscription}</p>
-                    <div className="mt-2 border-b border-gray-200"></div>
+                    <p className="col-span-9 text-gray-800">
+                      {user.emailSubscription}
+                    </p>
                   </div>
                 </div>
               </div>
