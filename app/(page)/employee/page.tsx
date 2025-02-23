@@ -42,44 +42,49 @@ const EmployeePage = () => {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen p-6">
+    <>
       <AdminNavbar />
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Recommended</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredUsers.map((user) => (
-            <div key={user._id} className="bg-white p-6 rounded-2xl shadow-md">
-              <h2 className="text-xl font-semibold">
-                {user.first_name} {user.last_name}
-              </h2>
-              <p className="text-gray-500">{user.role}</p>
-              <div className="flex flex-wrap gap-2 my-4">
-                <span className="bg-gray-200 px-3 py-1 rounded-full text-sm">
-                  {user.address}
-                </span>
+      <div className="bg-gray-100 min-h-screen p-6">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl font-bold text-gray-800 mb-6">Recommended</h1>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredUsers.map((user) => (
+              <div
+                key={user._id}
+                className="bg-white p-6 rounded-2xl shadow-md"
+              >
+                <h2 className="text-xl font-semibold">
+                  {user.first_name} {user.last_name}
+                </h2>
+                <p className="text-gray-500">{user.role}</p>
+                <div className="flex flex-wrap gap-2 my-4">
+                  <span className="bg-gray-200 px-3 py-1 rounded-full text-sm">
+                    {user.address}
+                  </span>
+                </div>
+                <div className="flex gap-4">
+                  <button
+                    className={`w-full px-4 py-2 rounded-lg ${
+                      user.role === "Doctor"
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-blue-600 text-white"
+                    }`}
+                    onClick={() => handleRecruit(user)}
+                    disabled={user.role === "Doctor" || loading === user._id}
+                  >
+                    {loading === user._id
+                      ? "Recruiting..."
+                      : user.role === "Doctor"
+                      ? "Recruited"
+                      : "Recruit"}
+                  </button>
+                </div>
               </div>
-              <div className="flex gap-4">
-                <button
-                  className={`w-full px-4 py-2 rounded-lg ${
-                    user.role === "Doctor"
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-blue-600 text-white"
-                  }`}
-                  onClick={() => handleRecruit(user)}
-                  disabled={user.role === "Doctor" || loading === user._id}
-                >
-                  {loading === user._id
-                    ? "Recruiting..."
-                    : user.role === "Doctor"
-                    ? "Recruited"
-                    : "Recruit"}
-                </button>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

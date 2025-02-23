@@ -5,13 +5,14 @@ import Link from "next/link";
 import Head from "next/head";
 import { register } from "@/app/services/authService";
 import { useRouter } from "next/navigation";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 interface FormData {
   name: string;
   first_name: string;
   last_name: string;
   email: string;
-  password: string;
+  plainPassword: string;
   confirmPassword: string;
   phone: string;
   address: string;
@@ -23,12 +24,13 @@ const SignUp: FC = () => {
     first_name: "",
     last_name: "",
     email: "",
-    password: "",
+    plainPassword: "",
     confirmPassword: "",
     phone: "",
     address: "",
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
@@ -50,15 +52,15 @@ const SignUp: FC = () => {
       newErrors.email = "Email is invalid";
     }
 
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+    if (!formData.plainPassword) {
+      newErrors.plainPassword = "Password is required";
+    } else if (formData.plainPassword.length < 6) {
+      newErrors.plainPassword = "Password must be at least 6 characters";
     }
 
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = "Please confirm your password";
-    } else if (formData.password !== formData.confirmPassword) {
+    } else if (formData.plainPassword !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
@@ -78,7 +80,7 @@ const SignUp: FC = () => {
       await register(
         formData.name,
         formData.email,
-        formData.password,
+        formData.plainPassword,
         formData.first_name,
         formData.last_name,
         formData.phone,
@@ -240,26 +242,34 @@ const SignUp: FC = () => {
             )}
           </div>
 
-          <div>
+          <div className="relative">
             <label
-              htmlFor="password"
+              htmlFor="plainPassword"
               className="block text-gray-700 font-medium mb-2"
             >
               Password
             </label>
             <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
+              type={showPassword ? "text" : "password"}
+              id="plainPassword"
+              name="plainPassword"
+              value={formData.plainPassword}
               onChange={handleChange}
               className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                errors.password ? "border-red-500" : "border-gray-300"
+                errors.plainPassword ? "border-red-500" : "border-gray-300"
               }`}
               placeholder="Create a password"
             />
-            {errors.password && (
-              <p className="mt-1 text-red-500 text-sm">{errors.password}</p>
+            <div
+              className="absolute inset-y-0 right-0 top-8 pr-3 flex items-center cursor-pointer"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </div>
+            {errors.plainPassword && (
+              <p className="mt-1 text-red-500 text-sm">
+                {errors.plainPassword}
+              </p>
             )}
           </div>
 

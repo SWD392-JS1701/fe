@@ -4,7 +4,7 @@ import axios from "axios";
 export const register = async (
   username: string,
   email: string,
-  password: string,
+  plainPassword: string,
   first_name: string,
   last_name: string,
   phone_number: string,
@@ -14,7 +14,7 @@ export const register = async (
     const response = await axios.post(`${API_URL}/auth/register`, {
       username,
       email,
-      password,
+      plainPassword,
       first_name,
       last_name,
       phone_number,
