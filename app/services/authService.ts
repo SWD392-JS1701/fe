@@ -8,7 +8,8 @@ export const register = async (
   first_name: string,
   last_name: string,
   phone_number: string,
-  address: string
+  address: string,
+  role?: string
 ) => {
   try {
     const response = await axios.post(`${API_URL}/auth/register`, {
@@ -19,6 +20,7 @@ export const register = async (
       last_name,
       phone_number,
       address,
+      role,
     });
 
     return response.data;
