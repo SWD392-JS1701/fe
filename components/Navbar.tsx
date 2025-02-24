@@ -4,14 +4,27 @@ import Link from "next/link";
 import React, { FC, useEffect, useState } from "react";
 import { FaShoppingBag } from "react-icons/fa";
 import Image from "next/image";
+import { useRouter } from "next/navigation"; 
 
 const Navbar: FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
+  const router=useRouter();
   useEffect(() => {
-    // Check if access_token exists in localStorage
-    const token = localStorage.getItem("access_token");
-    setIsLoggedIn(!!token);
+    const checkLoginStatus = () => {
+      const token = localStorage.getItem("access_token");
+      setIsLoggedIn(!!token);
+    };
+
+    // Initial check
+    checkLoginStatus();
+
+    // Listen for login/logout events
+    window.addEventListener("storage", checkLoginStatus);
+
+    return () => {
+      window.removeEventListener("storage", checkLoginStatus);
+    };
+
   }, []);
 
   return (
@@ -56,24 +69,24 @@ const Navbar: FC = () => {
 
           <div className="flex items-center space-x-6">
             <div className="relative group">
-              <Link href="/profile">
-                <div className="cursor-pointer p-2">
-                  <svg
-                    className="w-6 h-6 text-gray-800"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
-                </div>
-              </Link>
+            <Link href={isLoggedIn ? "/profile" : "/sign-in"}>
+              <div className="cursor-pointer p-2">
+                <svg
+                  className="w-6 h-6 text-gray-800"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+              </div>
+            </Link>
 
               <div className="absolute w-full h-5 bg-transparent"></div>
 
@@ -111,11 +124,15 @@ const Navbar: FC = () => {
                       onClick={() => {
                         localStorage.removeItem("access_token");
                         setIsLoggedIn(false);
-                        window.location.href = "/";
+
+                        window.dispatchEvent(new Event("storage")); 
+                        router.push("/"); 
+
                       }}
                       className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
                     >
                       LOGOUT
+                      
                     </button>
                   </>
                 ) : (
