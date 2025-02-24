@@ -8,7 +8,6 @@ import Error from "../../../components/Error";
 const ProfilePage: FC = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const getUserProfile = async () => {
@@ -42,7 +41,6 @@ const ProfilePage: FC = () => {
   }, []);
 
   if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
   if (!user) {
     Error("Error", "No user data available.");
     return null;
