@@ -1,5 +1,6 @@
 import axios from "axios";
 import { API_URL } from "@/config";
+import { jwtDecode } from "jwt-decode";
 
 export interface User {
   _id: string;
@@ -16,6 +17,14 @@ export interface User {
   updatedAt: string;
 }
 
+export interface DecodedToken {
+  id: string;
+  username: string;
+  role: string;
+  iat: number;
+  exp: number;
+}
+
 export const getAllUsers = async (): Promise<User[]> => {
   try {
     const response = await axios.get<User[]>(`${API_URL}/users`);
@@ -26,9 +35,22 @@ export const getAllUsers = async (): Promise<User[]> => {
   }
 };
 
-export const getUserById = async (userId: string): Promise<User | null> => {
+export const getUserById = async (): Promise<User | null> => {
   try {
-    const response = await axios.get<User>(`${API_URL}/users/${userId}`);
+    const accessToken = localStorage.getItem("access_token");
+
+    if (!accessToken) {
+      console.error("No access token found.");
+      return null;
+    }
+
+    const decoded: DecodedToken = jwtDecode(accessToken);
+    const userId = decoded.id;
+
+    const response = await axios.get<User>(`${API_URL}/users/${userId}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
     return response.data;
   } catch (error) {
     console.error("Error fetching user details:", error);

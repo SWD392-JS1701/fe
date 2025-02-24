@@ -6,7 +6,8 @@ import UserProfile from "../../../components/UserProfile";
 import Error from "@/components/Error";
 import Loading from "@/components/Loading";
 
-import { fetchProfile } from "../../services/authService";
+// import { fetchProfile } from "../../services/authService";
+import { getUserById } from "@/app/services/userService";
 
 const ProfilePage: FC = () => {
   const [user, setUser] = useState<any>(null);
@@ -15,7 +16,10 @@ const ProfilePage: FC = () => {
   useEffect(() => {
     const getUserProfile = async () => {
       try {
-        const userData = await fetchProfile();
+        const userData = await getUserById();
+        if (!userData) {
+          throw Error("No user data available.", "No user data available.");
+        }
 
         const defaultUser = {
           firstName: userData.first_name || "",
