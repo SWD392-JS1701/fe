@@ -2,8 +2,11 @@
 
 import React, { FC, useEffect, useState } from "react";
 import UserProfile from "../../../components/UserProfile";
-import { fetchProfile } from "../../services/authService"; // Import your API call function
-import Error from "../../../components/Error";
+
+import Error from "@/components/Error";
+import Loading from "@/components/Loading";
+
+import { fetchProfile } from "../../services/authService";
 
 const ProfilePage: FC = () => {
   const [user, setUser] = useState<any>(null);
@@ -40,7 +43,7 @@ const ProfilePage: FC = () => {
     getUserProfile();
   }, []);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Loading />;
   if (!user) {
     Error("Error", "No user data available.");
     return null;
