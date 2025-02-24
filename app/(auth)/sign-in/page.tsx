@@ -32,7 +32,12 @@ const SignIn: FC = () => {
     try {
       const data = await login(formData.email, formData.password);
       localStorage.setItem("access_token", JSON.stringify(data));
-      router.push("/");
+
+      if (data.role === "Admin") {
+        router.push("/overview");
+      } else {
+        router.push("/");
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {

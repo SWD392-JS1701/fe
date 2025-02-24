@@ -9,13 +9,25 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.6",
     "@tailwindcss/postcss": "^4.0.6",
+    "axios": "^1.7.9",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.475.0",
     "next": "15.1.7",
     "postcss": "^8.5.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+<<<<<<< HEAD
     "react-icons": "^5.5.0",
     "tailwindcss": "^4.0.6"
+=======
+    "react-icons": "^5.4.0",
+    "tailwind-merge": "^3.0.2",
+    "tailwindcss": "^4.0.6",
+    "tailwindcss-animate": "^1.0.7"
+>>>>>>> b842911c62f9360a40968f97e987d0d8c2e6ebd6
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
