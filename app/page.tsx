@@ -1,11 +1,11 @@
 import About from "@/components/About";
 import Hero from "@/components/Hero";
-//import Products from "./(page)/products/page";
+import Products from "./(page)/products/page";
 import Head from "next/head";
 
 const page = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-r from-pink-50 to-purple-50">
+    <div className="min-h-screen bg-white">
       <Head>
         <title>GlowUp Skincare</title>
         <meta
@@ -17,7 +17,7 @@ const page = () => {
 
       <Hero />
 
-      {/*<Products />*/}
+      <Products />
 
       <About />
     </div>
