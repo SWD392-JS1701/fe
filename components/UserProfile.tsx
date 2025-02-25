@@ -187,7 +187,12 @@ const UserProfile: FC<UserProfileProps> = ({ user }) => {
                     </h3>
                     <p className="col-span-9 text-gray-800">{user.email}</p>
                   </div>
-
+                  <div className="grid grid-cols-12 items-center">
+                    <h3 className="col-span-3 text-sm font-bold text-gray-600 py-2.5">
+                      Address
+                    </h3>
+                    <p className="col-span-9 text-gray-800">{user.address}</p>
+                  </div>
                   <div className="grid grid-cols-12 items-center">
                     <h3 className="col-span-3 text-sm font-bold text-gray-600 py-2.5">
                       Skin Type

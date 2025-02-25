@@ -24,6 +24,7 @@ const ProfilePage: FC = () => {
           firstName: userData.first_name || "",
           lastName: userData.last_name || "",
           email: userData.email || "",
+          address:userData.address || "",
           skinType: "Unknown",
           sensitivity:  "Unknown",
           emailSubscription:  "Not Subscribed",
