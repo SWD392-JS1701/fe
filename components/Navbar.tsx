@@ -5,7 +5,6 @@ import React, { FC, useEffect, useState } from "react";
 import Image from "next/image";
 import { Search } from "lucide-react";
 import Logo from "../assets/logo.png";
-
 import { useRouter } from "next/navigation";
 
 const Navbar: FC = () => {
@@ -14,6 +13,19 @@ const Navbar: FC = () => {
   const router = useRouter();
   const maxScrollCount = 3; //
   const maxBorderWidth = 250; // the max width of border when the scroll count is 3
+
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    setIsLoggedIn(!!token);
+
+    const handleStorageChange = () => {
+      const token = localStorage.getItem("access_token");
+      setIsLoggedIn(!!token);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -108,68 +120,70 @@ const Navbar: FC = () => {
                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                 />
               </svg>
-              <div className="absolute w-full h-5 bg-transparent"></div>
-
-              {/* Dropdown Menu */}
-              <div className="absolute right-0 hidden group-hover:block w-48 bg-white rounded-md shadow-lg z-50">
-                {isLoggedIn ? (
-                  <>
-                    <div className="px-4 py-3 border-b border-gray-200">
-                      <Link
-                        href="/rewards"
-                        className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
-                      >
-                        My Rewards
-                      </Link>
-                      <Link
-                        href="/routine"
-                        className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
-                      >
-                        My Routine Steps
-                      </Link>
-                      <Link
-                        href="/shop-routine"
-                        className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
-                      >
-                        Shop My Routine
-                      </Link>
-                      <Link
-                        href="/quiz"
-                        className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
-                      >
-                        Retake the Quiz
-                      </Link>
-                    </div>
-                    <button
-                      onClick={() => {
-                        localStorage.removeItem("access_token");
-                        setIsLoggedIn(false);
-                        window.dispatchEvent(new Event("storage"));
-                        router.push("/");
-                      }}
-                      className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
-                    >
-                      LOGOUT
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      href="/sign-in"
-                      className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
-                    >
-                      LOGIN
-                    </Link>
-                    <Link
-                      href="/sign-up"
-                      className="block w-full text-center py-3 text-sm border text-black border-gray-200 hover:bg-gray-50"
-                    >
-                      SIGN UP
-                    </Link>
-                  </>
-                )}
-              </div>
             </Link>
+
+            {/* Transparent overlay for hover */}
+            <div className="absolute w-full h-5 bg-transparent"></div>
+
+            {/* Dropdown Menu */}
+            <div className="absolute right-0 hidden group-hover:block w-48 bg-white rounded-md shadow-lg z-50">
+              {isLoggedIn ? (
+                <>
+                  <div className="px-4 py-3 border-b border-gray-200">
+                    <Link
+                      href="/rewards"
+                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
+                    >
+                      My Rewards
+                    </Link>
+                    <Link
+                      href="/routine"
+                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
+                    >
+                      My Routine Steps
+                    </Link>
+                    <Link
+                      href="/shop-routine"
+                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
+                    >
+                      Shop My Routine
+                    </Link>
+                    <Link
+                      href="/quiz"
+                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
+                    >
+                      Retake the Quiz
+                    </Link>
+                  </div>
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem("access_token");
+                      setIsLoggedIn(false);
+                      window.dispatchEvent(new Event("storage"));
+                      router.push("/");
+                    }}
+                    className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
+                  >
+                    LOGOUT
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/sign-in"
+                    className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
+                  >
+                    LOGIN
+                  </Link>
+                  <Link
+                    href="/sign-up"
+                    className="block w-full text-center py-3 text-sm border text-black border-gray-200 hover:bg-gray-50"
+                  >
+                    SIGN UP
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
 
           <Link href="/cart">
