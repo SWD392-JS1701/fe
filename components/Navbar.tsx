@@ -3,7 +3,7 @@
 import Link from "next/link";
 import React, { FC, useEffect, useState } from "react";
 import Image from "next/image";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import Logo from "../assets/logo.png";
 
 const Navbar: FC = () => {
@@ -11,10 +11,10 @@ const Navbar: FC = () => {
   const [scrollCount, setScrollCount] = useState(0);
   const maxScrollCount = 3; //
   const maxBorderWidth = 250; // the max width of border when the scroll count is 3
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
-
     const handleScroll = () => {
       const scrollY = window.scrollY;
       const scrollDiff = scrollY - lastScrollY;
@@ -45,24 +45,46 @@ const Navbar: FC = () => {
       {/* Top navbar */}
       <div className="container mx-auto flex justify-between items-center px-6">
         {/* Search bar */}
-        <div className="flex-1">
-          <div className="relative w-full max-w-lg">
-            <Search
-              className={`absolute left-4 top-1/2 transform -translate-y-1/2 transition-all duration-500 ${
-                scrollCount === maxScrollCount ? "text-white" : "text-gray-400"
-              }`}
-              size={20}
-            />
-            <input
-              type="text"
-              placeholder="Search products, brands"
-              className={`w-full pl-12 pr-4 py-3 border rounded-full focus:outline-none transition-all duration-500 ${
-                scrollCount === maxScrollCount
-                  ? "w-10 bg-transparent border-transparent focus:ring-0"
-                  : "border-black focus:ring-2 focus:ring-gray-400 text-gray-600"
-              }`}
-            />
-          </div>
+        <div className="relative w-full max-w-lg">
+          {!isOpen ? (
+            <button
+              onClick={() => setIsOpen(true)}
+              className="p-2 rounded-full bg-white hover:bg-gray-300"
+            >
+              <Search size={24} className="text-gray-600 cursor-pointer" />
+            </button>
+          ) : (
+            <div className="relative w-full">
+              <input
+                type="text"
+                autoFocus
+                placeholder="Search products, brands"
+                className={`w-full pl-12 pr-10 py-3 border rounded-full focus:outline-none focus:ring-2 ${
+                  scrollCount === maxScrollCount
+                    ? "bg-white text-black focus:ring-gray-600"
+                    : "bg-gray-100 text-gray-600 focus:ring-gray-400"
+                }`}
+              />
+              <Search
+                className={`absolute left-4 top-1/2 transform -translate-y-1/2 ${
+                  scrollCount === maxScrollCount
+                    ? "text-black"
+                    : "text-gray-400"
+                }`}
+                size={20}
+              />
+              <button
+                onClick={() => setIsOpen(false)}
+                className={`absolute right-4 top-1/2 transform -translate-y-1/2 ${
+                  scrollCount === maxScrollCount
+                    ? "text-black hover:text-gray-800"
+                    : "text-gray-600 hover:text-black"
+                }`}
+              >
+                <X className="cursor-pointer" size={20} />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Logo */}
