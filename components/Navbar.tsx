@@ -6,10 +6,12 @@ import Image from "next/image";
 import { Search } from "lucide-react";
 import Logo from "../assets/logo.png";
 
+import { useRouter } from "next/navigation";
 
 const Navbar: FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [scrollCount, setScrollCount] = useState(0);
+  const router = useRouter();
   const maxScrollCount = 3; //
   const maxBorderWidth = 250; // the max width of border when the scroll count is 3
 
@@ -142,6 +144,8 @@ const Navbar: FC = () => {
                       onClick={() => {
                         localStorage.removeItem("access_token");
                         setIsLoggedIn(false);
+                        window.dispatchEvent(new Event("storage"));
+                        router.push("/");
                       }}
                       className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
                     >
