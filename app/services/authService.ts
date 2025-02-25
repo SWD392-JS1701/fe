@@ -40,41 +40,12 @@ export const login = async (email: string, password: string) => {
     });
 
     const data = response.data;
-    localStorage.setItem("access_token", data.access_token); // Save access_token to localStorage
+    localStorage.setItem("access_token", data.access_token);
     return data;
   } catch (error: any) {
     console.error("Login API Error:", error);
     throw new Error(
       error.response?.data?.message || "Failed to fetch. Please try again."
     );
-  }
-};
-
-export const fetchProfile = async () => {
-  try {
-   
-    const storedToken = localStorage.getItem("access_token");
-    if (!storedToken) throw new Error("No token found");
-
-    const token = JSON.parse(storedToken)?.access_token;
-    if (!token) throw new Error("Invalid token format");
-    
-    
-    const response = await fetch(`${API_URL}/auth/profile`, {
-      method: "GET",
-      headers: { 
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-    });
-
-    if (!response.ok) throw new Error("Failed to fetch profile");
-
-    const userProfile = await response.json();
-    
-    return userProfile; 
-  } catch (error) {
-    console.error("Profile Fetch Error:", error);
-    return null;
   }
 };

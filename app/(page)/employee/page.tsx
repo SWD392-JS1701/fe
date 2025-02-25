@@ -7,11 +7,14 @@ import React, {
   ChangeEvent,
   FormEvent,
 } from "react";
+
+import AdminNavbar from "@/components/AdminNavbar";
+import UserCard from "@/components/UserCard";
+import { FaPlus, FaEye, FaEyeSlash } from "react-icons/fa";
+
 import { getAllUsers, User } from "@/app/services/userService";
 import { createDoctor } from "@/app/services/doctorService";
-import AdminNavbar from "@/components/AdminNavbar";
 import { register } from "@/app/services/authService";
-import { FaPlus, FaEye, FaEyeSlash } from "react-icons/fa";
 
 interface FormData {
   name: string;
@@ -368,37 +371,13 @@ const EmployeePage = () => {
           {/* User Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredUsers.map((user) => (
-              <div
+              <UserCard
                 key={user._id}
-                className="bg-white p-6 rounded-2xl shadow-md"
-              >
-                <h2 className="text-xl font-semibold">
-                  {user.first_name} {user.last_name}
-                </h2>
-                <p className="text-gray-500">{user.role}</p>
-                <div className="flex flex-wrap gap-2 my-4">
-                  <span className="bg-gray-200 px-3 py-1 rounded-full text-sm">
-                    {user.address}
-                  </span>
-                </div>
-                <div className="flex gap-4">
-                  <button
-                    className={`w-full px-4 py-2 rounded-lg ${
-                      user.role === "Doctor"
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-blue-600 text-white"
-                    }`}
-                    onClick={() => handleRecruit(user)}
-                    disabled={user.role === "Doctor" || loading === user._id}
-                  >
-                    {loading === user._id
-                      ? "Recruiting..."
-                      : user.role === "Doctor"
-                      ? "Recruited"
-                      : "Recruit"}
-                  </button>
-                </div>
-              </div>
+                user={user}
+                isAdmin={true}
+                isLoading={loading === user._id}
+                onRecruit={() => handleRecruit(user)}
+              />
             ))}
           </div>
         </div>
