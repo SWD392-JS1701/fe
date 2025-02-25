@@ -5,13 +5,33 @@ import React, { FC, useEffect, useState } from "react";
 import Image from "next/image";
 import { Search } from "lucide-react";
 import Logo from "../assets/logo.png";
-
+import { useRouter } from "next/navigation"; 
 
 const Navbar: FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [scrollCount, setScrollCount] = useState(0);
   const maxScrollCount = 3; //
   const maxBorderWidth = 250; // the max width of border when the scroll count is 3
+ const router=useRouter();
+ useEffect(() => {
+  const checkLoginStatus = () => {
+    const token = localStorage.getItem("access_token");
+      setIsLoggedIn(!!token);
+    };
+
+    // Initial check
+    checkLoginStatus();
+
+    // Listen for login/logout events
+    window.addEventListener("storage", checkLoginStatus);
+
+    return () => {
+      window.removeEventListener("storage", checkLoginStatus);
+    };
+
+  }, []);
+
+
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -87,7 +107,7 @@ const Navbar: FC = () => {
         {/* Icons */}
         <div className="flex-1 flex justify-end items-center space-x-3">
           <div className="relative group">
-            <Link href="/profile">
+          <Link href={isLoggedIn ? "/profile" : "/sign-in"}>
               <svg
                 className={`w-6 h-6 transition-all duration-500 ${
                   scrollCount === maxScrollCount
@@ -106,6 +126,7 @@ const Navbar: FC = () => {
                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                 />
               </svg>
+            </Link>
               <div className="absolute w-full h-5 bg-transparent"></div>
 
               {/* Dropdown Menu */}
@@ -142,6 +163,7 @@ const Navbar: FC = () => {
                       onClick={() => {
                         localStorage.removeItem("access_token");
                         setIsLoggedIn(false);
+                        router.push("/"); 
                       }}
                       className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
                     >
@@ -165,7 +187,7 @@ const Navbar: FC = () => {
                   </>
                 )}
               </div>
-            </Link>
+            
           </div>
 
           <Link href="/cart">
