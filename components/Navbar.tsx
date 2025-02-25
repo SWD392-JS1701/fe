@@ -141,10 +141,15 @@ const Navbar: FC = () => {
                       onClick={() => {
                         localStorage.removeItem("access_token");
                         setIsLoggedIn(false);
+
+                        window.dispatchEvent(new Event("storage")); 
+                        router.push("/"); 
+
                       }}
                       className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
                     >
                       LOGOUT
+                      
                     </button>
                   </>
                 ) : (

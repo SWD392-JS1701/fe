@@ -32,6 +32,7 @@ const SignIn: FC = () => {
     try {
       const data = await login(formData.email, formData.password);
       localStorage.setItem("access_token", JSON.stringify(data));
+      window.dispatchEvent(new Event("storage"));
 
       if (data.role === "Admin") {
         router.push("/overview");
