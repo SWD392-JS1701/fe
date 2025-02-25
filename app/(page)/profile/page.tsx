@@ -1,12 +1,11 @@
 "use client";
 
 import React, { FC, useEffect, useState } from "react";
-import UserProfile from "../../../components/UserProfile";
 
+import UserProfile from "../../../components/UserProfile";
 import Error from "@/components/Error";
 import Loading from "@/components/Loading";
 
-// import { fetchProfile } from "../../services/authService";
 import { getUserById } from "@/app/services/userService";
 
 const ProfilePage: FC = () => {
@@ -30,7 +29,6 @@ const ProfilePage: FC = () => {
           emailSubscription: userData.emailSubscription || "Not Subscribed",
           totalSpent: userData.totalSpent ?? 0,
           orderCount: userData.orderCount ?? 0,
-          addressCount: userData.addressCount ?? 0,
         };
 
         setUser(defaultUser);
