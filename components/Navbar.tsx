@@ -101,7 +101,7 @@ const Navbar: FC = () => {
         {/* Icons */}
         <div className="flex-1 flex justify-end items-center space-x-3">
           <div className="relative group">
-            <Link href="/profile">
+            <Link href={isLoggedIn ? "/profile" : "/sign-in"}>
               <svg
                 className={`w-6 h-6 transition-all duration-500 ${
                   scrollCount === maxScrollCount
