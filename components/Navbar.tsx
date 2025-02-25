@@ -153,6 +153,8 @@ const Navbar: FC = () => {
                 />
               </svg>
             </Link>
+
+            {/* Transparent overlay for hover */}
             <div className="absolute w-full h-5 bg-transparent"></div>
 
             {/* Dropdown Menu */}
@@ -189,6 +191,7 @@ const Navbar: FC = () => {
                     onClick={() => {
                       localStorage.removeItem("access_token");
                       setIsLoggedIn(false);
+                      window.dispatchEvent(new Event("storage"));
                       router.push("/");
                     }}
                     className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
