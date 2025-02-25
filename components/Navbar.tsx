@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Search, X } from "lucide-react";
 import Logo from "../assets/logo.png";
 
+
 const Navbar: FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [scrollCount, setScrollCount] = useState(0);

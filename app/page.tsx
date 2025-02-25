@@ -5,7 +5,7 @@ import Head from "next/head";
 
 const page = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-r from-pink-50 to-purple-50">
+    <div className="min-h-screen bg-white">
       <Head>
         <title>GlowUp Skincare</title>
         <meta

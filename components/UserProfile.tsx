@@ -70,16 +70,6 @@ const UserProfile: FC<UserProfileProps> = ({ user }) => {
                     <span className="text-black">Orders</span>
                   </Link>
                   <Link
-                    href="/addresses"
-                    className="flex items-center p-4 border-b border-gray-200 hover:bg-gray-50"
-                  >
-                    <FaMapMarkerAlt className="mr-3 text-gray-500" />
-                    <span className="text-black">Addresses</span>
-                    <span className="ml-auto bg-gray-200 px-2 rounded-md text-black">
-                      {user.addressCount}
-                    </span>
-                  </Link>
-                  <Link
                     href="/change-password"
                     className="flex items-center p-4 border-b border-gray-200 hover:bg-gray-50"
                   >
