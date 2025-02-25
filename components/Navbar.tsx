@@ -5,7 +5,7 @@ import React, { FC, useEffect, useState } from "react";
 import Image from "next/image";
 import { Search, X } from "lucide-react";
 import Logo from "../assets/logo.png";
-
+import { motion } from "framer-motion";
 
 const Navbar: FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -55,7 +55,13 @@ const Navbar: FC = () => {
               <Search size={24} className="text-gray-600 cursor-pointer" />
             </button>
           ) : (
-            <div className="relative w-full">
+            <motion.div
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: "100%", opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+              className="relative w-full"
+            >
               <input
                 type="text"
                 autoFocus
@@ -84,7 +90,7 @@ const Navbar: FC = () => {
               >
                 <X className="cursor-pointer" size={20} />
               </button>
-            </div>
+            </motion.div>
           )}
         </div>
 
