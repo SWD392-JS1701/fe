@@ -4,7 +4,8 @@ import Link from "next/link";
 import React, { FC, useEffect, useState } from "react";
 import Image from "next/image";
 import { Search } from "lucide-react";
-import Logo from "../assets/coiffure-logo.png";
+import Logo from "../assets/logo.png";
+
 
 const Navbar: FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -36,7 +37,7 @@ const Navbar: FC = () => {
 
   return (
     <div
-      className={`fixed top-0 left-0 w-full transition-all duration-500 ease-in-out ${
+      className={`fixed top-0 left-0 w-full transition-all duration-500 ease-in-out z-50 ${
         scrollCount === maxScrollCount
           ? "bg-black text-white py-1"
           : "bg-white text-black py-3"
@@ -58,7 +59,7 @@ const Navbar: FC = () => {
               placeholder="Search products, brands"
               className={`w-full pl-12 pr-4 py-3 border rounded-full focus:outline-none transition-all duration-500 ${
                 scrollCount === maxScrollCount
-                  ? "w-10 bg-transparent border-transparent focus:ring-0 cursor-pointer"
+                  ? "w-10 bg-transparent border-transparent focus:ring-0"
                   : "border-black focus:ring-2 focus:ring-gray-400 text-gray-600"
               }`}
             />
@@ -141,15 +142,10 @@ const Navbar: FC = () => {
                       onClick={() => {
                         localStorage.removeItem("access_token");
                         setIsLoggedIn(false);
-
-                        window.dispatchEvent(new Event("storage")); 
-                        router.push("/"); 
-
                       }}
                       className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
                     >
                       LOGOUT
-                      
                     </button>
                   </>
                 ) : (
