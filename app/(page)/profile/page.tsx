@@ -29,7 +29,6 @@ const ProfilePage: FC = () => {
           emailSubscription: userData.emailSubscription || "Not Subscribed",
           totalSpent: userData.totalSpent ?? 0,
           orderCount: userData.orderCount ?? 0,
-          addressCount: userData.addressCount ?? 0,
         };
 
         setUser(defaultUser);
