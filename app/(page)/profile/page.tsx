@@ -33,11 +33,11 @@ const ProfilePage: FC = () => {
           firstName: userData.first_name || "",
           lastName: userData.last_name || "",
           email: userData.email || "",
-          skinType: userData.skinType || "Unknown",
-          sensitivity: userData.sensitivity || "Unknown",
-          emailSubscription: userData.emailSubscription || "Not Subscribed",
-          totalSpent: userData.totalSpent ?? 0,
-          orderCount: userData.orderCount ?? 0,
+          skinType: "Unknown",
+          sensitivity:  "Unknown",
+          emailSubscription:  "Not Subscribed",
+          totalSpent:  0,
+          orderCount:  0,
         };
 
         setUser(defaultUser);
