@@ -2,7 +2,7 @@
 
 import React, { FC, useEffect, useState } from "react";
 
-import UserProfile from "../../../components/UserProfile";
+import UserProfile from "@/components/UserProfile";
 import Error from "@/components/Error";
 import Loading from "@/components/Loading";
 
@@ -34,10 +34,10 @@ const ProfilePage: FC = () => {
           lastName: userData.last_name || "",
           email: userData.email || "",
           skinType: "Unknown",
-          sensitivity:  "Unknown",
-          emailSubscription:  "Not Subscribed",
-          totalSpent:  0,
-          orderCount:  0,
+          sensitivity: "Unknown",
+          emailSubscription: "Not Subscribed",
+          totalSpent: 0,
+          orderCount: 0,
         };
 
         setUser(defaultUser);
