@@ -2,17 +2,26 @@
 
 import React, { FC, useEffect, useState } from "react";
 
-import UserProfile from "../../../components/UserProfile";
+import UserProfile from "@/components/UserProfile";
 import Error from "@/components/Error";
 import Loading from "@/components/Loading";
 
 import { getUserById } from "@/app/services/userService";
+import { useRouter } from "next/navigation";
 
 const ProfilePage: FC = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const access_token = localStorage.getItem("access_token");
 
   useEffect(() => {
+    if (!access_token) {
+      Error("Not Logged In", "Please log in to view your profile.");
+      router.push("/sign-in");
+      return;
+    }
+
     const getUserProfile = async () => {
       try {
         const userData = await getUserById();
@@ -26,10 +35,10 @@ const ProfilePage: FC = () => {
           email: userData.email || "",
           address:userData.address || "",
           skinType: "Unknown",
-          sensitivity:  "Unknown",
-          emailSubscription:  "Not Subscribed",
-          totalSpent:  0,
-          orderCount:  0,
+          sensitivity: "Unknown",
+          emailSubscription: "Not Subscribed",
+          totalSpent: 0,
+          orderCount: 0,
         };
 
         setUser(defaultUser);
