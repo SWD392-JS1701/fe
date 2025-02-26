@@ -64,7 +64,7 @@ const ProfilePage: FC = () => {
     return null;
   }
 
-  return  <UserProfile user={user} setUser={setUser} />;
+  return <UserProfile user={user} />;
 };
 
 export default ProfilePage;

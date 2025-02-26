@@ -6,7 +6,6 @@ import Head from "next/head";
 import Link from "next/link";
 import { updateUser } from "@/app/services/userService";
 import { useEffect } from "react";
-import{toast,Toaster} from"react-hot-toast"
 import {
   FaLock,
   FaEye,
@@ -76,11 +75,7 @@ const UserProfile: FC<UserProfileProps> = ({ user,setUser }) => {
     const updatedUser = await updateUser(user.id, formData);
 
     if (updatedUser) {
-      setUser((prevUser) => ({
-        ...prevUser,
-        ...formData,
-      }));
-      toast(<p className="text-green-500 mt-2">Profile updated successfully!</p>);
+      setUser(updatedUser);
       setIsEditing(false);
       setSuccess(true);
     } else {
@@ -95,7 +90,7 @@ const UserProfile: FC<UserProfileProps> = ({ user,setUser }) => {
       <Head>
         <title>My Profile | SkinType Solutions</title>
       </Head>
-      <Toaster/>  
+
       <div className="bg-pink-50">
         <main className="container mx-auto py-30 px-4 bg-white">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">

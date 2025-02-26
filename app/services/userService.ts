@@ -100,7 +100,7 @@ export const getUserById = async (): Promise<User | null> => {
     const response = await axios.get<User>(`${API_URL}/users/${userId}`, {
       headers,
     });
-
+    
     return response.data;
   } catch (error) {
     console.error("Error fetching user details:", error);
@@ -139,22 +139,25 @@ export const createUser = async (user: User): Promise<User | null> => {
   }
 };
 
-export const updateUser = async (
-  userId: string,
-  user: Partial<User>
-): Promise<User | null> => {
-  try {
-    const response = await axios.patch<User>(
-      `${API_URL}/users/${userId}`,
-      user,
-      { headers: authHeaders() }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error updating user:", error);
-    return null;
-  }
-};
+  export const updateUser = async (
+    userId: string,
+    user: Partial<User>
+  ): Promise<User | null> => {
+    try {
+      
+      const response = await axios.patch<User>(
+        `${API_URL}/users/${userId}`,
+        user,
+        { headers: authHeaders() }
+      );
+     
+      return response.data;
+
+    } catch (error) {
+      console.error("Error updating user:", error);
+      return null;
+    }
+  };
 
 export const deleteUser = async (userId: string): Promise<void> => {
   try {

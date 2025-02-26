@@ -80,7 +80,7 @@ const UserProfile: FC<UserProfileProps> = ({ user,setUser }) => {
         ...prevUser,
         ...formData,
       }));
-      toast(<p className="text-green-500 mt-2">Profile updated successfully!</p>);
+      toast(<p className="text-green-500 mr-3">Profile updated successfully!</p>);
       setIsEditing(false);
       setSuccess(true);
     } else {

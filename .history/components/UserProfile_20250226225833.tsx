@@ -80,7 +80,6 @@ const UserProfile: FC<UserProfileProps> = ({ user,setUser }) => {
         ...prevUser,
         ...formData,
       }));
-      toast(<p className="text-green-500 mt-2">Profile updated successfully!</p>);
       setIsEditing(false);
       setSuccess(true);
     } else {
@@ -95,7 +94,7 @@ const UserProfile: FC<UserProfileProps> = ({ user,setUser }) => {
       <Head>
         <title>My Profile | SkinType Solutions</title>
       </Head>
-      <Toaster/>  
+
       <div className="bg-pink-50">
         <main className="container mx-auto py-30 px-4 bg-white">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
