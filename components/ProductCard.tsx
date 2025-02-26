@@ -1,12 +1,44 @@
-import React, { FC } from "react";
+"use client";
+
+import React, { FC, MouseEvent } from "react";
 import Link from "next/link";
+
 import { Product } from "@/app/services/productService";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart, updateQuantity } from "@/lib/redux/cartSlice";
+import { RootState } from "@/lib/redux/store";
 
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard: FC<ProductCardProps> = ({ product }) => {
+  const dispatch = useDispatch();
+  const cart = useSelector((state: RootState) => state.cart.items);
+  const handleAddToCart = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const existingProduct = cart.find((item) => item.id === product._id);
+    if (existingProduct) {
+      dispatch(
+        updateQuantity({
+          id: product._id,
+          quantity: existingProduct.quantity + 1,
+        })
+      );
+    } else {
+      dispatch(
+        addToCart({
+          id: product._id,
+          name: product.name,
+          price: product.price,
+          quantity: 1,
+        })
+      );
+    }
+  };
+
   return (
     <Link href={`/products/${product._id}`} key={product._id}>
       <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden hover:shadow-3xl transition duration-300">
@@ -49,7 +81,7 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
 
             <button
               className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
-              onClick={(e) => e.stopPropagation()}
+              onClick={handleAddToCart}
             >
               Add to Cart
             </button>
