@@ -1,15 +1,42 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, MouseEvent } from "react";
 import Comment from "@/components/Comment";
 
 import { useParams } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart, updateQuantity } from "@/lib/redux/cartSlice";
+import { RootState } from "@/lib/redux/store";
 import { getProductById, Product } from "@/app/services/productService";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const dispatch = useDispatch();
+  const cart = useSelector((state: RootState) => state.cart.items);
+  const handleAddToCart = (e: MouseEvent<HTMLButtonElement>) => {
+    // e.preventDefault();
+    // e.stopPropagation();
+    // const existingProduct = cart.find((item) => item.id === product._id);
+    // if (existingProduct) {
+    //   dispatch(
+    //     updateQuantity({
+    //       id: product._id,
+    //       quantity: existingProduct.quantity + 1,
+    //     })
+    //   );
+    // } else {
+    //   dispatch(
+    //     addToCart({
+    //       id: product._id,
+    //       name: product.name,
+    //       price: product.price,
+    //       quantity: 1,
+    //     })
+    //   );
+    // }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -48,7 +75,10 @@ const ProductDetail = () => {
             </div>
             <div className="flex -mx-2 mb-4">
               <div className="w-1/2 px-2">
-                <button className="bg-indigo-600 flex gap-2 items-center justify-center text-white px-6 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 w-full">
+                <button
+                  className="bg-indigo-600 flex gap-2 items-center justify-center text-white px-6 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 w-full"
+                  onClick={handleAddToCart}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -140,6 +170,7 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
+
       {/* Review Section */}
       <Comment />
     </div>
