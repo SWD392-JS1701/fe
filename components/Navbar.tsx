@@ -4,9 +4,11 @@ import Link from "next/link";
 import React, { FC, useEffect, useState } from "react";
 import Image from "next/image";
 import { Search, X } from "lucide-react";
-import Logo from "../assets/logo.png";
+import Logo from "@/assets/logo.png";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
+import { RootState } from "@/lib/redux/store";
 
 const Navbar: FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -15,25 +17,7 @@ const Navbar: FC = () => {
   const maxBorderWidth = 250; // the max width of border when the scroll count is 3
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
-  const [cartCount, setCartCount] = useState(0);
-
-  useEffect(() => {
-    const storedCart = localStorage.getItem("cart_count");
-    if (storedCart) {
-      setCartCount(parseInt(storedCart, 10));
-    }
-
-    const handleCartUpdate = () => {
-      const updatedCart = localStorage.getItem("cart_count");
-      setCartCount(updatedCart ? parseInt(updatedCart, 10) : 0);
-    };
-
-    window.addEventListener("storage", handleCartUpdate);
-
-    return () => {
-      window.removeEventListener("storage", handleCartUpdate);
-    };
-  }, []);
+  const cartCount = useSelector((state: RootState) => state.cart.items.length);
 
   useEffect(() => {
     const checkLoginStatus = () => {
@@ -72,15 +56,6 @@ const Navbar: FC = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [scrollCount]);
-
-  const addToCart = () => {
-    setCartCount((prev) => {
-      const newCount = prev + 1;
-      localStorage.setItem("cart_count", newCount.toString());
-      window.dispatchEvent(new Event("storage"));
-      return newCount;
-    });
-  };
 
   return (
     <div
@@ -265,8 +240,9 @@ const Navbar: FC = () => {
               />
             </svg>
 
+            {/* Display cart count if greater than 0 */}
             {cartCount > 0 && (
-              <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-2">
+              <span className="absolute top-0 left-4 bg-red-500 text-white text-xs rounded-full px-2">
                 {cartCount}
               </span>
             )}
