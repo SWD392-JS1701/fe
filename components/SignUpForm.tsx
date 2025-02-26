@@ -95,7 +95,7 @@ const SignUpForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 mt-[70px]">
       {submitError && (
         <div className="bg-red-50 text-red-600 p-3 rounded-md">
           {submitError}
