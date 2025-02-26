@@ -1,18 +1,21 @@
 import About from "@/components/About";
 import Hero from "@/components/Hero";
 import Products from "./(root)/(page)/products/page";
-import Nav from "../components/Navbar";
+import Navbar from "../components/Navbar";
+import Footer from "@/components/Footer";
 
 const page = () => {
   return (
     <div className="min-h-screen bg-white">
-      <Nav />
+      <Navbar />
 
       <Hero />
 
       <Products />
 
       <About />
+
+      <Footer />
     </div>
   );
 };
