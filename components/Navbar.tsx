@@ -11,10 +11,30 @@ import { useRouter } from "next/navigation";
 const Navbar: FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [scrollCount, setScrollCount] = useState(0);
-  const maxScrollCount = 3; //
+  const maxScrollCount = 3;
   const maxBorderWidth = 250; // the max width of border when the scroll count is 3
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    const storedCart = localStorage.getItem("cart_count");
+    if (storedCart) {
+      setCartCount(parseInt(storedCart, 10));
+    }
+
+    const handleCartUpdate = () => {
+      const updatedCart = localStorage.getItem("cart_count");
+      setCartCount(updatedCart ? parseInt(updatedCart, 10) : 0);
+    };
+
+    window.addEventListener("storage", handleCartUpdate);
+
+    return () => {
+      window.removeEventListener("storage", handleCartUpdate);
+    };
+  }, []);
+
   useEffect(() => {
     const checkLoginStatus = () => {
       const token = localStorage.getItem("access_token");
@@ -52,6 +72,15 @@ const Navbar: FC = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [scrollCount]);
+
+  const addToCart = () => {
+    setCartCount((prev) => {
+      const newCount = prev + 1;
+      localStorage.setItem("cart_count", newCount.toString());
+      window.dispatchEvent(new Event("storage"));
+      return newCount;
+    });
+  };
 
   return (
     <div
@@ -218,7 +247,7 @@ const Navbar: FC = () => {
             </div>
           </div>
 
-          <Link href="/cart">
+          <Link href="/cart" className="relative">
             <svg
               className={`w-6 h-6 transition-all duration-500 ${
                 scrollCount === maxScrollCount ? "text-white" : "text-gray-800"
@@ -235,6 +264,12 @@ const Navbar: FC = () => {
                 d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
               />
             </svg>
+
+            {cartCount > 0 && (
+              <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-2">
+                {cartCount}
+              </span>
+            )}
           </Link>
         </div>
       </div>

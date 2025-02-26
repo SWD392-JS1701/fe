@@ -1,6 +1,6 @@
 import About from "@/components/About";
 import Hero from "@/components/Hero";
-import Products from "./(page)/products/page";
+import Products from "./(root)/(page)/products/page";
 import Nav from "../components/Navbar";
 
 const page = () => {

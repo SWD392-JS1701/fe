@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import { API_URL } from "@/config";
 import { jwtDecode } from "jwt-decode";
@@ -8,6 +10,8 @@ export interface User {
   email: string;
   role: string;
   point: number;
+  skinType: string;
+  sensitivity: string;
   first_name: string;
   last_name: string;
   phone_number: string;
@@ -39,6 +43,30 @@ const getAccessToken = (): string | null => {
   }
 };
 
+const isTokenExpired = (token: string): boolean => {
+  try {
+    const decoded: { exp: number } = jwtDecode(token);
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    return decoded.exp < currentTime;
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return true;
+  }
+};
+
+export const useAuthRedirect = () => {
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = getAccessToken();
+
+    if (!token || isTokenExpired(token)) {
+      localStorage.removeItem("access_token");
+    }
+  }, []);
+};
+
 const authHeaders = () => {
   const token = getAccessToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
@@ -68,8 +96,9 @@ export const getUserById = async (): Promise<User | null> => {
     const decoded: DecodedToken = jwtDecode(accessToken);
     const userId = decoded.id;
 
+    const headers = authHeaders();
     const response = await axios.get<User>(`${API_URL}/users/${userId}`, {
-      headers: authHeaders(),
+      headers,
     });
 
     return response.data;

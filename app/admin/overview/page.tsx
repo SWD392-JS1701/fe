@@ -1,20 +1,27 @@
-import AdminNavbar from "@/components/AdminNavbar";
-import React from "react";
+"use client";
+
+import React, { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const AdminPage = () => {
-  // Sample data for Total All Stock Product
   const totalStockProducts = [
     { name: "T-Shirts", quantity: 1200 },
     { name: "Jeans", quantity: 850 },
     { name: "Shoes", quantity: 500 },
     { name: "Accessories", quantity: 300 },
   ];
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+      router.push("/sign-in");
+    }
+  }, [router]);
 
   return (
     <>
-      {/* Admin Navbar */}
-      <AdminNavbar />
-
       <div className="min-h-screen bg-gray-100 p-6">
         {/* Header */}
         <header className="mb-8 flex justify-between items-center">
