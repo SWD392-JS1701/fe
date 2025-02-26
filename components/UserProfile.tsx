@@ -22,6 +22,7 @@ interface UserProfileProps {
     firstName: string;
     lastName: string;
     email: string;
+    address:string;
     skinType: string;
     sensitivity: string;
     emailSubscription: string;
@@ -39,7 +40,7 @@ const UserProfile: FC<UserProfileProps> = ({ user }) => {
       </Head>
 
       <div className="bg-pink-50">
-        <main className="container mx-auto py-10 px-4 bg-white">
+        <main className="container mx-auto py-30 px-4 bg-white">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Left Sidebar - User Info & Navigation */}
             <div className="md:col-span-1">
@@ -187,7 +188,12 @@ const UserProfile: FC<UserProfileProps> = ({ user }) => {
                     </h3>
                     <p className="col-span-9 text-gray-800">{user.email}</p>
                   </div>
-
+                  <div className="grid grid-cols-12 items-center">
+                    <h3 className="col-span-3 text-sm font-bold text-gray-600 py-2.5">
+                      Address
+                    </h3>
+                    <p className="col-span-9 text-gray-800">{user.address}</p>
+                  </div>
                   <div className="grid grid-cols-12 items-center">
                     <h3 className="col-span-3 text-sm font-bold text-gray-600 py-2.5">
                       Skin Type
