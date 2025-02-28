@@ -295,7 +295,7 @@ const UserProfile: FC<UserProfileProps> = ({ user,setUser }) => {
                 </div>
 
                 {error && <p className="text-red-500 mt-2">{error}</p>}
-                
+                {success && <p className="text-green-500 mt-2">Profile updated successfully!</p>}
               </form>
             ) : (
               <div>
