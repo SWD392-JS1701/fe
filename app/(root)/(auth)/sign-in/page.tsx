@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState, FC, ChangeEvent, FormEvent } from "react";
+import React, { useState, FC, ChangeEvent, FormEvent, useEffect } from "react";
 import Link from "next/link";
 import Head from "next/head";
-import { login } from "@/app/services/authService";
+import { login as loginUser } from "@/app/services/authService";
 import { useRouter } from "next/navigation";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, login } from "@/lib/redux/store";
 
 interface FormData {
   email: string;
@@ -19,6 +21,16 @@ const SignIn: FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, router]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,15 +42,12 @@ const SignIn: FC = () => {
     setLoading(true);
 
     try {
-      const data = await login(formData.email, formData.password);
+      const data = await loginUser(formData.email, formData.password);
       localStorage.setItem("access_token", JSON.stringify(data));
+      dispatch(login());
       window.dispatchEvent(new Event("storage"));
 
-      if (data.role === "Admin") {
-        router.push("/overview");
-      } else {
-        router.push("/");
-      }
+      router.push(data.role === "Admin" ? "/overview" : "/");
     } catch (err: any) {
       setError(err.message);
     } finally {
