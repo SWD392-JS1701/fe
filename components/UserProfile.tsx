@@ -37,7 +37,7 @@ const UserProfile: FC<UserProfileProps> = ({ user }) => {
         <title>My Profile | SkinType Solutions</title>
       </Head>
 
-      <div className="bg-pink-50">
+      <div className="bg-pink-50 mt-[70px]">
         <main className="container mx-auto py-10 px-4 bg-white">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Left Sidebar - User Info & Navigation */}

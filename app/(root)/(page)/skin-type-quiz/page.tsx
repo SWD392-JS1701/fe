@@ -30,7 +30,7 @@ const getTypeColor = (typeNumber: number): string => {
 
 const QuizPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-r from-pink-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-r from-pink-50 to-purple-50 mt-[70px]">
       <Head>
         <title>Skin Type Quiz - GlowUp Skincare</title>
         <meta

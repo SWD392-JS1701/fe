@@ -4,21 +4,17 @@ import Link from "next/link";
 import React, { FC, useEffect, useState } from "react";
 import Image from "next/image";
 import { Search, X } from "lucide-react";
-import Logo from "@/assets/logo.png";
+import Logo from "../assets/logo.png";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
-import { RootState } from "@/lib/redux/store";
 
 const Navbar: FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [scrollCount, setScrollCount] = useState(0);
-  const maxScrollCount = 3;
+  const maxScrollCount = 3; //
   const maxBorderWidth = 250; // the max width of border when the scroll count is 3
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
-  const cartCount = useSelector((state: RootState) => state.cart.items.length);
-
   useEffect(() => {
     const checkLoginStatus = () => {
       const token = localStorage.getItem("access_token");
@@ -157,8 +153,6 @@ const Navbar: FC = () => {
                 />
               </svg>
             </Link>
-
-            {/* Transparent overlay for hover */}
             <div className="absolute w-full h-5 bg-transparent"></div>
 
             {/* Dropdown Menu */}
@@ -195,7 +189,6 @@ const Navbar: FC = () => {
                     onClick={() => {
                       localStorage.removeItem("access_token");
                       setIsLoggedIn(false);
-                      window.dispatchEvent(new Event("storage"));
                       router.push("/");
                     }}
                     className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
@@ -222,7 +215,7 @@ const Navbar: FC = () => {
             </div>
           </div>
 
-          <Link href="/cart" className="relative">
+          <Link href="/cart">
             <svg
               className={`w-6 h-6 transition-all duration-500 ${
                 scrollCount === maxScrollCount ? "text-white" : "text-gray-800"
@@ -239,13 +232,6 @@ const Navbar: FC = () => {
                 d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
               />
             </svg>
-
-            {/* Display cart count if greater than 0 */}
-            {cartCount > 0 && (
-              <span className="absolute top-0 left-4 bg-red-500 text-white text-xs rounded-full px-2">
-                {cartCount}
-              </span>
-            )}
           </Link>
         </div>
       </div>
