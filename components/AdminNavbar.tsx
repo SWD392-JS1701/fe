@@ -10,19 +10,28 @@ const AdminNavbar = () => {
 
         {/* Navigation Links */}
         <div className="flex space-x-6">
-          <Link href="/overview" className="text-gray-700 hover:text-blue-600">
+          <Link
+            href="/admin/overview"
+            className="text-gray-700 hover:text-blue-600"
+          >
             Overview
           </Link>
-          <Link href="/product" className="text-gray-700 hover:text-blue-600">
+          <Link
+            href="/admin/product"
+            className="text-gray-700 hover:text-blue-600"
+          >
             Product
           </Link>
           <Link
-            href="/transaction"
+            href="/admin/transaction"
             className="text-gray-700 hover:text-blue-600"
           >
             Transaction
           </Link>
-          <Link href="/employee" className="text-gray-700 hover:text-blue-600">
+          <Link
+            href="/admin/employee"
+            className="text-gray-700 hover:text-blue-600"
+          >
             Employee
           </Link>
         </div>

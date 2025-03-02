@@ -8,7 +8,6 @@ import React, {
   FormEvent,
 } from "react";
 
-import AdminNavbar from "@/components/AdminNavbar";
 import UserCard from "@/components/UserCard";
 import { FaPlus, FaEye, FaEyeSlash } from "react-icons/fa";
 
@@ -164,7 +163,6 @@ const EmployeePage = () => {
 
   return (
     <>
-      <AdminNavbar />
       <div className="bg-gray-100 min-h-screen p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-6">

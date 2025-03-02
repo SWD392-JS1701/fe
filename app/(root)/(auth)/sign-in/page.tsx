@@ -35,7 +35,7 @@ const SignIn: FC = () => {
       window.dispatchEvent(new Event("storage"));
 
       if (data.role === "Admin") {
-        router.push("/overview");
+        router.push("/admin/overview");
       } else {
         router.push("/");
       }
