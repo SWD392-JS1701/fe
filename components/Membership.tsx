@@ -1,132 +1,124 @@
-import React from "react";
+import React, { FC, useState, Dispatch, SetStateAction } from "react";
+import Swal from "sweetalert2";
+import { updateUser } from "@/app/services/userService";
 
-const Membership = () => {
+interface Membership {
+  _id: string;
+  name: string;
+  description: string;
+  discount_percentage: number;
+  point_value: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface MembershipProps {
+  memberships: Membership[];
+  user: any;
+  setUser: Dispatch<SetStateAction<any>>;
+}
+
+const Membership: FC<MembershipProps> = ({ memberships, user, setUser }) => {
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handleJoin = async (membershipId: string) => {
+    setLoading(membershipId);
+
+    try {
+      const updatedUserData = await updateUser(user.id, {
+        membership_id: membershipId,
+      });
+
+      if (updatedUserData) {
+        setUser((prevUser: any) => ({
+          ...prevUser,
+          membership_id: membershipId,
+        }));
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: `Successfully joined ${
+            memberships.find((m) => m._id === membershipId)?.name
+          }!`,
+          confirmButtonColor: "#9333EA",
+          confirmButtonText: "OK",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to join membership. Please try again.",
+          confirmButtonColor: "#9333EA",
+          confirmButtonText: "OK",
+        });
+      }
+    } catch (err: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: err.message || "Failed to join membership. Please try again.",
+        confirmButtonColor: "#9333EA",
+        confirmButtonText: "OK",
+      });
+    } finally {
+      setLoading(null);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 py-10">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white py-20">
-        <div className="container mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-4">
-            Unlock Exclusive Skincare Benefits
-          </h1>
-          <p className="text-xl mb-8">
-            Join our membership program and enjoy discounts, early access to new
-            products, and personalized skincare recommendations.
-          </p>
-          <button className="bg-white text-purple-600 font-semibold py-3 px-8 rounded-full hover:bg-purple-100 transition duration-300">
-            Join Now
-          </button>
+    <div className="p-6 bg-white rounded-lg border">
+      <h2 className="text-2xl font-bold text-black mb-6">
+        Your Membership Options
+      </h2>
+      {memberships.length === 0 ? (
+        <p className="text-gray-600">No memberships available at this time.</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {memberships.map((membership) => {
+            const isJoined = user.membership_id === membership._id;
+            return (
+              <div
+                key={membership._id}
+                className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 flex flex-col h-64"
+              >
+                <h3 className="text-xl font-semibold text-purple-800 mb-2">
+                  {membership.name}
+                </h3>
+                <p className="text-gray-700 mb-4 flex-grow">
+                  {membership.description}
+                </p>
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">Discount:</span>{" "}
+                    {membership.discount_percentage}% off
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">Points:</span>{" "}
+                    {membership.point_value}
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleJoin(membership._id)}
+                  disabled={isJoined || loading === membership._id}
+                  className={`mt-4 w-full py-2 px-4 rounded-full transition-colors duration-300 ${
+                    isJoined
+                      ? "bg-green-500 text-white cursor-not-allowed opacity-75"
+                      : loading === membership._id
+                      ? "bg-purple-600 text-white opacity-50 cursor-not-allowed"
+                      : "bg-purple-600 text-white hover:bg-purple-700"
+                  }`}
+                >
+                  {isJoined
+                    ? "Joined"
+                    : loading === membership._id
+                    ? "Joining..."
+                    : "Join Now"}
+                </button>
+              </div>
+            );
+          })}
         </div>
-      </div>
-
-      {/* Membership Benefits Section */}
-      <div className="container mx-auto my-20">
-        <h2 className="text-3xl font-bold text-center mb-10">
-          Membership Benefits
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Benefit 1 */}
-          <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-            <div className="text-4xl mb-4">🎁</div>
-            <h3 className="text-xl font-semibold mb-4">Exclusive Discounts</h3>
-            <p className="text-gray-600">
-              Enjoy up to 30% off on all skincare products.
-            </p>
-          </div>
-
-          {/* Benefit 2 */}
-          <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-            <div className="text-4xl mb-4">🚀</div>
-            <h3 className="text-xl font-semibold mb-4">Early Access</h3>
-            <p className="text-gray-600">
-              Be the first to try new products before they launch.
-            </p>
-          </div>
-
-          {/* Benefit 3 */}
-          <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-            <div className="text-4xl mb-4">💎</div>
-            <h3 className="text-xl font-semibold mb-4">Personalized Care</h3>
-            <p className="text-gray-600">
-              Get tailored skincare recommendations based on your skin type.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Featured Products Section */}
-      <div className="bg-white py-20">
-        <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-10">
-            Featured Products
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Product 1 */}
-            <div className="bg-gray-50 p-6 rounded-lg shadow-md">
-              <img
-                src="https://via.placeholder.com/300"
-                alt="Product 1"
-                className="w-full h-48 object-cover rounded-lg mb-4"
-              />
-              <h3 className="text-xl font-semibold mb-2">Hydrating Serum</h3>
-              <p className="text-gray-600 mb-4">
-                Deeply hydrates and plumps your skin.
-              </p>
-              <button className="bg-purple-500 text-white py-2 px-6 rounded-full hover:bg-purple-600 transition duration-300">
-                Add to Cart
-              </button>
-            </div>
-
-            {/* Product 2 */}
-            <div className="bg-gray-50 p-6 rounded-lg shadow-md">
-              <img
-                src="https://via.placeholder.com/300"
-                alt="Product 2"
-                className="w-full h-48 object-cover rounded-lg mb-4"
-              />
-              <h3 className="text-xl font-semibold mb-2">Vitamin C Cream</h3>
-              <p className="text-gray-600 mb-4">
-                Brightens and evens out skin tone.
-              </p>
-              <button className="bg-purple-500 text-white py-2 px-6 rounded-full hover:bg-purple-600 transition duration-300">
-                Add to Cart
-              </button>
-            </div>
-
-            {/* Product 3 */}
-            <div className="bg-gray-50 p-6 rounded-lg shadow-md">
-              <img
-                src="https://via.placeholder.com/300"
-                alt="Product 3"
-                className="w-full h-48 object-cover rounded-lg mb-4"
-              />
-              <h3 className="text-xl font-semibold mb-2">Sunscreen SPF 50</h3>
-              <p className="text-gray-600 mb-4">
-                Protects your skin from harmful UV rays.
-              </p>
-              <button className="bg-purple-500 text-white py-2 px-6 rounded-full hover:bg-purple-600 transition duration-300">
-                Add to Cart
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Call-to-Action Section */}
-      <div className="bg-gradient-to-r from-pink-500 to-purple-500 text-white py-20">
-        <div className="container mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-6">
-            Ready to Transform Your Skin?
-          </h2>
-          <p className="text-xl mb-8">
-            Join our membership program today and start your journey to
-            healthier, glowing skin.
-          </p>
-          <button className="bg-white text-purple-600 font-semibold py-3 px-8 rounded-full hover:bg-purple-100 transition duration-300">
-            Sign Up Now
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
