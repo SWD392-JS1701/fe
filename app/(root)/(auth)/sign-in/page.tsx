@@ -21,6 +21,7 @@ const SignIn: FC = () => {
   const router = useRouter();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setError(null);
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -32,7 +33,6 @@ const SignIn: FC = () => {
     try {
       const data = await login(formData.email, formData.password);
       localStorage.setItem("access_token", data.access_token);
-      window.dispatchEvent(new Event("storage"));
 
       const userRole = data.decodedToken.role;
 

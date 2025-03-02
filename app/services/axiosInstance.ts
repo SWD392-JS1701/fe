@@ -8,7 +8,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && error.config.url !== "/auth/login") {
       localStorage.removeItem("access_token");
 
       if (typeof window !== "undefined") {
