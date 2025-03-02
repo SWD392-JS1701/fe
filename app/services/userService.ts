@@ -11,6 +11,7 @@ export interface User {
   role: string;
   point: number;
   skinType: string;
+  membership_id?: string;
   sensitivity: string;
   first_name: string;
   last_name: string;
@@ -35,18 +36,6 @@ const getAccessToken = (): string | null => {
   return storedToken;
 };
 
-const isTokenExpired = (token: string): boolean => {
-  try {
-    const decoded: { exp: number } = jwtDecode(token);
-    const currentTime = Math.floor(Date.now() / 1000);
-
-    return decoded.exp < currentTime;
-  } catch (error) {
-    console.error("Error decoding token:", error);
-    return true;
-  }
-};
-
 export const useAuthRedirect = () => {
   const router = useRouter();
 
@@ -58,6 +47,18 @@ export const useAuthRedirect = () => {
       router.push("/sign-in");
     }
   }, [router]);
+};
+
+const isTokenExpired = (token: string): boolean => {
+  try {
+    const decoded: { exp: number } = jwtDecode(token);
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    return decoded.exp < currentTime;
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return true;
+  }
 };
 
 const authHeaders = () => {

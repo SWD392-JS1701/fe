@@ -3,10 +3,7 @@
 import React, { FC, useEffect, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import UserProfile from "@/components/UserProfile";
-import Membership from "@/components/Membership";
-import Error from "@/components/Error";
-import Loading from "@/components/Loading";
+import { useRouter } from "next/navigation";
 
 import {
   FaLock,
@@ -19,11 +16,15 @@ import {
 } from "react-icons/fa";
 
 import { getUserById } from "@/app/services/userService";
-import { useRouter } from "next/navigation";
-import ChangePasswordPage from "../change-password/page";
+import { getMemberships } from "@/app/services/membershipSevice";
+import UserProfile from "@/components/UserProfile";
+import Membership from "@/components/Membership";
+import Error from "@/components/Error";
+import Loading from "@/components/Loading";
 
 const ProfilePage: FC = () => {
   const [user, setUser] = useState<any>(null);
+  const [memberships, setMemberships] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState("profile");
   const router = useRouter();
@@ -69,10 +70,22 @@ const ProfilePage: FC = () => {
       }
     };
 
+    const fetchMemberships = async () => {
+      try {
+        const membershipData = await getMemberships();
+        setMemberships(membershipData);
+      } catch (err) {
+        Error(
+          "Memberships Load Failed",
+          "We couldn't load memberships. Please try again later."
+        );
+      }
+    };
+
     getUserProfile();
+    fetchMemberships();
   }, []);
 
-  // Handler for navigation clicks
   const handleNavClick = (section: string) => {
     setActiveSection(section);
   };
@@ -83,13 +96,14 @@ const ProfilePage: FC = () => {
     return null;
   }
 
-  // Conditional rendering for the right content
   const renderContent = () => {
     switch (activeSection) {
       case "profile":
         return <UserProfile user={user} setUser={setUser} />;
       case "subscriptions":
-        return <Membership />;
+        return (
+          <Membership memberships={memberships} user={user} setUser={setUser} />
+        );
       case "orders":
         return (
           <div className="p-6 bg-white rounded-lg border">
@@ -100,7 +114,8 @@ const ProfilePage: FC = () => {
       case "change-password":
         return (
           <div className="p-6 bg-white rounded-lg border">
-            <ChangePasswordPage />
+            <h2 className="text-2xl font-bold">Change Password</h2>
+            <p>Change password content coming soon...</p>
           </div>
         );
       case "recently-viewed":
@@ -133,7 +148,6 @@ const ProfilePage: FC = () => {
             {/* Left Sidebar - User Info & Navigation */}
             <div className="md:col-span-1">
               <div className="border border-gray-200 rounded-md overflow-hidden">
-                {/* User Name and Email */}
                 <div className="p-6 border-b border-gray-200">
                   <h2 className="text-2xl font-bold mb-1 text-black">
                     {user.first_name}
@@ -142,7 +156,6 @@ const ProfilePage: FC = () => {
                   <p className="text-gray-600 text-sm">{user.email}</p>
                 </div>
 
-                {/* Profile Navigation */}
                 <nav>
                   <button
                     onClick={() => handleNavClick("profile")}
