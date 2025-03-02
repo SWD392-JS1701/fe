@@ -121,6 +121,14 @@ const SignIn: FC = () => {
                   Sign up
                 </Link>
               </p>
+              <p className="text-gray-600 mt-2">
+                <Link
+                  href="/email"
+                  className="text-purple-600 hover:text-purple-800"
+                >
+                  Forget Password?
+                </Link>
+              </p>
             </div>
           </form>
         </div>

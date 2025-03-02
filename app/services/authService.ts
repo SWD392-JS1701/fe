@@ -49,3 +49,19 @@ export const login = async (email: string, password: string) => {
     );
   }
 };
+
+export const resetPassword = async (token: string, newPassword: string) => {
+  try {
+    const response = await axios.post(`${API_URL}/auth/reset-password`, {
+      token,
+      newPassword,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Reset Password API Error:", error);
+    throw new Error(
+      error.response?.data?.message ||
+        "Failed to reset password. Please try again."
+    );
+  }
+};
