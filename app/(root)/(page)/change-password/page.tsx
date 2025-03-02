@@ -4,9 +4,11 @@ import React, { useState, ChangeEvent } from "react";
 import Swal from "sweetalert2";
 
 import { resetPassword } from "@/app/services/authService";
+import { useRouter } from "next/navigation";
 
 const ChangePasswordPage = () => {
   const tokenData = localStorage.getItem("access_token");
+  const router = useRouter();
   const [newPassword, setNewPassword] = useState<string>("");
   const [passwordValidation, setPasswordValidation] = useState({
     lowercase: false,
@@ -58,7 +60,7 @@ const ChangePasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">
           Reset Password
@@ -116,7 +118,7 @@ const ChangePasswordPage = () => {
         <div className="flex justify-between">
           <button
             className="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400 transition duration-200"
-            onClick={() => alert("Cancel clicked")}
+            onClick={() => router.back()}
           >
             Cancel
           </button>
