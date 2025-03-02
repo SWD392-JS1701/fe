@@ -31,16 +31,8 @@ export interface DecodedToken {
 
 const getAccessToken = (): string | null => {
   const storedToken = localStorage.getItem("access_token");
-
   if (!storedToken) return null;
-
-  try {
-    const parsedToken = JSON.parse(storedToken);
-    return parsedToken.access_token;
-  } catch (error) {
-    console.error("Error parsing access token:", error);
-    return null;
-  }
+  return storedToken;
 };
 
 const isTokenExpired = (token: string): boolean => {
