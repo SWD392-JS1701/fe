@@ -31,10 +31,12 @@ const SignIn: FC = () => {
 
     try {
       const data = await login(formData.email, formData.password);
-      localStorage.setItem("access_token", JSON.stringify(data));
+      localStorage.setItem("access_token", data.access_token);
       window.dispatchEvent(new Event("storage"));
 
-      if (data.role === "Admin") {
+      const userRole = data.decodedToken.role;
+
+      if (userRole === "admin") {
         router.push("/admin/overview");
       } else {
         router.push("/");

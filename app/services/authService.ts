@@ -1,5 +1,14 @@
-import { API_URL } from "@/config";
-import axios from "axios";
+import axiosInstance from "./axiosInstance";
+import { jwtDecode } from "jwt-decode";
+
+interface DecodedToken {
+  id: string;
+  username: string;
+  email: string;
+  role?: string;
+  iat: number;
+  exp: number;
+}
 
 export const register = async (
   username: string,
@@ -12,7 +21,7 @@ export const register = async (
   role?: string
 ) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/register`, {
+    const response = await axiosInstance.post("/auth/register", {
       username,
       email,
       plainPassword,
@@ -34,14 +43,19 @@ export const register = async (
 
 export const login = async (email: string, password: string) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/login`, {
+    const response = await axiosInstance.post("/auth/login", {
       email,
       password,
     });
 
     const data = response.data;
-    localStorage.setItem("access_token", data.access_token);
-    return data;
+    const accessToken = data.access_token;
+
+    localStorage.setItem("access_token", accessToken);
+
+    const decodedToken: DecodedToken = jwtDecode(accessToken);
+
+    return { ...data, decodedToken };
   } catch (error: any) {
     console.error("Login API Error:", error);
     throw new Error(
@@ -52,7 +66,7 @@ export const login = async (email: string, password: string) => {
 
 export const resetPassword = async (token: string, newPassword: string) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/reset-password`, {
+    const response = await axiosInstance.post("/auth/reset-password", {
       token,
       newPassword,
     });
@@ -63,5 +77,18 @@ export const resetPassword = async (token: string, newPassword: string) => {
       error.response?.data?.message ||
         "Failed to reset password. Please try again."
     );
+  }
+};
+
+export const getDecodedToken = (): DecodedToken | null => {
+  const accessToken = localStorage.getItem("access_token");
+  if (!accessToken) return null;
+
+  try {
+    const decoded: DecodedToken = jwtDecode(accessToken);
+    return decoded;
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return null;
   }
 };

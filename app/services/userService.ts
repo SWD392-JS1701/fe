@@ -1,9 +1,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
-import { API_URL } from "@/config";
 import axiosInstance from "./axiosInstance";
 
 export interface User {
