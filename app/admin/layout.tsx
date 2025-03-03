@@ -1,4 +1,4 @@
-import AdminNavbar from "@/components/AdminNavbar";
+import AdminNavbar from "@/components/Navbar/AdminNavbar";
 import Footer from "@/components/Footer";
 import React from "react";
 

@@ -18,7 +18,7 @@ const Navbar: FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const cartCount = useSelector((state: RootState) => state.cart.items.length);
-
+ 
   useEffect(() => {
     const checkLoginStatus = () => {
       const token = localStorage.getItem("access_token");
@@ -254,7 +254,7 @@ const Navbar: FC = () => {
       <div className="flex justify-center items-center py-2 space-x-20 relative">
         <Link href="/shop">SHOP</Link>
         <Link href="/brands">BRANDS</Link>
-        <Link href="/blog">BLOG</Link>
+        
         <Link href="/library">SKIN TYPE LIBRARY</Link>
         <Link href="/quiz">TAKE THE QUIZ</Link>
 

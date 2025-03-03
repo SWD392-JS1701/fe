@@ -6,9 +6,9 @@ import UserProfile from "@/components/UserProfile";
 import Error from "@/components/Error";
 import Loading from "@/components/Loading";
 
-import { getUserById,useAuthRedirect  } from "@/app/services/userService";
+import { getUserById } from "@/app/services/userService";
 import { useRouter } from "next/navigation";
-
+import { useAuthRedirect  } from "@/app/services/authService";
 const ProfilePage: FC = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
