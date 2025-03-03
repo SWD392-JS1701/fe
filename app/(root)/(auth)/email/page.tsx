@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, FormEvent, FC } from "react";
-import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
+
+import { forgetPassword } from "@/app/services/authService";
 
 const EmailPage: FC = () => {
   const [email, setEmail] = useState<string>("");
-  const router = useRouter();
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -21,8 +21,25 @@ const EmailPage: FC = () => {
       return;
     }
 
-    console.log("Email submitted:", email);
-    router.push("/forget-pasword");
+    try {
+      forgetPassword(email).then(() => {
+        Swal.fire({
+          icon: "success",
+          title:
+            "Email sent successfully! Check your inbox for further instructions.",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      });
+    } catch (error: any) {
+      Swal.fire({
+        icon: "error",
+        title: "Failed to send email",
+        text: error.message,
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    }
   };
 
   return (

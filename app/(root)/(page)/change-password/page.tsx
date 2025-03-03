@@ -7,7 +7,7 @@ import { resetPassword } from "@/app/services/authService";
 import { useRouter } from "next/navigation";
 
 const ChangePasswordPage = () => {
-  const tokenData = localStorage.getItem("access_token");
+  const token = localStorage.getItem("access_token");
   const router = useRouter();
   const [newPassword, setNewPassword] = useState<string>("");
   const [passwordValidation, setPasswordValidation] = useState({
@@ -31,8 +31,19 @@ const ChangePasswordPage = () => {
 
   const handleResetPassword = async () => {
     if (Object.values(passwordValidation).every((rule) => rule)) {
+      if (!token) {
+        Swal.fire({
+          icon: "error",
+          title: "No token found",
+          text: "Please log in to reset your password.",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        router.push("/sign-in");
+        return;
+      }
+
       try {
-        const token = tokenData ? JSON.parse(tokenData).access_token : null;
         await resetPassword(token, newPassword);
         Swal.fire({
           icon: "success",
@@ -40,10 +51,11 @@ const ChangePasswordPage = () => {
           showConfirmButton: false,
           timer: 1500,
         });
-      } catch (error) {
+      } catch (error: any) {
         Swal.fire({
           icon: "error",
-          title: "Failed to reset password. Please try again.",
+          title: "Failed to reset password",
+          text: error.message || "Please try again.",
           showConfirmButton: false,
           timer: 1500,
         });
@@ -52,7 +64,8 @@ const ChangePasswordPage = () => {
     } else {
       Swal.fire({
         icon: "error",
-        title: "Please ensure the password meets the requirements.",
+        title: "Invalid password",
+        text: "Please ensure the password meets the requirements.",
         showConfirmButton: false,
         timer: 1500,
       });

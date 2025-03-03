@@ -80,15 +80,17 @@ export const resetPassword = async (token: string, newPassword: string) => {
   }
 };
 
-export const getDecodedToken = (): DecodedToken | null => {
-  const accessToken = localStorage.getItem("access_token");
-  if (!accessToken) return null;
-
+export const forgetPassword = async (email: string) => {
   try {
-    const decoded: DecodedToken = jwtDecode(accessToken);
-    return decoded;
-  } catch (error) {
-    console.error("Error decoding token:", error);
-    return null;
+    const response = await axiosInstance.post("/auth/forgot-password", {
+      email,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Forget Password API Error:", error);
+    throw new Error(
+      error.response?.data?.message ||
+        "Failed to forget password. Please try again."
+    );
   }
 };
