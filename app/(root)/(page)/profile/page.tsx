@@ -21,6 +21,7 @@ import UserProfile from "@/components/UserProfile";
 import Membership from "@/components/Membership";
 import Error from "@/components/Error";
 import Loading from "@/components/Loading";
+import ChangePasswordPage from "../change-password/page";
 
 const ProfilePage: FC = () => {
   const [user, setUser] = useState<any>(null);
@@ -112,12 +113,7 @@ const ProfilePage: FC = () => {
           </div>
         );
       case "change-password":
-        return (
-          <div className="p-6 bg-white rounded-lg border">
-            <h2 className="text-2xl font-bold">Change Password</h2>
-            <p>Change password content coming soon...</p>
-          </div>
-        );
+        return <ChangePasswordPage />;
       case "recently-viewed":
         return (
           <div className="p-6 bg-white rounded-lg border">
