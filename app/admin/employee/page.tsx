@@ -8,6 +8,9 @@ import React, {
   FormEvent,
 } from "react";
 
+
+import AdminNavbar from "@/components/Navbar/AdminNavbar";
+
 import UserCard from "@/components/UserCard";
 import { FaPlus, FaEye, FaEyeSlash } from "react-icons/fa";
 

@@ -22,11 +22,10 @@ import Membership from "@/components/Membership";
 import Error from "@/components/Error";
 import Loading from "@/components/Loading";
 
+
 import ChangePasswordPage from "../change-password/page";
 
 
-import { getUserById,useAuthRedirect  } from "@/app/services/userService";
-import { useRouter } from "next/navigation";
 
 
 const ProfilePage: FC = () => {
@@ -36,7 +35,7 @@ const ProfilePage: FC = () => {
   const [activeSection, setActiveSection] = useState("profile");
   const router = useRouter();
   const access_token = localStorage.getItem("access_token");
-  useAuthRedirect();
+  
   useEffect(() => {
     if (!access_token) {
       Error("Not Logged In", "Please log in to view your profile.");

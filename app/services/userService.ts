@@ -36,54 +36,6 @@ const getAccessToken = (): string | null => {
   return storedToken;
 };
 
-export const useAuthRedirect = () => {
-  const router = useRouter();
-
-  useEffect(() => {
-    const token = getAccessToken();
-
-    if (!token || isTokenExpired(token)) {
-      localStorage.removeItem("access_token");
-      router.push("/sign-in");
-    }
-  }, [router]);
-};
-
-const isTokenExpired = (token: string): boolean => {
-  try {
-    const decoded: { exp: number } = jwtDecode(token);
-    const currentTime = Math.floor(Date.now() / 1000);
-
-    return decoded.exp < currentTime;
-  } catch (error) {
-    console.error("Error decoding token:", error);
-    return true;
-  }
-};
-
-
-export const useAuthRedirect = () => {
-  const router = useRouter();
-  const [isChecking, setIsChecking] = useState(true);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const token = getAccessToken();
-
-    if (!token || isTokenExpired(token)) {
-      localStorage.removeItem("access_token");
-      router.push("/sign-in");
-    } else {
-      setIsChecking(false);
-    }
-  }, [router]);
-
-  return { isChecking };
-};
-
-
-
 const authHeaders = () => {
   const token = getAccessToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
