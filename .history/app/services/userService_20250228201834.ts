@@ -1,8 +1,8 @@
 import { useEffect,useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
+import { API_URL } from "@/config";
 import { jwtDecode } from "jwt-decode";
-
-import axiosInstance from "./axiosInstance";
 
 export interface User {
   _id: string;
@@ -11,7 +11,6 @@ export interface User {
   role: string;
   point: number;
   skinType: string;
-  membership_id?: string;
   sensitivity: string;
   first_name: string;
   last_name: string;
@@ -32,21 +31,16 @@ export interface DecodedToken {
 
 const getAccessToken = (): string | null => {
   const storedToken = localStorage.getItem("access_token");
+
   if (!storedToken) return null;
-  return storedToken;
-};
 
-export const useAuthRedirect = () => {
-  const router = useRouter();
-
-  useEffect(() => {
-    const token = getAccessToken();
-
-    if (!token || isTokenExpired(token)) {
-      localStorage.removeItem("access_token");
-      router.push("/sign-in");
-    }
-  }, [router]);
+  try {
+    const parsedToken = JSON.parse(storedToken);
+    return parsedToken.access_token;
+  } catch (error) {
+    console.error("Error parsing access token:", error);
+    return null;
+  }
 };
 
 const isTokenExpired = (token: string): boolean => {
@@ -60,7 +54,6 @@ const isTokenExpired = (token: string): boolean => {
     return true;
   }
 };
-
 
 export const useAuthRedirect = () => {
   const router = useRouter();
@@ -83,7 +76,6 @@ export const useAuthRedirect = () => {
 };
 
 
-
 const authHeaders = () => {
   const token = getAccessToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
@@ -91,7 +83,7 @@ const authHeaders = () => {
 
 export const getAllUsers = async (): Promise<User[]> => {
   try {
-    const response = await axiosInstance.get<User[]>("/users", {
+    const response = await axios.get<User[]>(`${API_URL}/users`, {
       headers: authHeaders(),
     });
     return response.data;
@@ -113,10 +105,11 @@ export const getUserById = async (): Promise<User | null> => {
     const decoded: DecodedToken = jwtDecode(accessToken);
     const userId = decoded.id;
 
-    const response = await axiosInstance.get<User>(`/users/${userId}`, {
-      headers: authHeaders(),
+    const headers = authHeaders();
+    const response = await axios.get<User>(`${API_URL}/users/${userId}`, {
+      headers,
     });
-
+    
     return response.data;
   } catch (error) {
     console.error("Error fetching user details:", error);
@@ -128,11 +121,11 @@ export const getUser = async (query: string): Promise<User | null> => {
   try {
     let response;
     if (query.includes("@")) {
-      response = await axiosInstance.get<User>(`/user/${query}`, {
+      response = await axios.get<User>(`${API_URL}/user/${query}`, {
         headers: authHeaders(),
       });
     } else {
-      response = await axiosInstance.get<User>(`/users/${query}`, {
+      response = await axios.get<User>(`${API_URL}/users/${query}`, {
         headers: authHeaders(),
       });
     }
@@ -145,7 +138,7 @@ export const getUser = async (query: string): Promise<User | null> => {
 
 export const createUser = async (user: User): Promise<User | null> => {
   try {
-    const response = await axiosInstance.post<User>("/users", user, {
+    const response = await axios.post<User>(`${API_URL}/users`, user, {
       headers: authHeaders(),
     });
     return response.data;
@@ -155,24 +148,29 @@ export const createUser = async (user: User): Promise<User | null> => {
   }
 };
 
-export const updateUser = async (
-  userId: string,
-  user: Partial<User>
-): Promise<User | null> => {
-  try {
-    const response = await axiosInstance.patch<User>(`/users/${userId}`, user, {
-      headers: authHeaders(),
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error updating user:", error);
-    return null;
-  }
-};
+  export const updateUser = async (
+    userId: string,
+    user: Partial<User>
+  ): Promise<User | null> => {
+    try {
+      
+      const response = await axios.patch<User>(
+        `${API_URL}/users/${userId}`,
+        user,
+        { headers: authHeaders() }
+      );
+     
+      return response.data;
+
+    } catch (error) {
+      console.error("Error updating user:", error);
+      return null;
+    }
+  };
 
 export const deleteUser = async (userId: string): Promise<void> => {
   try {
-    await axiosInstance.delete(`/users/${userId}`, {
+    await axios.delete(`${API_URL}/users/${userId}`, {
       headers: authHeaders(),
     });
   } catch (error) {
