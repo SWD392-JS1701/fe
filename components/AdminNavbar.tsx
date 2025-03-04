@@ -23,10 +23,10 @@ const AdminNavbar = () => {
             Product
           </Link>
           <Link
-            href="/admin/transaction"
+            href="/admin/schedule"
             className="text-gray-700 hover:text-blue-600"
           >
-            Transaction
+            Schedule
           </Link>
           <Link
             href="/admin/employee"
