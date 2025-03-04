@@ -63,7 +63,7 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
 
           <div>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-2xl font-bold text-indigo-600">
+              <span className="text-2xl font-bold text-black">
                 ${product.price.toFixed(2)}
               </span>
               <div className="flex items-center">
@@ -80,7 +80,8 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
             </div>
 
             <button
-              className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg"
+              className="w-full border-2 border-black bg-white text-black font-bold py-3 px-4 rounded-lg transition duration-200 ease-in-out 
+             hover:bg-black hover:text-white cursor-pointer"
               onClick={handleAddToCart}
             >
               Add to Cart

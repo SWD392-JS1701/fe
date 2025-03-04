@@ -3,6 +3,7 @@ import Hero from "@/components/Hero";
 import Products from "./(root)/(page)/products/page";
 import Navbar from "@/components/Navbar/Navbar";
 import Footer from "@/components/Footer";
+import QuizPromo from "@/components/QuizPromo";
 
 const page = () => {
   return (
@@ -10,6 +11,8 @@ const page = () => {
       <Navbar />
 
       <Hero />
+
+      <QuizPromo />
 
       <Products />
 

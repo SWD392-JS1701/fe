@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState, FC, ChangeEvent, FormEvent } from "react";
+import React, { useState, FC, ChangeEvent, FormEvent, useEffect } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import { login } from "@/app/services/authService";
 import { useRouter } from "next/navigation";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "@/lib/redux/store";
 
 interface FormData {
   email: string;
@@ -19,6 +21,16 @@ const SignIn: FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, router]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setError(null);
@@ -32,17 +44,23 @@ const SignIn: FC = () => {
 
     try {
       const data = await login(formData.email, formData.password);
-      localStorage.setItem("access_token", data.access_token);
 
+      if (!data || !data.access_token || !data.decodedToken) {
+        throw new Error("Invalid login response. Please try again.");
+      }
+
+      localStorage.setItem("access_token", data.access_token);
       const userRole = data.decodedToken.role;
 
-      if (userRole === "admin") {
+      if (userRole.toLowerCase() === "admin") {
         router.push("/admin/overview");
       } else {
         router.push("/");
       }
     } catch (err: any) {
-      setError(err.message);
+      setError(
+        err.message || "An error occurred during login. Please try again."
+      );
     } finally {
       setLoading(false);
     }

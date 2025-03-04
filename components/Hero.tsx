@@ -2,7 +2,7 @@ import React from "react";
 
 const Hero = () => {
   return (
-    <div className="w-full h-screen relative overflow-hidden mt-[70px]">
+    <div className="w-full h-screen relative overflow-hidden mt-[50px]">
       <video
         autoPlay
         loop

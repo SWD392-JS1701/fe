@@ -1,4 +1,10 @@
+
 "use client";
+
+
+import Providers from "@/app/provider";
+import React from "react";
+
 
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar/Navbar";
@@ -10,7 +16,7 @@ import { Route } from "lucide-react";
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const  role  = getUserRole();
   return (
-    <>
+    <Providers>
       <Navbar />
     
       {role === "User" && <Navbar />}
@@ -19,7 +25,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       
       {children}
       <Footer />
-    </>
+    </Providers>
   );
 };
 

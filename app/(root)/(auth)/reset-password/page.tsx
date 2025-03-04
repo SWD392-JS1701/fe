@@ -1,13 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, ChangeEvent } from "react";
 import Swal from "sweetalert2";
 
+import { changePassword } from "@/app/services/authService";
+import { useRouter, useSearchParams } from "next/navigation";
+
 const ChangePasswordPage = () => {
-  const [code, setCode] = useState<string>("");
+  const token = useSearchParams().get("token");
+  const router = useRouter();
   const [newPassword, setNewPassword] = useState<string>("");
-  const [isCodeVerified, setIsCodeVerified] = useState<boolean>(false);
   const [passwordValidation, setPasswordValidation] = useState({
     lowercase: false,
     uppercase: false,
@@ -15,20 +17,10 @@ const ChangePasswordPage = () => {
     length: false,
   });
 
-  const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCode(e.target.value);
-    if (e.target.value.length === 6) {
-      setIsCodeVerified(true); // Simulate code verification
-    } else {
-      setIsCodeVerified(false);
-    }
-  };
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     const password = e.target.value;
     setNewPassword(password);
 
-    // Validate password
     setPasswordValidation({
       lowercase: /[a-z]/.test(password),
       uppercase: /[A-Z]/.test(password),
@@ -37,23 +29,43 @@ const ChangePasswordPage = () => {
     });
   };
 
-  const handleResetPassword = () => {
-    if (
-      isCodeVerified &&
-      Object.values(passwordValidation).every((rule) => rule)
-    ) {
-      Swal.fire({
-        icon: "success",
-        title: "Password reset successfully!",
-        showConfirmButton: false,
-        timer: 1500,
-      });
-      // Add your logic to reset the password here
+  const handleResetPassword = async () => {
+    if (Object.values(passwordValidation).every((rule) => rule)) {
+      if (!token) {
+        Swal.fire({
+          icon: "error",
+          title: "No token found",
+          text: "Please log in to reset your password.",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        router.push("/sign-in");
+        return;
+      }
+
+      try {
+        await changePassword(token, newPassword);
+        Swal.fire({
+          icon: "success",
+          title: "Password reset successfully!",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      } catch (error: any) {
+        Swal.fire({
+          icon: "error",
+          title: "Failed to reset password",
+          text: error.message || "Please try again.",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        console.error("Reset Password API Error:", error);
+      }
     } else {
       Swal.fire({
         icon: "error",
-        title:
-          "Please complete all fields and ensure the password meets the requirements.",
+        title: "Invalid password",
+        text: "Please ensure the password meets the requirements.",
         showConfirmButton: false,
         timer: 1500,
       });
@@ -61,37 +73,12 @@ const ChangePasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-2">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">
           Reset Password
         </h1>
 
-        {/* Code Verification Section */}
-        <div className="mb-6">
-          <p className="text-gray-600 mb-4">
-            Enter the code sent to{" "}
-            <span className="font-semibold">abc@gmail.com</span> to reset your
-            password.
-          </p>
-          <div className="flex justify-between space-x-2">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <input
-                key={index}
-                type="text"
-                maxLength={1}
-                value={code[index] || ""}
-                onChange={handleCodeChange}
-                className="w-12 h-12 text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            ))}
-          </div>
-          {isCodeVerified && (
-            <p className="text-green-500 text-sm mt-2">✔ Code verified</p>
-          )}
-        </div>
-
-        {/* New Password Section */}
         <div className="mb-6">
           <label
             htmlFor="newPassword"
@@ -141,14 +128,13 @@ const ChangePasswordPage = () => {
           </div>
         </div>
 
-        {/* Buttons */}
         <div className="flex justify-between">
-          <Link
-            href="/sign-in"
+          <button
             className="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400 transition duration-200"
+            onClick={() => router.back()}
           >
             Cancel
-          </Link>
+          </button>
           <button
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
             onClick={handleResetPassword}
