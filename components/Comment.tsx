@@ -33,7 +33,7 @@ const Comment = () => {
       time: "5 years ago",
       content:
         "This is quiet sad. He become the next villain to make his friend motivated again.",
-      replies: 5,
+      replies: 1,
     },
   ];
 
@@ -86,8 +86,8 @@ const Comment = () => {
               alignItems: "center",
             }}
           >
-            <FaChevronDown style={{ marginRight: "5px" }} /> {comment.replies}
-            replies
+            <FaChevronDown style={{ marginRight: "5px" }} />
+            {comment.replies} {comment.replies === 1 ? "reply" : "replies"}
           </button>
         </div>
       ))}
