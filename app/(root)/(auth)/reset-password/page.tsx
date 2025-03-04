@@ -3,7 +3,7 @@
 import React, { useState, ChangeEvent } from "react";
 import Swal from "sweetalert2";
 
-import { changePassword } from "@/app/services/authService";
+import { resetPassword } from "@/app/services/authService";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const ChangePasswordPage = () => {
@@ -44,7 +44,7 @@ const ChangePasswordPage = () => {
       }
 
       try {
-        await changePassword(token, newPassword);
+        await resetPassword(token, newPassword);
         Swal.fire({
           icon: "success",
           title: "Password reset successfully!",

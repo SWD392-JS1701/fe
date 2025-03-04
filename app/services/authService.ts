@@ -64,7 +64,7 @@ export const login = async (email: string, password: string) => {
 
 export const resetPassword = async (token: string, newPassword: string) => {
   try {
-    const response = await axiosInstance.post("/auth/reset-password", {
+    const response = await axiosInstance.put("/auth/change-password", {
       token,
       newPassword,
     });
@@ -80,7 +80,7 @@ export const resetPassword = async (token: string, newPassword: string) => {
 
 export const forgetPassword = async (email: string) => {
   try {
-    const response = await axiosInstance.put("/auth/change-password", {
+    const response = await axiosInstance.post("/auth/forgot-password", {
       email,
     });
     return response.data;

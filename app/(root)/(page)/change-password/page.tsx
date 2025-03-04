@@ -3,11 +3,11 @@
 import React, { useState, ChangeEvent } from "react";
 import Swal from "sweetalert2";
 
-import { changePassword } from "@/app/services/authService";
-import { useRouter } from "next/navigation";
+import { resetPassword } from "@/app/services/authService";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const ChangePasswordPage = () => {
-  const token = localStorage.getItem("access_token");
+  const token = useSearchParams().get("token");
   const router = useRouter();
   const [newPassword, setNewPassword] = useState<string>("");
   const [passwordValidation, setPasswordValidation] = useState({
@@ -44,13 +44,14 @@ const ChangePasswordPage = () => {
       }
 
       try {
-        await changePassword(token, newPassword);
+        await resetPassword(token, newPassword);
         Swal.fire({
           icon: "success",
           title: "Password reset successfully!",
           showConfirmButton: false,
           timer: 1500,
         });
+        router.push("/sign-in");
       } catch (error: any) {
         Swal.fire({
           icon: "error",
