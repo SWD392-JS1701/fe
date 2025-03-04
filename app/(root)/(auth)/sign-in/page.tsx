@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState, FC, ChangeEvent, FormEvent } from "react";
+import React, { useState, FC, ChangeEvent, FormEvent, useEffect } from "react";
 import Link from "next/link";
 import Head from "next/head";
-import { login } from "@/app/services/authService";
+import { login as loginUser } from "@/app/services/authService";
 import { useRouter } from "next/navigation";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, login } from "@/lib/redux/store";
 
 interface FormData {
   email: string;
@@ -19,6 +21,16 @@ const SignIn: FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, router]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setError(null);
