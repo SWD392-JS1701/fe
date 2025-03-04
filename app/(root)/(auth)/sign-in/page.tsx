@@ -33,6 +33,7 @@ const SignIn: FC = () => {
   }, [isAuthenticated, router]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setError(null);
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -42,12 +43,16 @@ const SignIn: FC = () => {
     setLoading(true);
 
     try {
-      const data = await loginUser(formData.email, formData.password);
-      localStorage.setItem("access_token", JSON.stringify(data));
-      dispatch(login());
-      window.dispatchEvent(new Event("storage"));
+      const data = await login(formData.email, formData.password);
+      localStorage.setItem("access_token", data.access_token);
 
-      router.push(data.role === "Admin" ? "/overview" : "/");
+      const userRole = data.decodedToken.role;
+
+      if (userRole === "admin") {
+        router.push("/admin/overview");
+      } else {
+        router.push("/");
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -128,6 +133,14 @@ const SignIn: FC = () => {
                   className="text-purple-600 hover:text-purple-800"
                 >
                   Sign up
+                </Link>
+              </p>
+              <p className="text-gray-600 mt-2">
+                <Link
+                  href="/email"
+                  className="text-purple-600 hover:text-purple-800"
+                >
+                  Forget Password?
                 </Link>
               </p>
             </div>
