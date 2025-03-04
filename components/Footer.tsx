@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import Logo from "@/assets/logo.png";
 import {
   FaTruck,
   FaBook,
@@ -63,7 +64,7 @@ const Footer = () => {
             {/* Company Information */}
             <div>
               <Image
-                src="/logo.png"
+                src={Logo}
                 alt="SkinType Solutions"
                 width={150}
                 height={40}
@@ -74,28 +75,28 @@ const Footer = () => {
                 GUARANTEED
               </p>
               <p className="text-sm text-gray-600 mb-6">
-                Skin Type Solutions does not provide medical advice. Information
-                on this website is provided for educational purposes and does
-                not create a doctor-patient relationship. Skin Type Concierge
+                Lumiere Skin does not provide medical advice. Information on
+                this website is provided for educational purposes and does not
+                create a doctor-patient relationship. Skin Type Concierge
                 powered by AI does not provide medical advice.
               </p>
               <div className="mb-4">
                 <p className="text-sm text-gray-600 flex items-center mb-2">
                   <span className="font-semibold mr-2">Phone:</span>
                   <a
-                    href="tel:888-756-8973"
+                    href="tel:028 7300 5588"
                     className="text-blue-600 hover:underline"
                   >
-                    888-756-8973
+                    028 7300 5588
                   </a>
                 </p>
                 <p className="text-sm text-gray-600 flex items-center">
                   <span className="font-semibold mr-2">Email:</span>
                   <a
-                    href="mailto:support@skintypesolutions.com"
+                    href="mailto:support@lumiereskin.com"
                     className="text-blue-600 hover:underline"
                   >
-                    support@skintypesolutions.com
+                    support@lumiereskin.com
                   </a>
                 </p>
               </div>
@@ -230,44 +231,44 @@ const Footer = () => {
             {/* Copyright */}
             <div className="flex justify-center md:justify-end">
               <p className="text-sm text-gray-500">
-                Copyright © Skin Type Solutions 2025
+                Copyright © Lumiere Skin 2025
               </p>
             </div>
 
             {/* Social Media Icons */}
             <div className="flex justify-center md:justify-start space-x-4">
               <Link
-                href="https://instagram.com/skintypesolutions"
+                href="https://instagram.com/lumiereskin"
                 className="text-gray-500 hover:text-blue-600"
               >
                 <FaInstagram className="text-xl" />
               </Link>
               <Link
-                href="https://tiktok.com/@skintypesolutions"
+                href="https://tiktok.com/@lumiereskin"
                 className="text-gray-500 hover:text-blue-600"
               >
                 <FaTiktok className="text-xl" />
               </Link>
               <Link
-                href="https://facebook.com/skintypesolutions"
+                href="https://facebook.com/lumiereskin"
                 className="text-gray-500 hover:text-blue-600"
               >
                 <FaFacebookF className="text-xl" />
               </Link>
               <Link
-                href="https://pinterest.com/skintypesolutions"
+                href="https://pinterest.com/lumiereskin"
                 className="text-gray-500 hover:text-blue-600"
               >
                 <FaPinterestP className="text-xl" />
               </Link>
               <Link
-                href="https://youtube.com/skintypesolutions"
+                href="https://youtube.com/lumiereskin"
                 className="text-gray-500 hover:text-blue-600"
               >
                 <FaYoutube className="text-xl" />
               </Link>
               <Link
-                href="https://reddit.com/r/skintypesolutions"
+                href="https://reddit.com/r/lumiereskin"
                 className="text-gray-500 hover:text-blue-600"
               >
                 <FaRedditAlien className="text-xl" />
