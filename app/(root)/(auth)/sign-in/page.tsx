@@ -5,7 +5,7 @@ import Link from "next/link";
 import Head from "next/head";
 import { login } from "@/app/services/authService";
 import { useRouter } from "next/navigation";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "@/lib/redux/store";
 
 interface FormData {
@@ -21,7 +21,6 @@ const SignIn: FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const dispatch = useDispatch();
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
   );

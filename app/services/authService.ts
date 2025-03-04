@@ -45,6 +45,10 @@ export const login = async (email: string, password: string) => {
     const data = response.data;
     const accessToken = data.access_token;
 
+    if (!accessToken) {
+      throw new Error("No access token received from server.");
+    }
+
     localStorage.setItem("access_token", accessToken);
 
     const decodedToken: DecodedToken = jwtDecode(accessToken);
@@ -94,13 +98,7 @@ const getAccessToken = (): string | null => {
 
   if (!storedToken) return null;
 
-  try {
-    const parsedToken = JSON.parse(storedToken);
-    return parsedToken.access_token;
-  } catch (error) {
-    console.error("Error parsing access token:", error);
-    return null;
-  }
+  return storedToken;
 };
 
 const isTokenExpired = (token: string): boolean => {
@@ -114,6 +112,7 @@ const isTokenExpired = (token: string): boolean => {
     return true;
   }
 };
+
 export const useAuthRedirect = () => {
   const router = useRouter();
   const [isChecking, setIsChecking] = useState(true);

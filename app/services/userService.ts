@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 
 import axiosInstance from "./axiosInstance";
@@ -11,7 +9,6 @@ const getAccessToken = (): string | null => {
   if (!storedToken) return null;
   return storedToken;
 };
-
 
 const authHeaders = () => {
   const token = getAccessToken();

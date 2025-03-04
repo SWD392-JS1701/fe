@@ -4,7 +4,9 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { CiLogout } from "react-icons/ci";
 
-import { getUserById, User, useAuthRedirect } from "@/app/services/userService";
+import { getUserById } from "@/app/services/userService";
+import { useAuthRedirect } from "@/app/services/authService";
+import { User } from "@/app/types/user";
 
 const AdminNavbar = () => {
   const { isChecking } = useAuthRedirect();
