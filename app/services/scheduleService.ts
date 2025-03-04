@@ -69,3 +69,17 @@ export const getSlot = async (dateOfWeek: string, slotId: string) => {
     );
   }
 };
+
+export const getSlotOfWeek = async (dateOfWeek: string, slotId: string) => {
+  try {
+    const response = await axiosInstance.get(
+      `/schedules/${dateOfWeek}/slots/${slotId}`
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error("Slot API Error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch slot. Please try again."
+    );
+  }
+};
