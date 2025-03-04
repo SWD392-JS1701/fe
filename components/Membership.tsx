@@ -1,3 +1,5 @@
+"use client";
+
 import React, { FC, useState, Dispatch, SetStateAction } from "react";
 import Swal from "sweetalert2";
 import { updateUser } from "@/app/services/userService";
