@@ -19,8 +19,8 @@ export default function SkinQuizPromo() {
   const router = useRouter();
 
   return (
-    <div className="max-w-[100rem] mx-auto my-28 px-6">
-      <h3 className="text-4xl font-bold text-gray-900 text-center mb-28">
+    <div className="max-w-[100rem] mx-auto mt-28 mb-10 px-6">
+      <h3 className="text-4xl font-extrabold italic text-black uppercase text-center mb-28">
         Key Features
       </h3>
 
