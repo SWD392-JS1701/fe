@@ -122,7 +122,9 @@ const CartPage = () => {
               <span className="font-semibold text-sm uppercase">
                 Items {totalItems}
               </span>
-              <span className="font-semibold text-sm">${totalPrice}</span>
+              <span className="font-semibold text-sm">
+                ${totalPrice.toFixed(2)}
+              </span>
             </div>
             <div>
               <label className="font-medium inline-block mb-3 text-sm uppercase">
