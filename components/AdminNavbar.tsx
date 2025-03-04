@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { CiLogout } from "react-icons/ci";
+
 import { getUserById, User, useAuthRedirect } from "@/app/services/userService";
 
 const AdminNavbar = () => {
@@ -66,6 +68,11 @@ const AdminNavbar = () => {
     );
   }
 
+  const handleLogout = async () => {
+    localStorage.removeItem("access_token");
+    window.location.href = "/sign-in";
+  };
+
   return (
     <nav className="bg-white shadow-md p-4 w-full border rounded-xl">
       <div className="max-w-[1400px] mx-auto flex justify-between items-center">
@@ -114,6 +121,10 @@ const AdminNavbar = () => {
           <span className="text-gray-700">
             {user ? `${user.first_name} ${user.last_name}` : "Admin"}
           </span>
+          <CiLogout
+            className="text-2xl text-gray-700 hover:text-blue-600 cursor-pointer"
+            onClick={handleLogout}
+          />
         </div>
       </div>
     </nav>
