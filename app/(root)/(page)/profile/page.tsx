@@ -15,7 +15,7 @@ import {
   FaShoppingCart,
 } from "react-icons/fa";
 
-import { getUserById } from "@/app/services/userService";
+import { getUserById, useAuthRedirect } from "@/app/services/userService";
 import { getMemberships } from "@/app/services/membershipSevice";
 import UserProfile from "@/components/UserProfile";
 import Membership from "@/components/Membership";
@@ -23,11 +23,6 @@ import Error from "@/components/Error";
 import Loading from "@/components/Loading";
 
 import ChangePasswordPage from "../change-password/page";
-
-
-import { getUserById,useAuthRedirect  } from "@/app/services/userService";
-import { useRouter } from "next/navigation";
-
 
 const ProfilePage: FC = () => {
   const [user, setUser] = useState<any>(null);
@@ -43,13 +38,21 @@ const ProfilePage: FC = () => {
       router.push("/sign-in");
       return;
     }
-    
+
     const getUserProfile = async () => {
       try {
         const userData = await getUserById();
 
         if (!userData) {
           throw Error("No user data available.", "No user data available.");
+        }
+
+        if (
+          userData.role.toLocaleLowerCase() !== "user" &&
+          userData.role.toLocaleLowerCase() !== "doctor"
+        ) {
+          Error("Unauthorized", "You are not allowed to view this page.");
+          router.push("/admin/overview");
         }
 
         const defaultUser = {
