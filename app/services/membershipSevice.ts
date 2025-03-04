@@ -1,11 +1,5 @@
 import axiosInstance from "./axiosInstance";
-
-interface Membership {
-  name: string;
-  description: string;
-  discount_percentage: number;
-  point_value: number;
-}
+import { Membership } from "../types/membership";
 
 export const getMemberships = async () => {
   try {

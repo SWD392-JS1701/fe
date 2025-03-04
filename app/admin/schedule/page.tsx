@@ -14,7 +14,8 @@ import {
 import { useSortable } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { getAllUsers, User } from "@/app/services/userService";
+import { getAllUsers } from "@/app/services/userService";
+import { User } from "@/app/types/user";
 
 interface ScheduleSlot {
   id: string;

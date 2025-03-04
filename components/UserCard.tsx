@@ -1,5 +1,5 @@
 import React from "react";
-import { User } from "@/app/services/userService";
+import { User } from "../app/types/user";
 
 interface UserCardProps {
   user: User;

@@ -1,14 +1,6 @@
 import axiosInstance from "./axiosInstance";
 import { jwtDecode } from "jwt-decode";
-
-interface DecodedToken {
-  id: string;
-  username: string;
-  email: string;
-  role?: string;
-  iat: number;
-  exp: number;
-}
+import { DecodedToken } from "../types/token";
 
 export const register = async (
   username: string,
