@@ -15,17 +15,33 @@ import {
   FaShoppingCart,
 } from "react-icons/fa";
 
-import { getUserById } from "@/app/services/userService";
-import { getMemberships } from "@/app/services/membershipSevice";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+
 import UserProfile from "@/components/UserProfile";
 import Membership from "@/components/Membership";
 import Error from "@/components/Error";
 import Loading from "@/components/Loading";
 
 
+
+
+
+
+
+
 import ChangePasswordPage from "../change-password/page";
 
-
+import { getUserById } from "@/app/services/userService";
+import { getMemberships } from "@/app/services/membershipSevice";
 
 
 const ProfilePage: FC = () => {
@@ -33,23 +49,36 @@ const ProfilePage: FC = () => {
   const [memberships, setMemberships] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState("profile");
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const router = useRouter();
   const access_token = localStorage.getItem("access_token");
-  
+
   useEffect(() => {
     if (!access_token) {
+      setIsAuthorized(false);
       Error("Not Logged In", "Please log in to view your profile.");
       router.push("/sign-in");
       return;
     }
-    
+
     const getUserProfile = async () => {
       try {
         const userData = await getUserById();
 
         if (!userData) {
-          throw Error("No user data available.", "No user data available.");
+          throw Error("No user data available.", "Please try again later.");
         }
+
+        const allowedRoles = ["user", "doctor"];
+        if (!allowedRoles.includes(userData.role.toLowerCase())) {
+          setIsAuthorized(false);
+          Error("Unauthorized", "You are not allowed to view this page.");
+          router.push("/admin/overview");
+          return;
+        }
+
+        setIsAuthorized(true);
 
         const defaultUser = {
           id: userData._id,
@@ -67,6 +96,7 @@ const ProfilePage: FC = () => {
 
         setUser(defaultUser);
       } catch (err) {
+        setIsAuthorized(false);
         Error(
           "Profile Load Failed",
           "We couldn't load your profile. Please try again later."
@@ -96,7 +126,19 @@ const ProfilePage: FC = () => {
     setActiveSection(section);
   };
 
-  if (loading) return <Loading />;
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    router.push("/sign-in");
+  };
+
+  if (isAuthorized === null || loading) {
+    return <Loading />;
+  }
+
+  if (!isAuthorized) {
+    return null;
+  }
+
   if (!user) {
     Error("Error", "No user data available.");
     return null;
@@ -224,13 +266,43 @@ const ProfilePage: FC = () => {
                     <FaFileAlt className="mr-3 text-gray-500" />
                     <span>Subscriptions</span>
                   </button>
-                  <Link
-                    href="/logout"
-                    className="flex items-center p-4 hover:bg-gray-50 text-black"
+                  <Dialog
+                    open={showLogoutDialog}
+                    onOpenChange={setShowLogoutDialog}
                   >
-                    <FaSignOutAlt className="mr-3 text-gray-500" />
-                    <span>Logout</span>
-                  </Link>
+                    <DialogTrigger asChild>
+                      <button className="flex items-center p-4 hover:bg-gray-50 text-black w-full text-left">
+                        <FaSignOutAlt className="mr-3 text-gray-500" />
+                        <span>Logout</span>
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Confirm Logout</DialogTitle>
+                        <DialogDescription>
+                          Are you sure you want to log out? You will need to
+                          sign in again to access your profile.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter className="sm:justify-end">
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowLogoutDialog(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={() => {
+                            handleLogout();
+                            setShowLogoutDialog(false);
+                          }}
+                        >
+                          Logout
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </nav>
               </div>
             </div>

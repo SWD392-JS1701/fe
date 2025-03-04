@@ -1,4 +1,4 @@
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 
@@ -35,6 +35,7 @@ const getAccessToken = (): string | null => {
   if (!storedToken) return null;
   return storedToken;
 };
+
 
 const authHeaders = () => {
   const token = getAccessToken();
