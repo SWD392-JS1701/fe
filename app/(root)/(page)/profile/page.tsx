@@ -30,10 +30,19 @@ import UserProfile from "@/components/UserProfile";
 import Membership from "@/components/Membership";
 import Error from "@/components/Error";
 import Loading from "@/components/Loading";
+
+
+
+
+
+
+
+
 import ChangePasswordPage from "../change-password/page";
 
-import { getUserById, useAuthRedirect } from "@/app/services/userService";
+import { getUserById } from "@/app/services/userService";
 import { getMemberships } from "@/app/services/membershipSevice";
+
 
 const ProfilePage: FC = () => {
   const [user, setUser] = useState<any>(null);
@@ -44,7 +53,6 @@ const ProfilePage: FC = () => {
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const router = useRouter();
   const access_token = localStorage.getItem("access_token");
-  useAuthRedirect();
 
   useEffect(() => {
     if (!access_token) {

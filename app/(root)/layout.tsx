@@ -1,12 +1,28 @@
-import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
+
+"use client";
+
+
 import Providers from "@/app/provider";
 import React from "react";
 
-const MainLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
+
+import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar/Navbar";
+
+import { getUserRole  } from "@/app/services/authService";
+
+import DoctorNavbar from "@/components/Navbar/DoctorNavbar";
+import { Route } from "lucide-react";
+const MainLayout = ({ children }: { children: React.ReactNode }) => {
+  const  role  = getUserRole();
   return (
     <Providers>
       <Navbar />
+    
+      {role === "User" && <Navbar />}
+      {role === "Doctor" && <DoctorNavbar />}
+
+      
       {children}
       <Footer />
     </Providers>
