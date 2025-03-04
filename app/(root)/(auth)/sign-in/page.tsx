@@ -3,10 +3,10 @@
 import React, { useState, FC, ChangeEvent, FormEvent, useEffect } from "react";
 import Link from "next/link";
 import Head from "next/head";
-import { login as loginUser } from "@/app/services/authService";
+import { login } from "@/app/services/authService";
 import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState, login } from "@/lib/redux/store";
+import { RootState } from "@/lib/redux/store";
 
 interface FormData {
   email: string;
@@ -44,17 +44,23 @@ const SignIn: FC = () => {
 
     try {
       const data = await login(formData.email, formData.password);
-      localStorage.setItem("access_token", data.access_token);
 
+      if (!data || !data.access_token || !data.decodedToken) {
+        throw new Error("Invalid login response. Please try again.");
+      }
+
+      localStorage.setItem("access_token", data.access_token);
       const userRole = data.decodedToken.role;
 
-      if (userRole === "admin") {
+      if (userRole.toLowerCase() === "admin") {
         router.push("/admin/overview");
       } else {
         router.push("/");
       }
     } catch (err: any) {
-      setError(err.message);
+      setError(
+        err.message || "An error occurred during login. Please try again."
+      );
     } finally {
       setLoading(false);
     }

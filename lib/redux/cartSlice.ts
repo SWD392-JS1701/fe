@@ -6,6 +6,7 @@ interface CartItem {
   name: string;
   price: number;
   quantity: number;
+  image: string;
 }
 
 interface CartState {
@@ -85,10 +86,12 @@ const cartSlice = createSlice({
     // Clear the entire cart
     clearCart: (state) => {
       state.items = [];
-      alert({
+      Swal.fire({
+        icon: "warning",
         title: "Cart cleared",
-        description: "Your cart has been cleared.",
-        variant: "destructive",
+        text: "Your cart has been cleared.",
+        showConfirmButton: false,
+        timer: 1500,
       });
     },
   },
