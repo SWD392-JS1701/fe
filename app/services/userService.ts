@@ -24,9 +24,7 @@ export interface User {
 
 export interface DecodedToken {
   id: string;
-  username: string;
   role: string;
-  iat: number;
   exp: number;
 }
 
