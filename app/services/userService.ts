@@ -1,4 +1,4 @@
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 
@@ -36,19 +36,6 @@ const getAccessToken = (): string | null => {
   return storedToken;
 };
 
-export const useAuthRedirect = () => {
-  const router = useRouter();
-
-  useEffect(() => {
-    const token = getAccessToken();
-
-    if (!token || isTokenExpired(token)) {
-      localStorage.removeItem("access_token");
-      router.push("/sign-in");
-    }
-  }, [router]);
-};
-
 const isTokenExpired = (token: string): boolean => {
   try {
     const decoded: { exp: number } = jwtDecode(token);
@@ -60,7 +47,6 @@ const isTokenExpired = (token: string): boolean => {
     return true;
   }
 };
-
 
 export const useAuthRedirect = () => {
   const router = useRouter();
@@ -81,8 +67,6 @@ export const useAuthRedirect = () => {
 
   return { isChecking };
 };
-
-
 
 const authHeaders = () => {
   const token = getAccessToken();
