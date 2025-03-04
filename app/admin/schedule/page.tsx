@@ -249,17 +249,13 @@ const SchedulePage: FC = () => {
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     setActiveDoctorId(active.id as string);
-    console.log("Drag started:", active.id);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveDoctorId(null);
 
-    console.log("Drag ended:", { active: active.id, over: over?.id });
-
     if (!over || !over.id) {
-      console.log("No drop target found");
       return;
     }
 
@@ -267,25 +263,19 @@ const SchedulePage: FC = () => {
     const overId = over.id as string;
 
     if (!activeId.startsWith("doctor-") || !overId.startsWith("slot-")) {
-      console.log("Invalid drag-to-drop pair:", { activeId, overId });
       return;
     }
 
     const doctorId = activeId.replace("doctor-", "");
     const parts = overId.split("-");
-    const day = parts[1]; // e.g., "monday"
-    const slotId = parts.slice(2).join("-"); // e.g., "mon-1"
+    const day = parts[1];
+    const slotId = parts.slice(2).join("-");
 
-    console.log("Dropping doctor:", { doctorId, day, slotId });
-
-    // Update the schedule with a deep copy to ensure re-rendering
     setSchedule((prevSchedule) => {
       const newSchedule = prevSchedule.map((daySchedule) => {
         if (daySchedule.day.toLowerCase() === day) {
           const updatedSlots = daySchedule.slots.map((slot) => {
             if (slot.id === slotId) {
-              // Compare slot.id directly with slotId
-              console.log(`Assigning doctor ${doctorId} to slot ${slotId}`);
               return { ...slot, doctorId };
             }
             return slot;
@@ -294,7 +284,6 @@ const SchedulePage: FC = () => {
         }
         return { ...daySchedule };
       });
-      console.log("Updated schedule:", newSchedule);
       return newSchedule;
     });
   };
@@ -313,7 +302,6 @@ const SchedulePage: FC = () => {
         }
         return { ...daySchedule };
       });
-      console.log("Cleared slot, updated schedule:", newSchedule);
       return newSchedule;
     });
   };
