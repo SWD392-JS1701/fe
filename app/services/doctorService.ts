@@ -1,13 +1,6 @@
 import axios from "axios";
 import { API_URL } from "@/config";
-
-export interface Doctor {
-  _id?: string;
-  user_Id: string;
-  certification: string;
-  schedule: string;
-  description: string;
-}
+import { Doctor } from "../types/doctor";
 
 export const getAllDoctors = async (): Promise<Doctor[]> => {
   try {

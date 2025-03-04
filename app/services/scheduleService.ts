@@ -1,8 +1,9 @@
 import axiosInstance from "./axiosInstance";
+import { Schedule } from "../types/schedule";
 
 export const getSchedule = async () => {
   try {
-    const response = await axiosInstance.get("/schedule");
+    const response = await axiosInstance.get("/schedules");
     return response.data;
   } catch (error: any) {
     console.error("Schedule API Error:", error);
@@ -15,13 +16,56 @@ export const getSchedule = async () => {
 
 export const getScheduleById = async (id: string) => {
   try {
-    const response = await axiosInstance.get(`/schedule/${id}`);
+    const response = await axiosInstance.get(`/schedules/${id}`);
     return response.data;
   } catch (error: any) {
     console.error("Schedule API Error:", error);
     throw new Error(
       error.response?.data?.message ||
         "Failed to fetch schedule. Please try again."
+    );
+  }
+};
+
+export const updateSchedule = async (id: string, schedule: Schedule) => {
+  try {
+    const response = await axiosInstance.put(`/schedules/${id}`, schedule);
+    return response.data;
+  } catch (error: any) {
+    console.error("Schedule API Error:", error);
+    throw new Error(
+      error.response?.data?.message ||
+        "Failed to update schedule. Please try again."
+    );
+  }
+};
+
+export const updateSlot = async (id: string, slotId: string, slot: any) => {
+  try {
+    const response = await axiosInstance.put(
+      `/schedules/${id}/slots/${slotId}`,
+      slot
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error("Slot API Error:", error);
+    throw new Error(
+      error.response?.data?.message ||
+        "Failed to update slot. Please try again."
+    );
+  }
+};
+
+export const getSlot = async (dateOfWeek: string, slotId: string) => {
+  try {
+    const response = await axiosInstance.get(
+      `/schedules/${dateOfWeek}/slots/${slotId}`
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error("Slot API Error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch slot. Please try again."
     );
   }
 };

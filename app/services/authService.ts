@@ -1,19 +1,9 @@
-
 import axiosInstance from "./axiosInstance";
 import { jwtDecode } from "jwt-decode";
-import { API_URL } from "@/config";
-import axios from "axios";
+import { DecodedToken } from "../types/token";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-import { useEffect,useState } from "react";
-interface DecodedToken {
-  id: string;
-  username: string;
-  email: string;
-  role?: string;
-  iat: number;
-  exp: number;
-}
 export const register = async (
   username: string,
   email: string,
@@ -55,6 +45,10 @@ export const login = async (email: string, password: string) => {
     const data = response.data;
     const accessToken = data.access_token;
 
+    if (!accessToken) {
+      throw new Error("No access token received from server.");
+    }
+
     localStorage.setItem("access_token", accessToken);
 
     const decodedToken: DecodedToken = jwtDecode(accessToken);
@@ -68,11 +62,9 @@ export const login = async (email: string, password: string) => {
   }
 };
 
-
 export const resetPassword = async (token: string, newPassword: string) => {
-
   try {
-    const response = await axiosInstance.post("/auth/reset-password", {
+    const response = await axiosInstance.put("/auth/change-password", {
       token,
       newPassword,
     });
@@ -88,7 +80,7 @@ export const resetPassword = async (token: string, newPassword: string) => {
 
 export const forgetPassword = async (email: string) => {
   try {
-    const response = await axiosInstance.put("/auth/change-password", {
+    const response = await axiosInstance.post("/auth/forgot-password", {
       email,
     });
     return response.data;
@@ -106,13 +98,7 @@ const getAccessToken = (): string | null => {
 
   if (!storedToken) return null;
 
-  try {
-    const parsedToken = JSON.parse(storedToken);
-    return parsedToken.access_token;
-  } catch (error) {
-    console.error("Error parsing access token:", error);
-    return null;
-  }
+  return storedToken;
 };
 
 const isTokenExpired = (token: string): boolean => {
@@ -126,6 +112,7 @@ const isTokenExpired = (token: string): boolean => {
     return true;
   }
 };
+
 export const useAuthRedirect = () => {
   const router = useRouter();
   const [isChecking, setIsChecking] = useState(true);
@@ -146,7 +133,6 @@ export const useAuthRedirect = () => {
   return { isChecking };
 };
 
-
 export const getUserRole = (): string | null => {
   const token = getAccessToken();
 
@@ -162,5 +148,3 @@ export const getUserRole = (): string | null => {
     return null;
   }
 };
-
-

@@ -1,41 +1,14 @@
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 
 import axiosInstance from "./axiosInstance";
-
-export interface User {
-  _id: string;
-  username: string;
-  email: string;
-  role: string;
-  point: number;
-  skinType: string;
-  membership_id?: string;
-  sensitivity: string;
-  first_name: string;
-  last_name: string;
-  phone_number: string;
-  address: string;
-  status: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface DecodedToken {
-  id: string;
-  username: string;
-  role: string;
-  iat: number;
-  exp: number;
-}
+import { User } from "../types/user";
+import { DecodedToken } from "../types/token";
 
 const getAccessToken = (): string | null => {
   const storedToken = localStorage.getItem("access_token");
   if (!storedToken) return null;
   return storedToken;
 };
-
 
 const authHeaders = () => {
   const token = getAccessToken();
