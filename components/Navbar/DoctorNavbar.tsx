@@ -7,8 +7,6 @@ import { Search, X } from "lucide-react";
 import Logo from "@/assets/logo.png";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
-import { RootState } from "@/lib/redux/store";
 import { useSession, signOut } from "next-auth/react";
 
 const DoctorNavbar: FC = () => {
@@ -17,7 +15,7 @@ const DoctorNavbar: FC = () => {
   const maxBorderWidth = 250;
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
-  const cartCount = useSelector((state: RootState) => state.cart.items.length);
+  
   const { data: session } = useSession();
 
   useEffect(() => {

@@ -45,7 +45,7 @@ const CartPage = () => {
                 >
                   <div className="md:w-4/12 2xl:w-1/4 w-full">
                     <img
-                      src="https://i.ibb.co/6gzWwSq/Rectangle-20-1.png"
+                      src={item.image}
                       alt={item.name}
                       className="h-full object-center object-cover md:block hidden"
                     />
@@ -122,7 +122,9 @@ const CartPage = () => {
               <span className="font-semibold text-sm uppercase">
                 Items {totalItems}
               </span>
-              <span className="font-semibold text-sm">${totalPrice}</span>
+              <span className="font-semibold text-sm">
+                ${totalPrice.toFixed(2)}
+              </span>
             </div>
             <div>
               <label className="font-medium inline-block mb-3 text-sm uppercase">

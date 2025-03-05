@@ -1,11 +1,16 @@
 "use client";
 
-import React, { useState, FC, ChangeEvent, FormEvent } from "react";
+import React, { useState, FC, ChangeEvent, FormEvent, useEffect } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import { useRouter } from "next/navigation";
+
+import { useSelector } from "react-redux";
+import { RootState } from "@/lib/redux/store";
+
 import { signIn } from "next-auth/react";
 import { jwtDecode } from "jwt-decode";
+
 
 interface FormData {
   email: string;
@@ -28,8 +33,18 @@ const SignIn: FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, router]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setError(null);
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -39,6 +54,7 @@ const SignIn: FC = () => {
     setLoading(true);
 
     try {
+
       const result = await signIn("credentials", {
         redirect: false,
         email: formData.email,
@@ -47,6 +63,7 @@ const SignIn: FC = () => {
   
       if (result?.error) {
         setError(result.error);
+
       } else {
         // Get the session to check the role
         const session = await fetch("/api/auth/session").then((res) => res.json());
@@ -62,7 +79,11 @@ const SignIn: FC = () => {
         }
       }
     } catch (err: any) {
-      setError(err.message || "An error occurred.");
+
+      setError(
+        err.message || "An error occurred during login. Please try again."
+      );
+
     } finally {
       setLoading(false);
     }
@@ -141,6 +162,14 @@ const SignIn: FC = () => {
                   className="text-purple-600 hover:text-purple-800"
                 >
                   Sign up
+                </Link>
+              </p>
+              <p className="text-gray-600 mt-2">
+                <Link
+                  href="/email"
+                  className="text-purple-600 hover:text-purple-800"
+                >
+                  Forget Password?
                 </Link>
               </p>
             </div>

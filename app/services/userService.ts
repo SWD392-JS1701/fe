@@ -67,6 +67,7 @@ export const getAllUsers = async (session?: any): Promise<User[]> => {
     const headers = await authHeaders(session);
     const response = await axios.get<User[]>(`${API_URL}/users`, {
       headers,
+
     });
     return response.data;
   } catch (error) {
@@ -77,12 +78,14 @@ export const getAllUsers = async (session?: any): Promise<User[]> => {
 
 export const getUserById = async (session?: any): Promise<User | null> => {
   try {
+    console.log("Session received in getUserById:", session);
+
     if (!session?.user?.access_token) {
       console.error("No access token found in session.");
       return null;
     }
 
-    // Decode the JWT token to get the user ID
+    
     const decoded: JWTPayload = jwtDecode(session.user.access_token);
     console.log("Decoded token:", decoded);
 
@@ -92,20 +95,31 @@ export const getUserById = async (session?: any): Promise<User | null> => {
     }
 
     const headers = await authHeaders(session);
+    console.log("Request headers:", headers);
+    console.log("Making request to:", `${API_URL}/users/${decoded.id}`);
+
     const response = await axios.get<User>(`${API_URL}/users/${decoded.id}`, {
       headers,
     });
-    
+
+    console.log("API Response:", response.data);
     return response.data;
   } catch (error: any) {
     console.error("Error fetching user details:", {
       message: error.message,
       status: error.response?.status,
-      data: error.response?.data
+      data: error.response?.data,
+      stack: error.stack
     });
+    
     if (error.response?.status === 400) {
       console.error("Invalid user ID format");
+    } else if (error.response?.status === 401) {
+      console.error("Unauthorized - Token might be invalid or expired");
+    } else if (error.response?.status === 404) {
+      console.error("User not found");
     }
+    
     return null;
   }
 };
@@ -115,12 +129,14 @@ export const getUser = async (query: string): Promise<User | null> => {
     const headers = await authHeaders();
     let response;
     if (query.includes("@")) {
+
       response = await axios.get<User>(`${API_URL}/user/${query}`, {
         headers,
       });
     } else {
       response = await axios.get<User>(`${API_URL}/users/${query}`, {
         headers,
+
       });
     }
     return response.data;
@@ -132,9 +148,11 @@ export const getUser = async (query: string): Promise<User | null> => {
 
 export const createUser = async (user: User): Promise<User | null> => {
   try {
+
     const headers = await authHeaders();
     const response = await axios.post<User>(`${API_URL}/users`, user, {
       headers,
+
     });
     return response.data;
   } catch (error) {
@@ -148,12 +166,14 @@ export const updateUser = async (
   user: Partial<User>
 ): Promise<User | null> => {
   try {
+
     const headers = await authHeaders();
     const response = await axios.patch<User>(
       `${API_URL}/users/${userId}`,
       user,
       { headers }
     );
+
     return response.data;
   } catch (error) {
     console.error("Error updating user:", error);
@@ -166,6 +186,7 @@ export const deleteUser = async (userId: string): Promise<void> => {
     const headers = await authHeaders();
     await axios.delete(`${API_URL}/users/${userId}`, {
       headers,
+
     });
   } catch (error) {
     console.error("Error deleting user:", error);

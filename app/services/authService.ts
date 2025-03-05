@@ -1,12 +1,8 @@
 
-import { API_URL } from "@/config";
-import axios from "axios";
+import axiosInstance from "./axiosInstance";
 import { jwtDecode } from "jwt-decode";
+import { DecodedToken } from "../types/token";
 
-interface DecodedToken {
-  role: string;
-  exp: number;
-}
 export const register = async (
   username: string,
   email: string,
@@ -18,7 +14,7 @@ export const register = async (
   role?: string
 ) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/register`, {
+    const response = await axiosInstance.post("/auth/register", {
       username,
       email,
       plainPassword,
@@ -40,14 +36,14 @@ export const register = async (
 
 export const login = async (email: string, password: string) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/login`, {
+    const response = await axiosInstance.post("/auth/login", {
       email,
       password,
     });
 
     const data = response.data;
-    
     return data;
+
   } catch (error: any) {
     console.error("Login API Error:", error);
     throw new Error(
@@ -55,18 +51,47 @@ export const login = async (email: string, password: string) => {
     );
   }
 };
+
+export const resetPassword = async (token: string, newPassword: string) => {
+  try {
+    const response = await axiosInstance.put("/auth/change-password", {
+      token,
+      newPassword,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Reset Password API Error:", error);
+    throw new Error(
+      error.response?.data?.message ||
+        "Failed to reset password. Please try again."
+    );
+  }
+};
+
+export const forgetPassword = async (email: string) => {
+  try {
+    const response = await axiosInstance.post("/auth/forgot-password", {
+      email,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Forget Password API Error:", error);
+    throw new Error(
+      error.response?.data?.message ||
+        "Failed to forget password. Please try again."
+    );
+  }
+};
+
 const getAccessToken = (): string | null => {
+  if (typeof window === "undefined") {
+    return null;
+  }
   const storedToken = localStorage.getItem("access_token");
 
   if (!storedToken) return null;
 
-  try {
-    const parsedToken = JSON.parse(storedToken);
-    return parsedToken.access_token;
-  } catch (error) {
-    console.error("Error parsing access token:", error);
-    return null;
-  }
+  return storedToken;
 };
 
 const isTokenExpired = (token: string): boolean => {
@@ -98,4 +123,3 @@ export const getUserRole = (): string | null => {
     return null;
   }
 };
-

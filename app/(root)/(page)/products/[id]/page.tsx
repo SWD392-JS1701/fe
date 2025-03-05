@@ -15,28 +15,6 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const dispatch = useDispatch();
   const cart = useSelector((state: RootState) => state.cart.items);
-  const handleAddToCart = (e: MouseEvent<HTMLButtonElement>) => {
-    // e.preventDefault();
-    // e.stopPropagation();
-    // const existingProduct = cart.find((item) => item.id === product._id);
-    // if (existingProduct) {
-    //   dispatch(
-    //     updateQuantity({
-    //       id: product._id,
-    //       quantity: existingProduct.quantity + 1,
-    //     })
-    //   );
-    // } else {
-    //   dispatch(
-    //     addToCart({
-    //       id: product._id,
-    //       name: product.name,
-    //       price: product.price,
-    //       quantity: 1,
-    //     })
-    //   );
-    // }
-  };
 
   useEffect(() => {
     if (!id) return;
@@ -60,8 +38,31 @@ const ProductDetail = () => {
     return <p className="text-center text-red-500">Product not found</p>;
   }
 
+  const handleAddToCart = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const existingProduct = cart.find((item) => item.id === product._id);
+    if (existingProduct) {
+      dispatch(
+        updateQuantity({
+          id: product._id,
+          quantity: existingProduct.quantity + 1,
+        })
+      );
+    } else {
+      dispatch(
+        addToCart({
+          id: product._id,
+          name: product.name,
+          price: product.price,
+          quantity: 1,
+        })
+      );
+    }
+  };
+
   return (
-    <div className="bg-gray-100 dark:bg-gray-800 py-8">
+    <div className="bg-gray-100 dark:bg-gray-800 py-8 mt-[80px]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row -mx-4">
           {/* Left Section - Product Image */}

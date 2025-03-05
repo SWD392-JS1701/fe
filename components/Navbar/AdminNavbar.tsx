@@ -1,5 +1,6 @@
 "use client";
 
+
 import React from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
@@ -12,6 +13,7 @@ const AdminNavbar = () => {
   const handleLogout = async () => {
     await signOut({ redirect: false });
     router.push("/sign-in");
+
   };
 
   return (
@@ -22,25 +24,35 @@ const AdminNavbar = () => {
 
         {/* Navigation Links */}
         <div className="flex space-x-6">
-          <Link href="/overview" className="text-gray-700 hover:text-blue-600">
+          <Link
+            href="/admin/overview"
+            className="text-gray-700 hover:text-blue-600"
+          >
             Overview
           </Link>
-          <Link href="/product" className="text-gray-700 hover:text-blue-600">
+          <Link
+            href="/admin/product"
+            className="text-gray-700 hover:text-blue-600"
+          >
             Product
           </Link>
           <Link
-            href="/transaction"
+            href="/admin/schedule"
             className="text-gray-700 hover:text-blue-600"
           >
-            Transaction
+            Schedule
           </Link>
-          <Link href="/employee" className="text-gray-700 hover:text-blue-600">
+          <Link
+            href="/admin/employee"
+            className="text-gray-700 hover:text-blue-600"
+          >
             Employee
           </Link>
         </div>
 
         {/* User Profile */}
         <div className="flex items-center space-x-4">
+
           <div className="relative group">
             <div className="flex items-center space-x-4 cursor-pointer">
               <div className="w-10 h-10 rounded-full overflow-hidden">
@@ -71,6 +83,7 @@ const AdminNavbar = () => {
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </nav>

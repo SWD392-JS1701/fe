@@ -9,12 +9,14 @@ import React, {
 } from "react";
 
 
+
 import UserCard from "@/components/UserCard";
 import { FaPlus, FaEye, FaEyeSlash } from "react-icons/fa";
 
-import { getAllUsers, User } from "@/app/services/userService";
+import { getAllUsers } from "@/app/services/userService";
 import { createDoctor } from "@/app/services/doctorService";
 import { register } from "@/app/services/authService";
+import { User } from "@/app/types/user";
 
 interface FormData {
   name: string;
@@ -164,7 +166,6 @@ const EmployeePage = () => {
 
   return (
     <>
-      
       <div className="bg-gray-100 min-h-screen p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-6">

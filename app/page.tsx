@@ -4,6 +4,7 @@ import Products from "./(root)/(page)/products/page";
 import NavbarWrapper from "@/components/Navbar/NavbarWrapper";
 
 import Footer from "@/components/Footer";
+import QuizPromo from "@/components/QuizPromo";
 
 export default async function page () {
     
@@ -14,6 +15,8 @@ export default async function page () {
       <NavbarWrapper />
       
       <Hero />
+
+      <QuizPromo />
 
       <Products />
 

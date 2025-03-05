@@ -7,27 +7,30 @@ export async function middleware(req: NextRequest) {
   const unauthorized = () => new NextResponse(null, { status: 404});
   const path = req.nextUrl.pathname;
 
-  // No token, return 401 for all protected routes
+  
   if (!token) {
     return unauthorized();
   }
 
   const role = token.role as string | undefined;
 
-  // If no role is defined, return 401
+  
   if (!role) {
     return unauthorized();
   }
 
   // Doctor routes protection
-  if (path.startsWith("/doctor") && role !== "Doctor") {
+  if (path.startsWith("/doctor") 
+    || path.startsWith("/blog")
+    && role !== "Doctor") {
     return unauthorized();
   }
 
   // Admin routes protection
   if ((path.startsWith("/admin") 
     || path.startsWith("/employee")
-  
+    || path.startsWith("/overview")
+    || path.startsWith("/schedule")
       ) && role !== "admin") {
 
     return unauthorized();
@@ -48,5 +51,7 @@ export const config = {
     "/profile/:path*",
     "/blog/:path*",
     "/employee/:path*",
+    "/overview/:path*",
+    "/schedule/:path*",
   ]
 };

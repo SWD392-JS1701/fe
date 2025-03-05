@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -90,3 +91,4 @@ const BlogPage = () => {
 };
 
 export default BlogPage;
+
