@@ -2,15 +2,6 @@
 import axiosInstance from "./axiosInstance";
 import { jwtDecode } from "jwt-decode";
 import { DecodedToken } from "../types/token";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-
-
-
-import { API_URL } from "@/config";
-import axios from "axios";
-
-
 
 export const register = async (
   username: string,
@@ -114,7 +105,7 @@ const isTokenExpired = (token: string): boolean => {
     return true;
   }
 };
-g
+
 
 
 export const getUserRole = (): string | null => {

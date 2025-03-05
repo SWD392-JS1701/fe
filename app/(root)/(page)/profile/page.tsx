@@ -62,35 +62,29 @@ const ProfilePage: FC = () => {
 
     if (status === "loading") return;
 
-    if (!session) {
-
+    if (!session?.user?.access_token) {
       router.push("/sign-in");
       return;
     }
 
     const getUserProfile = async () => {
       try {
-
         console.log("Calling getUserById with session:", {
           id: session?.user?.id,
           email: session?.user?.email,
-          role: session?.user?.role
+          role: session?.user?.role,
+          token: session?.user?.access_token ? "present" : "missing"
         });
         
         const userData = await getUserById(session);
         
-
         if (!userData) {
-          throw Error("No user data available.", "Please try again later.");
-        }
-
-        const allowedRoles = ["user", "doctor"];
-        if (!allowedRoles.includes(userData.role.toLowerCase())) {
+          console.error("No user data returned from getUserById");
           setIsAuthorized(false);
-          Error("Unauthorized", "You are not allowed to view this page.");
-          router.push("/admin/overview");
           return;
         }
+
+        
 
         setIsAuthorized(true);
 
@@ -101,23 +95,26 @@ const ProfilePage: FC = () => {
           email: userData.email || "",
           address: userData.address || "",
           phone_number: userData.phone_number || "",
-          skinType: "Unknown",
-          sensitivity: "Unknown",
+          skinType: userData.skinType || "Unknown",
+          sensitivity: userData.sensitivity || "Unknown",
           emailSubscription: "Not Subscribed",
           totalSpent: 0,
           orderCount: 0,
         };
 
         setUser(defaultUser);
-      } catch (err) {
-
+      } catch (err: any) {
+        console.error("Error in getUserProfile:", {
+          message: err.message,
+          status: err.response?.status,
+          data: err.response?.data
+        });
+        
         setIsAuthorized(false);
 
-        console.error("Error in getUserProfile:", err);
-        Error(
-          "Profile Load Failed",
-          "We couldn't load your profile. Please try again later."
-        );
+        if (err.response?.status === 401) {
+          router.push("/sign-in");
+        }
       } finally {
         setLoading(false);
       }

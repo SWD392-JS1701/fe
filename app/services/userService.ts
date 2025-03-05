@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -79,15 +78,16 @@ export const getAllUsers = async (session?: any): Promise<User[]> => {
 
 export const getUserById = async (session?: any): Promise<User | null> => {
   try {
+    console.log("Session received in getUserById:", session);
+
     if (!session?.user?.access_token) {
       console.error("No access token found in session.");
       return null;
     }
 
-    // Decode the JWT token to get the user ID
+    
     const decoded: JWTPayload = jwtDecode(session.user.access_token);
     console.log("Decoded token:", decoded);
-
 
     if (!decoded.id) {
       console.error("No user ID found in decoded token.");
@@ -95,21 +95,31 @@ export const getUserById = async (session?: any): Promise<User | null> => {
     }
 
     const headers = await authHeaders(session);
+    console.log("Request headers:", headers);
+    console.log("Making request to:", `${API_URL}/users/${decoded.id}`);
+
     const response = await axios.get<User>(`${API_URL}/users/${decoded.id}`, {
       headers,
-
     });
 
+    console.log("API Response:", response.data);
     return response.data;
   } catch (error: any) {
     console.error("Error fetching user details:", {
       message: error.message,
       status: error.response?.status,
-      data: error.response?.data
+      data: error.response?.data,
+      stack: error.stack
     });
+    
     if (error.response?.status === 400) {
       console.error("Invalid user ID format");
+    } else if (error.response?.status === 401) {
+      console.error("Unauthorized - Token might be invalid or expired");
+    } else if (error.response?.status === 404) {
+      console.error("User not found");
     }
+    
     return null;
   }
 };

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React from "react";
+import { useSession } from "next-auth/react";
 
 const AdminPage = () => {
   const totalStockProducts = [
@@ -10,15 +10,9 @@ const AdminPage = () => {
     { name: "Shoes", quantity: 500 },
     { name: "Accessories", quantity: 300 },
   ];
-  const router = useRouter();
 
-  useEffect(() => {
-    const token = localStorage.getItem("access_token");
-
-    if (!token) {
-      router.push("/sign-in");
-    }
-  }, [router]);
+  // Authentication is now handled by the layout
+  const { data: session } = useSession();
 
   return (
     <>
