@@ -1,8 +1,8 @@
+
 import { API_URL } from "@/config";
 import axios from "axios";
-import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
-import { useEffect,useState } from "react";
+
 interface DecodedToken {
   role: string;
   exp: number;
@@ -46,7 +46,7 @@ export const login = async (email: string, password: string) => {
     });
 
     const data = response.data;
-    localStorage.setItem("access_token", data.access_token);
+    
     return data;
   } catch (error: any) {
     console.error("Login API Error:", error);
@@ -80,25 +80,7 @@ const isTokenExpired = (token: string): boolean => {
     return true;
   }
 };
-export const useAuthRedirect = () => {
-  const router = useRouter();
-  const [isChecking, setIsChecking] = useState(true);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const token = getAccessToken();
-
-    if (!token || isTokenExpired(token)) {
-      localStorage.removeItem("access_token");
-      router.push("/sign-in");
-    } else {
-      setIsChecking(false);
-    }
-  }, [router]);
-
-  return { isChecking };
-};
 
 
 export const getUserRole = (): string | null => {

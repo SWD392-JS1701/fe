@@ -4,6 +4,7 @@ import React, { FC }  from "react";
 import  { useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 import { updateUser } from "@/app/services/userService";
 import { useEffect } from "react";
 import{toast,Toaster} from"react-hot-toast"
@@ -89,6 +90,9 @@ const UserProfile: FC<UserProfileProps> = ({ user,setUser }) => {
     setLoading(false);
   };
 
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/sign-in" });
+  };
 
   return (
     <>
@@ -155,13 +159,13 @@ const UserProfile: FC<UserProfileProps> = ({ user,setUser }) => {
                     <FaFileAlt className="mr-3 text-gray-500" />
                     <span className="text-black">Subscriptions</span>
                   </Link>
-                  <Link
-                    href="/logout"
-                    className="flex items-center p-4 hover:bg-gray-50"
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center p-4 hover:bg-gray-50"
                   >
                     <FaSignOutAlt className="mr-3 text-gray-500" />
                     <span className="text-black">Logout</span>
-                  </Link>
+                  </button>
                 </nav>
               </div>
             </div>

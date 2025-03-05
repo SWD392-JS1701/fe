@@ -9,32 +9,16 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/redux/store";
+import { useSession, signOut } from "next-auth/react";
 
 const Navbar: FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [scrollCount, setScrollCount] = useState(0);
   const maxScrollCount = 3;
-  const maxBorderWidth = 250; // the max width of border when the scroll count is 3
+  const maxBorderWidth = 250;
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const cartCount = useSelector((state: RootState) => state.cart.items.length);
- 
-  useEffect(() => {
-    const checkLoginStatus = () => {
-      const token = localStorage.getItem("access_token");
-      setIsLoggedIn(!!token);
-    };
-
-    // Initial check
-    checkLoginStatus();
-
-    // Listen for login/logout events
-    window.addEventListener("storage", checkLoginStatus);
-
-    return () => {
-      window.removeEventListener("storage", checkLoginStatus);
-    };
-  }, []);
+  const { data: session } = useSession();
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -43,10 +27,8 @@ const Navbar: FC = () => {
       const scrollDiff = scrollY - lastScrollY;
 
       if (scrollDiff > 0 && scrollCount < maxScrollCount) {
-        // If scroll down, increase the scroll count but not over 3
         setScrollCount((prev) => Math.min(prev + 1, maxScrollCount));
       } else if (scrollDiff < 0 && scrollCount > 0) {
-        // If scroll up, decrease the scroll count but not lower than 0
         setScrollCount((prev) => Math.max(prev - 1, 0));
       }
 
@@ -56,6 +38,11 @@ const Navbar: FC = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [scrollCount]);
+
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
+    router.push("/");
+  };
 
   return (
     <div
@@ -137,7 +124,7 @@ const Navbar: FC = () => {
         {/* Icons */}
         <div className="flex-1 flex justify-end items-center space-x-3">
           <div className="relative group">
-            <Link href={isLoggedIn ? "/profile" : "/sign-in"}>
+            <Link href={session ? "/profile" : "/sign-in"}>
               <svg
                 className={`w-6 h-6 transition-all duration-500 ${
                   scrollCount === maxScrollCount
@@ -163,7 +150,7 @@ const Navbar: FC = () => {
 
             {/* Dropdown Menu */}
             <div className="absolute right-0 hidden group-hover:block w-48 bg-white rounded-md shadow-lg z-50">
-              {isLoggedIn ? (
+              {session ? (
                 <>
                   <div className="px-4 py-3 border-b border-gray-200">
                     <Link
@@ -192,12 +179,7 @@ const Navbar: FC = () => {
                     </Link>
                   </div>
                   <button
-                    onClick={() => {
-                      localStorage.removeItem("access_token");
-                      setIsLoggedIn(false);
-                      window.dispatchEvent(new Event("storage"));
-                      router.push("/");
-                    }}
+                    onClick={handleLogout}
                     className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
                   >
                     LOGOUT
