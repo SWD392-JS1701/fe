@@ -94,6 +94,9 @@ export const forgetPassword = async (email: string) => {
 };
 
 const getAccessToken = (): string | null => {
+  if (typeof window === "undefined") {
+    return null;
+  }
   const storedToken = localStorage.getItem("access_token");
 
   if (!storedToken) return null;
