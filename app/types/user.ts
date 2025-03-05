@@ -7,6 +7,7 @@ export interface User {
   skinType: string;
   membership_id?: string;
   sensitivity: string;
+  specialization?: string;
   first_name: string;
   last_name: string;
   phone_number: string;
