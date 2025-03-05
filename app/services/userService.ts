@@ -1,24 +1,74 @@
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { API_URL } from "@/config";
+import { getSession, useSession } from "next-auth/react";
 import { jwtDecode } from "jwt-decode";
 
-import axiosInstance from "./axiosInstance";
-import { User } from "../types/user";
-import { DecodedToken } from "../types/token";
+interface JWTPayload {
+  id: string;
+  username: string;
+  role: string;
+  iat?: number;
+  exp?: number;
+}
 
-const getAccessToken = (): string | null => {
-  const storedToken = localStorage.getItem("access_token");
-  if (!storedToken) return null;
-  return storedToken;
+export interface User {
+  _id: string;
+  username: string;
+  email: string;
+  role: string;
+  point: number;
+  skinType: string;
+  sensitivity: string;
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  address: string;
+  status: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const useAuthRedirect = () => {
+  const router = useRouter();
+  const [isChecking, setIsChecking] = useState(true);
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    if (status === "loading") return;
+
+    if (!session) {
+      router.push("/sign-in");
+    } else {
+      setIsChecking(false);
+    }
+  }, [session, status, router]);
+
+  return { isChecking };
 };
 
-const authHeaders = () => {
-  const token = getAccessToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+export const useCurrentUser = () => {
+  const { data: session } = useSession();
+  return session?.user;
 };
 
-export const getAllUsers = async (): Promise<User[]> => {
+const authHeaders = async (session?: any) => {
+  if (!session) {
+    session = await getSession();
+  }
+  return session?.user?.access_token
+    ? { Authorization: `Bearer ${session.user.access_token}` }
+    : {};
+};
+
+export const getAllUsers = async (session?: any): Promise<User[]> => {
   try {
-    const response = await axiosInstance.get<User[]>("/users", {
-      headers: authHeaders(),
+    const headers = await authHeaders(session);
+    const response = await axios.get<User[]>(`${API_URL}/users`, {
+      headers,
+
     });
     return response.data;
   } catch (error) {
@@ -27,39 +77,56 @@ export const getAllUsers = async (): Promise<User[]> => {
   }
 };
 
-export const getUserById = async (): Promise<User | null> => {
+export const getUserById = async (session?: any): Promise<User | null> => {
   try {
-    const accessToken = getAccessToken();
-
-    if (!accessToken) {
-      console.error("No access token found.");
+    if (!session?.user?.access_token) {
+      console.error("No access token found in session.");
       return null;
     }
 
-    const decoded: DecodedToken = jwtDecode(accessToken);
-    const userId = decoded.id;
+    // Decode the JWT token to get the user ID
+    const decoded: JWTPayload = jwtDecode(session.user.access_token);
+    console.log("Decoded token:", decoded);
 
-    const response = await axiosInstance.get<User>(`/users/${userId}`, {
-      headers: authHeaders(),
+
+    if (!decoded.id) {
+      console.error("No user ID found in decoded token.");
+      return null;
+    }
+
+    const headers = await authHeaders(session);
+    const response = await axios.get<User>(`${API_URL}/users/${decoded.id}`, {
+      headers,
+
     });
 
     return response.data;
-  } catch (error) {
-    console.error("Error fetching user details:", error);
+  } catch (error: any) {
+    console.error("Error fetching user details:", {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data
+    });
+    if (error.response?.status === 400) {
+      console.error("Invalid user ID format");
+    }
     return null;
   }
 };
 
 export const getUser = async (query: string): Promise<User | null> => {
   try {
+    const headers = await authHeaders();
     let response;
     if (query.includes("@")) {
-      response = await axiosInstance.get<User>(`/user/${query}`, {
-        headers: authHeaders(),
+
+      response = await axios.get<User>(`${API_URL}/user/${query}`, {
+        headers,
       });
     } else {
-      response = await axiosInstance.get<User>(`/users/${query}`, {
-        headers: authHeaders(),
+      response = await axios.get<User>(`${API_URL}/users/${query}`, {
+        headers,
+
       });
     }
     return response.data;
@@ -71,8 +138,11 @@ export const getUser = async (query: string): Promise<User | null> => {
 
 export const createUser = async (user: User): Promise<User | null> => {
   try {
-    const response = await axiosInstance.post<User>("/users", user, {
-      headers: authHeaders(),
+
+    const headers = await authHeaders();
+    const response = await axios.post<User>(`${API_URL}/users`, user, {
+      headers,
+
     });
     return response.data;
   } catch (error) {
@@ -86,9 +156,14 @@ export const updateUser = async (
   user: Partial<User>
 ): Promise<User | null> => {
   try {
-    const response = await axiosInstance.patch<User>(`/users/${userId}`, user, {
-      headers: authHeaders(),
-    });
+
+    const headers = await authHeaders();
+    const response = await axios.patch<User>(
+      `${API_URL}/users/${userId}`,
+      user,
+      { headers }
+    );
+
     return response.data;
   } catch (error) {
     console.error("Error updating user:", error);
@@ -98,8 +173,10 @@ export const updateUser = async (
 
 export const deleteUser = async (userId: string): Promise<void> => {
   try {
-    await axiosInstance.delete(`/users/${userId}`, {
-      headers: authHeaders(),
+    const headers = await authHeaders();
+    await axios.delete(`${API_URL}/users/${userId}`, {
+      headers,
+
     });
   } catch (error) {
     console.error("Error deleting user:", error);

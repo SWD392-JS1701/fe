@@ -1,8 +1,16 @@
+
 import axiosInstance from "./axiosInstance";
 import { jwtDecode } from "jwt-decode";
 import { DecodedToken } from "../types/token";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+
+
+import { API_URL } from "@/config";
+import axios from "axios";
+
+
 
 export const register = async (
   username: string,
@@ -43,17 +51,8 @@ export const login = async (email: string, password: string) => {
     });
 
     const data = response.data;
-    const accessToken = data.access_token;
+    return data;
 
-    if (!accessToken) {
-      throw new Error("No access token received from server.");
-    }
-
-    localStorage.setItem("access_token", accessToken);
-
-    const decodedToken: DecodedToken = jwtDecode(accessToken);
-
-    return { ...data, decodedToken };
   } catch (error: any) {
     console.error("Login API Error:", error);
     throw new Error(
@@ -115,26 +114,8 @@ const isTokenExpired = (token: string): boolean => {
     return true;
   }
 };
+g
 
-export const useAuthRedirect = () => {
-  const router = useRouter();
-  const [isChecking, setIsChecking] = useState(true);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const token = getAccessToken();
-
-    if (!token || isTokenExpired(token)) {
-      localStorage.removeItem("access_token");
-      router.push("/sign-in");
-    } else {
-      setIsChecking(false);
-    }
-  }, [router]);
-
-  return { isChecking };
-};
 
 export const getUserRole = (): string | null => {
   const token = getAccessToken();

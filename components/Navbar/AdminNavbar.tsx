@@ -1,78 +1,19 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import { CiLogout } from "react-icons/ci";
 
-import { getUserById } from "@/app/services/userService";
-import { useAuthRedirect } from "@/app/services/authService";
-import { User } from "@/app/types/user";
+import React from "react";
+import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const AdminNavbar = () => {
-  const { isChecking } = useAuthRedirect();
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const userData = await getUserById();
-        if (userData) {
-          setUser(userData);
-        } else {
-          setError("Failed to fetch user data.");
-        }
-      } catch (err) {
-        setError("Error fetching user data.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (!isChecking) {
-      fetchUser();
-    }
-  }, [isChecking]);
-
-  if (isChecking || loading) {
-    return (
-      <nav className="bg-white shadow-md p-4 w-full border rounded-xl">
-        <div className="max-w-[1400px] mx-auto flex justify-between items-center">
-          <div className="text-xl font-bold text-gray-800">GlowUp</div>
-          <div className="flex space-x-6">
-            <span className="text-gray-400">Loading...</span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
-            <span className="text-gray-400">Loading...</span>
-          </div>
-        </div>
-      </nav>
-    );
-  }
-
-  if (error) {
-    return (
-      <nav className="bg-white shadow-md p-4 w-full border rounded-xl">
-        <div className="max-w-[1400px] mx-auto flex justify-between items-center">
-          <div className="text-xl font-bold text-gray-800">GlowUp</div>
-          <div className="flex space-x-6">
-            <span className="text-red-500">{error}</span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="w-10 h-10 rounded-full bg-gray-200"></div>
-            <span className="text-red-500">Error</span>
-          </div>
-        </div>
-      </nav>
-    );
-  }
+  const { data: session } = useSession();
+  const router = useRouter();
 
   const handleLogout = async () => {
-    localStorage.removeItem("access_token");
-    window.location.href = "/sign-in";
+    await signOut({ redirect: false });
+    router.push("/sign-in");
+
   };
 
   return (
@@ -111,22 +52,38 @@ const AdminNavbar = () => {
 
         {/* User Profile */}
         <div className="flex items-center space-x-4">
-          <div className="w-10 h-10 rounded-full overflow-hidden">
-            <img
-              src={
-                "https://res.cloudinary.com/djv4xa6wu/image/upload/v1735722165/AbhirajK/Abhirajk.webp"
-              }
-              alt="Profile"
-              className="w-full h-full object-cover"
-            />
+
+          <div className="relative group">
+            <div className="flex items-center space-x-4 cursor-pointer">
+              <div className="w-10 h-10 rounded-full overflow-hidden">
+                <img
+                  src="https://res.cloudinary.com/djv4xa6wu/image/upload/v1735722165/AbhirajK/Abhirajk.webp"
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <span className="text-gray-700">{session?.user?.name || "Admin"}</span>
+            </div>
+
+            {/* Dropdown Menu */}
+            <div className="absolute right-0 hidden group-hover:block w-48 bg-white rounded-md shadow-lg z-50">
+              <div className="py-1">
+                <Link
+                  href="/profile"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Profile Settings
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
           </div>
-          <span className="text-gray-700">
-            {user ? `${user.first_name} ${user.last_name}` : "Admin"}
-          </span>
-          <CiLogout
-            className="text-2xl text-gray-700 hover:text-blue-600 cursor-pointer"
-            onClick={handleLogout}
-          />
+
         </div>
       </div>
     </nav>

@@ -1,15 +1,19 @@
 import About from "@/components/About";
 import Hero from "@/components/Hero";
 import Products from "./(root)/(page)/products/page";
-import Navbar from "@/components/Navbar/Navbar";
+import NavbarWrapper from "@/components/Navbar/NavbarWrapper";
+
 import Footer from "@/components/Footer";
 import QuizPromo from "@/components/QuizPromo";
 
-const page = () => {
-  return (
-    <div className="min-h-screen bg-white">
-      <Navbar />
+export default async function page () {
+    
 
+  return (
+    
+    <div className="min-h-screen bg-white">
+      <NavbarWrapper />
+      
       <Hero />
 
       <QuizPromo />
@@ -23,4 +27,4 @@ const page = () => {
   );
 };
 
-export default page;
+

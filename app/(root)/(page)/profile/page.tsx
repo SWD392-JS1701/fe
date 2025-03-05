@@ -1,10 +1,12 @@
 "use client";
 
 import React, { FC, useEffect, useState } from "react";
+
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { signOut } from "next-auth/react";
 import {
   FaLock,
   FaEye,
@@ -26,23 +28,18 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
+import { useSession } from "next-auth/react";
+
+
 import UserProfile from "@/components/UserProfile";
 import Membership from "@/components/Membership";
 import Error from "@/components/Error";
 import Loading from "@/components/Loading";
-
-
-
-
-
-
-
-
 import ChangePasswordPage from "../change-password/page";
 
 import { getUserById } from "@/app/services/userService";
 import { getMemberships } from "@/app/services/membershipSevice";
-
+import { useAuthRedirect } from "@/app/services/userService";
 
 const ProfilePage: FC = () => {
   const [user, setUser] = useState<any>(null);
@@ -52,19 +49,36 @@ const ProfilePage: FC = () => {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const router = useRouter();
-  const access_token = localStorage.getItem("access_token");
+  
+
+  const { data: session, status } = useSession();
+  
+  // This will handle the redirection if not authenticated
+  useAuthRedirect();
 
   useEffect(() => {
-    if (!access_token) {
-      setIsAuthorized(false);
-      Error("Not Logged In", "Please log in to view your profile.");
+    console.log("Session Status:", status);
+    console.log("Session Data:", session);
+
+    if (status === "loading") return;
+
+    if (!session) {
+
       router.push("/sign-in");
       return;
     }
 
     const getUserProfile = async () => {
       try {
-        const userData = await getUserById();
+
+        console.log("Calling getUserById with session:", {
+          id: session?.user?.id,
+          email: session?.user?.email,
+          role: session?.user?.role
+        });
+        
+        const userData = await getUserById(session);
+        
 
         if (!userData) {
           throw Error("No user data available.", "Please try again later.");
@@ -96,7 +110,10 @@ const ProfilePage: FC = () => {
 
         setUser(defaultUser);
       } catch (err) {
+
         setIsAuthorized(false);
+
+        console.error("Error in getUserProfile:", err);
         Error(
           "Profile Load Failed",
           "We couldn't load your profile. Please try again later."
@@ -119,17 +136,19 @@ const ProfilePage: FC = () => {
     };
 
     getUserProfile();
-    fetchMemberships();
-  }, []);
 
+    fetchMemberships();
+  
+  }, [session, status, router]);
+
+  
   const handleNavClick = (section: string) => {
     setActiveSection(section);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    router.push("/sign-in");
-  };
+  const handleLogout = async () => {
+      await signOut({ callbackUrl: "/sign-in" });
+    };
 
   if (isAuthorized === null || loading) {
     return <Loading />;
@@ -143,6 +162,7 @@ const ProfilePage: FC = () => {
     Error("Error", "No user data available.");
     return null;
   }
+
 
   const renderContent = () => {
     switch (activeSection) {
@@ -314,6 +334,7 @@ const ProfilePage: FC = () => {
       </div>
     </>
   );
+
 };
 
 export default ProfilePage;

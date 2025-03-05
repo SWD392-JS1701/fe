@@ -3,14 +3,26 @@
 import React, { useState, FC, ChangeEvent, FormEvent, useEffect } from "react";
 import Link from "next/link";
 import Head from "next/head";
-import { login } from "@/app/services/authService";
 import { useRouter } from "next/navigation";
+
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/redux/store";
+
+import { signIn } from "next-auth/react";
+import { jwtDecode } from "jwt-decode";
+
 
 interface FormData {
   email: string;
   password: string;
+}
+
+interface JWTPayload {
+  id: string;
+  username: string;
+  role: string;
+  iat?: number;
+  exp?: number;
 }
 
 const SignIn: FC = () => {
@@ -42,24 +54,36 @@ const SignIn: FC = () => {
     setLoading(true);
 
     try {
-      const data = await login(formData.email, formData.password);
 
-      if (!data || !data.access_token || !data.decodedToken) {
-        throw new Error("Invalid login response. Please try again.");
-      }
+      const result = await signIn("credentials", {
+        redirect: false,
+        email: formData.email,
+        password: formData.password,
+      });
+  
+      if (result?.error) {
+        setError(result.error);
 
-      localStorage.setItem("access_token", data.access_token);
-      const userRole = data.decodedToken.role;
-
-      if (userRole.toLowerCase() === "admin") {
-        router.push("/admin/overview");
       } else {
-        router.push("/");
+        // Get the session to check the role
+        const session = await fetch("/api/auth/session").then((res) => res.json());
+        if (session?.user?.access_token) {
+          const decoded: JWTPayload = jwtDecode(session.user.access_token);
+          console.log("Decoded token:", decoded);
+          
+          if (decoded.role === "Admin") {
+            router.push("/overview");
+          } else {
+            router.push("/");
+          }
+        }
       }
     } catch (err: any) {
+
       setError(
         err.message || "An error occurred during login. Please try again."
       );
+
     } finally {
       setLoading(false);
     }

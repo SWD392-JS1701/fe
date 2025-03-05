@@ -9,32 +9,16 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/redux/store";
+import { useSession, signOut } from "next-auth/react";
 
-const Navbar: FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+const DoctorNavbar: FC = () => {
   const [scrollCount, setScrollCount] = useState(0);
   const maxScrollCount = 3;
-  const maxBorderWidth = 250; // the max width of border when the scroll count is 3
+  const maxBorderWidth = 250;
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const cartCount = useSelector((state: RootState) => state.cart.items.length);
-
-  useEffect(() => {
-    const checkLoginStatus = () => {
-      const token = localStorage.getItem("access_token");
-      setIsLoggedIn(!!token);
-    };
-
-    // Initial check
-    checkLoginStatus();
-
-    // Listen for login/logout events
-    window.addEventListener("storage", checkLoginStatus);
-
-    return () => {
-      window.removeEventListener("storage", checkLoginStatus);
-    };
-  }, []);
+  const { data: session } = useSession();
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -43,10 +27,8 @@ const Navbar: FC = () => {
       const scrollDiff = scrollY - lastScrollY;
 
       if (scrollDiff > 0 && scrollCount < maxScrollCount) {
-        // If scroll down, increase the scroll count but not over 3
         setScrollCount((prev) => Math.min(prev + 1, maxScrollCount));
       } else if (scrollDiff < 0 && scrollCount > 0) {
-        // If scroll up, decrease the scroll count but not lower than 0
         setScrollCount((prev) => Math.max(prev - 1, 0));
       }
 
@@ -56,6 +38,11 @@ const Navbar: FC = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [scrollCount]);
+
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
+    router.push("/");
+  };
 
   return (
     <div
@@ -137,7 +124,7 @@ const Navbar: FC = () => {
         {/* Icons */}
         <div className="flex-1 flex justify-end items-center space-x-3">
           <div className="relative group">
-            <Link href={isLoggedIn ? "/profile" : "/sign-in"}>
+            <Link href="/profile">
               <svg
                 className={`w-6 h-6 transition-all duration-500 ${
                   scrollCount === maxScrollCount
@@ -163,107 +150,51 @@ const Navbar: FC = () => {
 
             {/* Dropdown Menu */}
             <div className="absolute right-0 hidden group-hover:block w-48 bg-white rounded-md shadow-lg z-50">
-              {isLoggedIn ? (
-                <>
-                  <div className="px-4 py-3 border-b border-gray-200">
-                    <Link
-                      href="/rewards"
-                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
-                    >
-                      My Rewards
-                    </Link>
-                    <Link
-                      href="/routine"
-                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
-                    >
-                      My Routine Steps
-                    </Link>
-                    <Link
-                      href="/shop-routine"
-                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
-                    >
-                      Shop My Routine
-                    </Link>
-                    <Link
-                      href="/quiz"
-                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
-                    >
-                      Retake the Quiz
-                    </Link>
-                  </div>
-                  <button
-                    onClick={() => {
-                      localStorage.removeItem("access_token");
-                      setIsLoggedIn(false);
-                      window.dispatchEvent(new Event("storage"));
-                      router.push("/");
-                    }}
-                    className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
-                  >
-                    LOGOUT
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/sign-in"
-                    className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
-                  >
-                    LOGIN
-                  </Link>
-                  <Link
-                    href="/sign-up"
-                    className="block w-full text-center py-3 text-sm border text-black border-gray-200 hover:bg-gray-50"
-                  >
-                    SIGN UP
-                  </Link>
-                </>
-              )}
+              <div className="px-4 py-3 border-b border-gray-200">
+                <Link
+                  href="/doctor/appointments"
+                  className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
+                >
+                  My Appointments
+                </Link>
+                <Link
+                  href="/doctor/patients"
+                  className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
+                >
+                  My Patients
+                </Link>
+                <Link
+                  href="/doctor/schedule"
+                  className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
+                >
+                  My Schedule
+                </Link>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
+              >
+                LOGOUT
+              </button>
             </div>
           </div>
-
-          <Link href="/cart" className="relative">
-            <svg
-              className={`w-6 h-6 transition-all duration-500 ${
-                scrollCount === maxScrollCount ? "text-white" : "text-gray-800"
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-              />
-            </svg>
-
-            {/* Display cart count if greater than 0 */}
-            {cartCount > 0 && (
-              <span className="absolute top-0 left-4 bg-red-500 text-white text-xs rounded-full px-2">
-                {cartCount}
-              </span>
-            )}
-          </Link>
         </div>
       </div>
 
       {/* Shortcuts */}
       <div className="flex justify-center items-center py-2 space-x-20 relative">
-        <Link href="/shop">SHOP</Link>
-        <Link href="/brands">BRANDS</Link>
+        <Link href="/doctor/dashboard">DASHBOARD</Link>
+        <Link href="/doctor/appointments">APPOINTMENTS</Link>
+        <Link href="/doctor/patients">PATIENTS</Link>
+        <Link href="/doctor/schedule">SCHEDULE</Link>
         <Link href="/blog">BLOG</Link>
-        <Link href="/library">SKIN TYPE LIBRARY</Link>
-        <Link href="/schedule">SCHEDULE</Link>
 
         {/* Border Animation */}
         <div
           className="absolute bottom-0 h-[2px] bg-white transition-all duration-500 ease-in-out"
           style={{
             width: `${(scrollCount / maxScrollCount) * maxBorderWidth}px`,
-            opacity: scrollCount > 0 ? 1 : 0, // hide when does not scroll
+            opacity: scrollCount > 0 ? 1 : 0,
           }}
         ></div>
       </div>
@@ -271,4 +202,4 @@ const Navbar: FC = () => {
   );
 };
 
-export default Navbar;
+export default DoctorNavbar;
