@@ -7,7 +7,8 @@ import { useParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, updateQuantity } from "@/lib/redux/cartSlice";
 import { RootState } from "@/lib/redux/store";
-import { getProductById, Product } from "@/app/services/productService";
+import { getProductById } from "@/app/services/productService";
+import { Product } from "@/app/types/product";
 
 const ProductDetail = () => {
   const { id } = useParams();
