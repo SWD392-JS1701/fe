@@ -4,9 +4,11 @@ import React, { FC, useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Eye, Pencil, Trash2 } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import Swal from "sweetalert2";
+
 import { Product } from "@/app/types/product";
 import { getAllProducts, deleteProduct } from "@/app/services/productService";
-import { AnimatePresence } from "framer-motion";
 import ProductDrawer from "@/components/ProductDrawer";
 
 const ProductsPage: FC = () => {
@@ -16,7 +18,6 @@ const ProductsPage: FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const itemsPerPage = 6;
 
-  // Fetch products on component mount
   useEffect(() => {
     const fetchProducts = async () => {
       const fetchedProducts = await getAllProducts();
@@ -25,46 +26,66 @@ const ProductsPage: FC = () => {
     fetchProducts();
   }, []);
 
-  // Filter and search products
   const filteredProducts = useMemo(() => {
     return products.filter((product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [searchTerm, products]);
 
-  // Pagination logic
   const totalItems = filteredProducts.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentProducts = filteredProducts.slice(startIndex, endIndex);
 
-  // Handle pagination
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
   };
 
-  // Open off-canvas drawer
   const openDrawer = (product: Product) => {
     setSelectedProduct(product);
   };
 
-  // Close off-canvas drawer
   const closeDrawer = () => {
     setSelectedProduct(null);
   };
 
-  // Delete product
   const handleDelete = async (productId: string) => {
-    if (confirm("Are you sure you want to delete this product?")) {
-      await deleteProduct(productId);
-      setProducts((prevProducts) =>
-        prevProducts.filter((product) => product._id !== productId)
-      );
-      if (selectedProduct && selectedProduct._id === productId) {
-        closeDrawer();
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteProduct(productId);
+        setProducts((prevProducts) =>
+          prevProducts.filter((product) => product._id !== productId)
+        );
+        if (selectedProduct && selectedProduct._id === productId) {
+          closeDrawer();
+        }
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          text: "The product has been deleted.",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Failed to delete the product. Please try again.",
+          showConfirmButton: true,
+        });
       }
     }
   };
@@ -135,8 +156,8 @@ const ProductsPage: FC = () => {
                       className="rounded-lg"
                     />
                     <div>
-                      <Link href={`/admin/products/${product._id}`}>
-                        <p className="text-gray-800 font-medium hover:text-blue-600 hover:underline">
+                      <Link href={`/admin/product/${product._id}`}>
+                        <p className="text-gray-800 font-medium hover:text-blue-600 ">
                           {product.name}
                         </p>
                       </Link>
