@@ -1,33 +1,36 @@
 "use client";
 
-import React, { FC, useState, useMemo } from "react";
+import React, { FC, useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { Eye, Pencil, Trash2, X } from "lucide-react";
-import { fakeProducts } from "@/app/data/fakeProducts";
-import { ProductSample } from "@/app/types/sample";
-import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Product } from "@/app/types/product";
+import { getAllProducts, deleteProduct } from "@/app/services/productService";
+import { AnimatePresence } from "framer-motion";
+import ProductDrawer from "@/components/ProductDrawer";
 
 const ProductsPage: FC = () => {
-  const [products, setProducts] = useState<ProductSample[]>(fakeProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("All");
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedProduct, setSelectedProduct] = useState<ProductSample | null>(
-    null
-  );
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const itemsPerPage = 6;
+
+  // Fetch products on component mount
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const fetchedProducts = await getAllProducts();
+      setProducts(fetchedProducts);
+    };
+    fetchProducts();
+  }, []);
 
   // Filter and search products
   const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      const matchesSearch = product.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      const matchesStatus =
-        statusFilter === "All" || product.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [searchTerm, statusFilter, products]);
+    return products.filter((product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [searchTerm, products]);
 
   // Pagination logic
   const totalItems = filteredProducts.length;
@@ -35,20 +38,6 @@ const ProductsPage: FC = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentProducts = filteredProducts.slice(startIndex, endIndex);
-
-  // Toggle product status
-  const toggleStatus = (id: string) => {
-    setProducts((prevProducts) =>
-      prevProducts.map((product) =>
-        product.id === id
-          ? {
-              ...product,
-              status: product.status === "Active" ? "Inactive" : "Active",
-            }
-          : product
-      )
-    );
-  };
 
   // Handle pagination
   const handlePageChange = (page: number) => {
@@ -58,13 +47,26 @@ const ProductsPage: FC = () => {
   };
 
   // Open off-canvas drawer
-  const openDrawer = (product: ProductSample) => {
+  const openDrawer = (product: Product) => {
     setSelectedProduct(product);
   };
 
   // Close off-canvas drawer
   const closeDrawer = () => {
     setSelectedProduct(null);
+  };
+
+  // Delete product
+  const handleDelete = async (productId: string) => {
+    if (confirm("Are you sure you want to delete this product?")) {
+      await deleteProduct(productId);
+      setProducts((prevProducts) =>
+        prevProducts.filter((product) => product._id !== productId)
+      );
+      if (selectedProduct && selectedProduct._id === productId) {
+        closeDrawer();
+      }
+    }
   };
 
   return (
@@ -77,7 +79,7 @@ const ProductsPage: FC = () => {
               Product Inventory ({totalItems} products)
             </h1>
             <p className="text-sm text-gray-500">
-              All top performing product {totalItems} items
+              All products ({totalItems} items)
             </p>
           </div>
           <div className="flex items-center space-x-4">
@@ -104,15 +106,6 @@ const ProductsPage: FC = () => {
                 />
               </svg>
             </div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              <option value="All">All</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
           </div>
         </div>
 
@@ -122,84 +115,77 @@ const ProductsPage: FC = () => {
             <thead>
               <tr className="bg-gray-50 text-gray-600 text-sm">
                 <th className="p-3">Product</th>
-                <th className="p-3">Category</th>
-                <th className="p-3">Order/Stock</th>
-                <th className="p-3">Price/Discount</th>
-                <th className="p-3">Sales</th>
-                <th className="p-3">Status</th>
+                <th className="p-3">Price</th>
+                <th className="p-3">Stock</th>
+                <th className="p-3">Supplier</th>
+                <th className="p-3">Expired Date</th>
+                <th className="p-3">Rating</th>
                 <th className="p-3">Action</th>
               </tr>
             </thead>
             <tbody>
               {currentProducts.map((product) => (
-                <tr key={product.id} className="border-t hover:bg-gray-50">
+                <tr key={product._id} className="border-t hover:bg-gray-50">
                   <td className="p-3 flex items-center space-x-3">
                     <Image
-                      src={product.image}
+                      src={product.image_url}
                       alt={product.name}
                       width={40}
                       height={40}
                       className="rounded-lg"
                     />
                     <div>
-                      <p className="text-gray-800 font-medium">
-                        {product.name}
-                      </p>
-                      <p className="text-gray-500 text-sm">ID: {product.id}</p>
+                      <Link href={`/admin/products/${product._id}`}>
+                        <p className="text-gray-800 font-medium hover:text-blue-600 hover:underline">
+                          {product.name}
+                        </p>
+                      </Link>
+                      <p className="text-gray-500 text-sm">ID: {product._id}</p>
                     </div>
                   </td>
                   <td className="p-3">
-                    <p className="text-gray-800">{product.category}</p>
-                    <p className="text-gray-500 text-sm">
-                      {product.subCategory}
-                    </p>
+                    <p className="text-gray-800">${product.price.toFixed(2)}</p>
                   </td>
                   <td className="p-3">
-                    <p className="text-gray-800">{product.order}</p>
-                    <p className="text-gray-500 text-sm">
+                    <p className="text-gray-800">
                       {product.stock === 0
-                        ? "0 - empty"
-                        : product.stock > 0 && product.stock <= 10
-                        ? `${product.stock} Left`
+                        ? "Out of stock"
+                        : product.stock <= 10
+                        ? `${product.stock} left`
                         : product.stock}
                     </p>
                   </td>
                   <td className="p-3">
-                    <p className="text-gray-800">${product.price.toFixed(2)}</p>
-                    <p className="text-gray-500 text-sm">
-                      ${product.discount.toFixed(2)}, {product.discount}%
-                    </p>
+                    <p className="text-gray-800">{product.Supplier}</p>
                   </td>
                   <td className="p-3">
-                    <p className="text-gray-800">{product.sales}</p>
-                    <p className="text-gray-500 text-sm">
-                      {product.salesDuration}
-                    </p>
+                    <p className="text-gray-800">{product.expired_date}</p>
                   </td>
                   <td className="p-3">
-                    <button
-                      onClick={() => toggleStatus(product.id)}
-                      className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        product.status === "Active"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {product.status}
-                    </button>
+                    <p className="text-gray-800">{product.product_rating}/5</p>
                   </td>
                   <td className="p-3">
                     <div className="flex justify-center items-center space-x-2 h-full">
                       <button
                         onClick={() => openDrawer(product)}
                         className="text-gray-600 hover:text-gray-800"
+                        aria-label="View product details"
                       >
                         <Eye size={16} />
                       </button>
-                      <button className="text-blue-600 hover:text-blue-800">
-                        <Pencil size={16} />
-                      </button>
-                      <button className="text-red-600 hover:text-red-800">
+                      <Link href={`/admin/products/edit/${product._id}`}>
+                        <button
+                          className="text-blue-600 hover:text-blue-800"
+                          aria-label="Edit product"
+                        >
+                          <Pencil size={16} />
+                        </button>
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(product._id)}
+                        className="text-red-600 hover:text-red-800"
+                        aria-label="Delete product"
+                      >
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -262,161 +248,10 @@ const ProductsPage: FC = () => {
         </div>
       </div>
 
-      {/* Off-Canvas Drawer */}
+      {/* Render Product Drawer */}
       <AnimatePresence>
         {selectedProduct && (
-          <>
-            {/* Overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black z-40"
-              onClick={closeDrawer}
-            />
-
-            {/* Drawer */}
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-0 right-0 w-100 bg-white h-full shadow-lg z-50 p-6 overflow-y-auto"
-            >
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center space-x-4">
-                  <button className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-100">
-                    Edit
-                  </button>
-                  <h2 className="text-lg font-semibold text-gray-800">
-                    {selectedProduct.name}
-                  </h2>
-                </div>
-                <button
-                  onClick={closeDrawer}
-                  className="text-gray-600 hover:text-gray-800"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-              <div className="flex items-center mb-4">
-                <Image
-                  src={selectedProduct.image}
-                  alt={selectedProduct.name}
-                  width={80}
-                  height={80}
-                  className="rounded-lg mr-4"
-                />
-                <div>
-                  <p className="text-gray-800 font-medium">
-                    ID: {selectedProduct.id}
-                  </p>
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      selectedProduct.status === "Active"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {selectedProduct.status}
-                  </span>
-                  <p className="text-blue-600 text-sm mt-1">
-                    {selectedProduct.orders} Orders
-                  </p>
-                </div>
-              </div>
-
-              {/* Product Info */}
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-600">
-                    PRODUCT INFO
-                  </h3>
-                  <div className="mt-2 space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Category</span>
-                      <span className="text-gray-800">
-                        {selectedProduct.category} →{" "}
-                        {selectedProduct.subCategory}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">ID/SKU</span>
-                      <span className="text-gray-800">
-                        {selectedProduct.id}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Orders/Stock</span>
-                      <span className="text-gray-800">
-                        {selectedProduct.order} /{" "}
-                        {selectedProduct.stock === 0
-                          ? "0 - empty"
-                          : selectedProduct.stock > 0 &&
-                            selectedProduct.stock <= 10
-                          ? `${selectedProduct.stock} left`
-                          : selectedProduct.stock}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Price</span>
-                      <span className="text-gray-800">
-                        ${selectedProduct.price.toFixed(2)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Discount</span>
-                      <span className="text-gray-800">
-                        ${selectedProduct.discount.toFixed(2)} with COUPON{" "}
-                        {selectedProduct.discount}%
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Total Sales</span>
-                      <span className="text-gray-800">
-                        {selectedProduct.sales}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Status</span>
-                      <button
-                        onClick={() => toggleStatus(selectedProduct.id)}
-                        className={`px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-2 ${
-                          selectedProduct.status === "Active"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        <span>{selectedProduct.status}</span>
-                        <svg
-                          className={`w-4 h-4 ${
-                            selectedProduct.status === "Active"
-                              ? "text-green-800"
-                              : "text-red-800"
-                          }`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d={
-                              selectedProduct.status === "Active"
-                                ? "M5 13l4 4L19 7"
-                                : "M6 18L18 6M6 6l12 12"
-                            }
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </>
+          <ProductDrawer product={selectedProduct} onClose={closeDrawer} />
         )}
       </AnimatePresence>
     </div>
