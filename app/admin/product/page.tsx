@@ -14,7 +14,7 @@ const ProductsPage: FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState<ProductSample | null>(
     null
-  ); // For off-canvas drawer
+  );
   const itemsPerPage = 6;
 
   // Filter and search products
@@ -65,17 +65,6 @@ const ProductsPage: FC = () => {
   // Close off-canvas drawer
   const closeDrawer = () => {
     setSelectedProduct(null);
-  };
-
-  // Restock product (placeholder functionality)
-  const restockProduct = (id: string, newStock: number) => {
-    setProducts((prevProducts) =>
-      prevProducts.map((product) =>
-        product.id === id
-          ? { ...product, stock: product.stock + newStock }
-          : product
-      )
-    );
   };
 
   return (
@@ -199,19 +188,21 @@ const ProductsPage: FC = () => {
                       {product.status}
                     </button>
                   </td>
-                  <td className="p-3 flex space-x-2">
-                    <button
-                      onClick={() => openDrawer(product)}
-                      className="text-gray-600 hover:text-gray-800"
-                    >
-                      <Eye size={16} />
-                    </button>
-                    <button className="text-blue-600 hover:text-blue-800">
-                      <Pencil size={16} />
-                    </button>
-                    <button className="text-red-600 hover:text-red-800">
-                      <Trash2 size={16} />
-                    </button>
+                  <td className="p-3">
+                    <div className="flex justify-center items-center space-x-2 h-full">
+                      <button
+                        onClick={() => openDrawer(product)}
+                        className="text-gray-600 hover:text-gray-800"
+                      >
+                        <Eye size={16} />
+                      </button>
+                      <button className="text-blue-600 hover:text-blue-800">
+                        <Pencil size={16} />
+                      </button>
+                      <button className="text-red-600 hover:text-red-800">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -290,12 +281,17 @@ const ProductsPage: FC = () => {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-0 right-0 w-80 bg-white h-full shadow-lg z-50 p-6 overflow-y-auto"
+              className="fixed top-0 right-0 w-100 bg-white h-full shadow-lg z-50 p-6 overflow-y-auto"
             >
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-semibold text-gray-800">
-                  {selectedProduct.name}
-                </h2>
+                <div className="flex items-center space-x-4">
+                  <button className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-100">
+                    Edit
+                  </button>
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    {selectedProduct.name}
+                  </h2>
+                </div>
                 <button
                   onClick={closeDrawer}
                   className="text-gray-600 hover:text-gray-800"
@@ -418,13 +414,6 @@ const ProductsPage: FC = () => {
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Drawer Actions */}
-              <div className="mt-6 flex space-x-2">
-                <button className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-100">
-                  Edit
-                </button>
               </div>
             </motion.div>
           </>
