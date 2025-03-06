@@ -45,7 +45,7 @@ const CartPage = () => {
                 >
                   <div className="md:w-4/12 2xl:w-1/4 w-full">
                     <img
-                      src={item.image}
+                      src={item.image_url}
                       alt={item.name}
                       className="h-full object-center object-cover md:block hidden"
                     />
