@@ -4,6 +4,7 @@ import axios from "axios";
 import { API_URL } from "@/config";
 import { getSession, useSession } from "next-auth/react";
 import { jwtDecode } from "jwt-decode";
+import { User } from "../types/user";
 
 interface JWTPayload {
   id: string;
@@ -11,23 +12,6 @@ interface JWTPayload {
   role: string;
   iat?: number;
   exp?: number;
-}
-
-export interface User {
-  _id: string;
-  username: string;
-  email: string;
-  role: string;
-  point: number;
-  skinType: string;
-  sensitivity: string;
-  first_name: string;
-  last_name: string;
-  phone_number: string;
-  address: string;
-  status: number;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export const useAuthRedirect = () => {
@@ -67,7 +51,6 @@ export const getAllUsers = async (session?: any): Promise<User[]> => {
     const headers = await authHeaders(session);
     const response = await axios.get<User[]>(`${API_URL}/users`, {
       headers,
-
     });
     return response.data;
   } catch (error) {
@@ -85,7 +68,6 @@ export const getUserById = async (session?: any): Promise<User | null> => {
       return null;
     }
 
-    
     const decoded: JWTPayload = jwtDecode(session.user.access_token);
     console.log("Decoded token:", decoded);
 
@@ -109,9 +91,9 @@ export const getUserById = async (session?: any): Promise<User | null> => {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data,
-      stack: error.stack
+      stack: error.stack,
     });
-    
+
     if (error.response?.status === 400) {
       console.error("Invalid user ID format");
     } else if (error.response?.status === 401) {
@@ -119,7 +101,7 @@ export const getUserById = async (session?: any): Promise<User | null> => {
     } else if (error.response?.status === 404) {
       console.error("User not found");
     }
-    
+
     return null;
   }
 };
@@ -129,14 +111,12 @@ export const getUser = async (query: string): Promise<User | null> => {
     const headers = await authHeaders();
     let response;
     if (query.includes("@")) {
-
       response = await axios.get<User>(`${API_URL}/user/${query}`, {
         headers,
       });
     } else {
       response = await axios.get<User>(`${API_URL}/users/${query}`, {
         headers,
-
       });
     }
     return response.data;
@@ -148,11 +128,9 @@ export const getUser = async (query: string): Promise<User | null> => {
 
 export const createUser = async (user: User): Promise<User | null> => {
   try {
-
     const headers = await authHeaders();
     const response = await axios.post<User>(`${API_URL}/users`, user, {
       headers,
-
     });
     return response.data;
   } catch (error) {
@@ -166,7 +144,6 @@ export const updateUser = async (
   user: Partial<User>
 ): Promise<User | null> => {
   try {
-
     const headers = await authHeaders();
     const response = await axios.patch<User>(
       `${API_URL}/users/${userId}`,
@@ -186,7 +163,6 @@ export const deleteUser = async (userId: string): Promise<void> => {
     const headers = await authHeaders();
     await axios.delete(`${API_URL}/users/${userId}`, {
       headers,
-
     });
   } catch (error) {
     console.error("Error deleting user:", error);

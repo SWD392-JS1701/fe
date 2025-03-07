@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { getAllProducts, Product } from "@/app/services/productService";
+import { getAllProducts } from "@/app/services/productService";
+import { Product } from "@/app/types/product";
 import ProductCard from "@/components/ProductCard";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
