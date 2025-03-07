@@ -90,6 +90,15 @@ const ProductsPage: FC = () => {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen relative">
       <div className="bg-white rounded-lg shadow-md p-6">
@@ -161,7 +170,6 @@ const ProductsPage: FC = () => {
                           {product.name}
                         </p>
                       </Link>
-                      <p className="text-gray-500 text-sm">ID: {product._id}</p>
                     </div>
                   </td>
                   <td className="p-3">
@@ -177,10 +185,14 @@ const ProductsPage: FC = () => {
                     </p>
                   </td>
                   <td className="p-3">
-                    <p className="text-gray-800">{product.Supplier}</p>
+                    <p className="text-gray-800">
+                      {product.Supplier || "Currently no supplier"}
+                    </p>
                   </td>
                   <td className="p-3">
-                    <p className="text-gray-800">{product.expired_date}</p>
+                    <p className="text-gray-800">
+                      {formatDate(product.expired_date)}
+                    </p>
                   </td>
                   <td className="p-3">
                     <p className="text-gray-800">{product.product_rating}/5</p>

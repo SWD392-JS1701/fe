@@ -3,11 +3,12 @@ import { getProductById } from "@/app/services/productService";
 import Image from "next/image";
 
 interface ProductDetailPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 const ProductDetailPage: FC<ProductDetailPageProps> = async ({ params }) => {
-  const product = await getProductById(params.id);
+  const { id } = await params;
+  const product = await getProductById(id);
 
   if (!product) {
     return <div className="p-6">Product not found</div>;
