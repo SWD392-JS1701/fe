@@ -36,6 +36,15 @@ axiosInstance.interceptors.response.use(
       }
       return Promise.reject(error);
     }
+    // Handle 401 Forbidden errors
+    if (error.response?.status === 403) {
+      // Don't redirect if it's the login endpoint
+      if (originalRequest.url !== "/auth/login") {
+        await signOut({ redirect: true, callbackUrl: "/sign-in" });
+        toast.error("Token expired. Please sign in again.");
+      }
+      return Promise.reject(error);
+    }
 
       if (typeof window !== "undefined") {
         window.location.href = "/sign-in";

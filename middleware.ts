@@ -4,7 +4,7 @@ import { NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req });
-  const unauthorized = () => new NextResponse(null, { status: 404});
+  const unauthorized = () => NextResponse.rewrite(new URL("/404", req.url));
   const path = req.nextUrl.pathname;
 
   
@@ -36,10 +36,7 @@ export async function middleware(req: NextRequest) {
     return unauthorized();
   }
 
-  // Blog route protection
-  if (path.startsWith("/blog") && !["Doctor"].includes(role)) {
-    return unauthorized();
-  }
+  
 
   return NextResponse.next();
 }
