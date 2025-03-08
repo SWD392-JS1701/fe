@@ -2,28 +2,31 @@
 
 import Link from "next/link";
 import React, { FC, useEffect, useState } from "react";
-import Image from "next/image";
 import { Search, X } from "lucide-react";
-import Logo from "@/assets/logo.png";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/redux/store";
 import { useSession, signOut } from "next-auth/react";
+import Lottie from "lottie-react";
 
 const Navbar: FC = () => {
   const [scrollCount, setScrollCount] = useState(0);
-  const maxScrollCount = 3; //
-  const maxBorderWidth = 250; // the max width of border when the scroll count is 3
+  const maxScrollCount = 3;
+  const maxBorderWidth = 250;
   const [isOpen, setIsOpen] = useState(false);
+  const [logoAnimation, setLogoAnimation] = useState(null); // Thêm state để lưu JSON animation
   const cartCount = useSelector((state: RootState) => state.cart.items.length);
-
-
   const router = useRouter();
-
- 
   const { data: session } = useSession();
 
+  useEffect(() => {
+    // Fetch animation JSON từ thư mục public
+    fetch("/Logo.json")
+      .then((response) => response.json())
+      .then((data) => setLogoAnimation(data))
+      .catch((error) => console.error("Error loading animation:", error));
+  }, []);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -57,9 +60,8 @@ const Navbar: FC = () => {
           : "bg-white text-black py-3"
       }`}
     >
-      {/* Top navbar */}
       <div className="container mx-auto flex justify-between items-center px-6">
-        {/* Search bar */}
+        {/* Search Bar */}
         <div className="relative w-full max-w-lg">
           {!isOpen ? (
             <button
@@ -87,20 +89,12 @@ const Navbar: FC = () => {
                 }`}
               />
               <Search
-                className={`absolute left-4 top-1/2 transform -translate-y-1/2 ${
-                  scrollCount === maxScrollCount
-                    ? "text-black"
-                    : "text-gray-400"
-                }`}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
                 size={20}
               />
               <button
                 onClick={() => setIsOpen(false)}
-                className={`absolute right-4 top-1/2 transform -translate-y-1/2 ${
-                  scrollCount === maxScrollCount
-                    ? "text-black hover:text-gray-800"
-                    : "text-gray-600 hover:text-black"
-                }`}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-black"
               >
                 <X className="cursor-pointer" size={20} />
               </button>
@@ -111,104 +105,39 @@ const Navbar: FC = () => {
         {/* Logo */}
         <div className="flex-1 flex justify-center">
           <Link href="/">
-            <div className="cursor-pointer">
-              <Image
-                src={Logo}
-                alt="SkinType Solutions"
-                width={200}
-                height={50}
-                priority
-                className={`transition-all duration-500 ${
-                  scrollCount === maxScrollCount ? "invert" : ""
-                }`}
-              />
+            <div
+              className="cursor-pointer w-[200px] h-[50px] transition-all duration-500"
+              style={{
+                filter: `invert(${scrollCount / maxScrollCount})`, // Tăng dần mức độ đảo màu
+                transition: "filter 0.5s ease-in-out", // Làm mượt hiệu ứng
+              }}
+            >
+              {logoAnimation && (
+                <Lottie animationData={logoAnimation} loop autoplay />
+              )}
             </div>
           </Link>
         </div>
 
         {/* Icons */}
         <div className="flex-1 flex justify-end items-center space-x-3">
-          <div className="relative group">
-            <Link href={session ? "/profile" : "/sign-in"}>
-              <svg
-                className={`w-6 h-6 transition-all duration-500 ${
-                  scrollCount === maxScrollCount
-                    ? "text-white"
-                    : "text-gray-800"
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-            </Link>
-            <div className="absolute w-full h-5 bg-transparent"></div>
-
-            {/* Dropdown Menu */}
-            <div className="absolute right-0 hidden group-hover:block w-48 bg-white rounded-md shadow-lg z-50">
-              {session ? (
-                <>
-                  <div className="px-4 py-3 border-b border-gray-200">
-                    <Link
-                      href="/rewards"
-                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
-                    >
-                      My Rewards
-                    </Link>
-                    <Link
-                      href="/routine"
-                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
-                    >
-                      My Routine Steps
-                    </Link>
-                    <Link
-                      href="/shop-routine"
-                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
-                    >
-                      Shop My Routine
-                    </Link>
-                    <Link
-                      href="/quiz"
-                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
-                    >
-                      Retake the Quiz
-                    </Link>
-                  </div>
-                  <button
-
-                    onClick={handleLogout}
-
-                    className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
-                  >
-                    LOGOUT
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/sign-in"
-                    className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
-                  >
-                    LOGIN
-                  </Link>
-                  <Link
-                    href="/sign-up"
-                    className="block w-full text-center py-3 text-sm border text-black border-gray-200 hover:bg-gray-50"
-                  >
-                    SIGN UP
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-
+          <Link href={session ? "/profile" : "/sign-in"}>
+            <svg
+              className={`w-6 h-6 transition-all duration-500 ${
+                scrollCount === maxScrollCount ? "text-white" : "text-gray-800"
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+          </Link>
           <Link href="/cart" className="relative">
             <svg
               className={`w-6 h-6 transition-all duration-500 ${
@@ -217,7 +146,6 @@ const Navbar: FC = () => {
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
             >
               <path
                 strokeLinecap="round"
@@ -226,7 +154,6 @@ const Navbar: FC = () => {
                 d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
               />
             </svg>
-            {/* Display cart count if greater than 0 */}
             {cartCount > 0 && (
               <span className="absolute top-0 left-4 bg-red-500 text-white text-xs rounded-full px-2">
                 {cartCount}
@@ -240,16 +167,13 @@ const Navbar: FC = () => {
       <div className="flex justify-center items-center py-2 space-x-20 relative">
         <Link href="/shop">SHOP</Link>
         <Link href="/brands">BRANDS</Link>
-        
         <Link href="/library">SKIN TYPE LIBRARY</Link>
         <Link href="/quiz">TAKE THE QUIZ</Link>
-
-        {/* Border Animation */}
         <div
           className="absolute bottom-0 h-[2px] bg-white transition-all duration-500 ease-in-out"
           style={{
             width: `${(scrollCount / maxScrollCount) * maxBorderWidth}px`,
-            opacity: scrollCount > 0 ? 1 : 0, // hide when does not scroll
+            opacity: scrollCount > 0 ? 1 : 0,
           }}
         ></div>
       </div>

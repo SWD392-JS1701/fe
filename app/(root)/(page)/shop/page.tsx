@@ -98,7 +98,6 @@ const ShopPage = () => {
               className="relative flex items-center px-4 py-2 cursor-pointer rounded-md transition-colors duration-300"
               onClick={() => setSelectedSort(sortOption)}
             >
-              {/* Nền đen di chuyển mượt mà, nhưng không che mất chữ */}
               {selectedSort === sortOption && (
                 <motion.div
                   layoutId="activeSort"
@@ -106,7 +105,6 @@ const ShopPage = () => {
                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 />
               )}
-              {/* Giữ màu chữ của tất cả các tùy chọn */}
               <span
                 className={`relative z-10 text-lg px-2 py-1 transition-colors duration-300 ${
                   selectedSort === sortOption ? "text-white" : "text-black"

@@ -6,7 +6,7 @@ interface CartItem {
   name: string;
   price: number;
   quantity: number;
-  // image: string;
+  image_url: string; // Add image_url field
 }
 
 interface CartState {
