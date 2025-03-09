@@ -1,8 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, MouseEvent } from "react";
-import Comment from "@/components/Comment";
-
+import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, updateQuantity } from "@/lib/redux/cartSlice";
@@ -14,6 +12,7 @@ const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [quantity, setQuantity] = useState<number>(1);
   const dispatch = useDispatch();
   const cart = useSelector((state: RootState) => state.cart.items);
 
@@ -31,23 +30,25 @@ const ProductDetail = () => {
 
   if (loading) {
     return (
-      <p className="text-center text-gray-500">Loading product details...</p>
+      <p className="text-center text-xl text-gray-500">
+        Loading product details...
+      </p>
     );
   }
 
   if (!product) {
-    return <p className="text-center text-red-500">Product not found</p>;
+    return (
+      <p className="text-center text-2xl text-red-500">Product not found</p>
+    );
   }
 
-  const handleAddToCart = (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleAddToCart = () => {
     const existingProduct = cart.find((item) => item.id === product._id);
     if (existingProduct) {
       dispatch(
         updateQuantity({
           id: product._id,
-          quantity: existingProduct.quantity + 1,
+          quantity: existingProduct.quantity + quantity,
         })
       );
     } else {
@@ -56,7 +57,7 @@ const ProductDetail = () => {
           id: product._id,
           name: product.name,
           price: product.price,
-          quantity: 1,
+          quantity,
           image_url: product.image_url,
         })
       );
@@ -64,118 +65,102 @@ const ProductDetail = () => {
   };
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-800 py-8 mt-[80px]">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row -mx-4">
+    <div className="bg-white dark:bg-gray-900 py-12 mt-[120px]">
+      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+        <div className="flex flex-col md:flex-row gap-12">
           {/* Left Section - Product Image */}
-          <div className="md:flex-1 px-4">
-            <div className="h-[460px] rounded-lg bg-gray-300 dark:bg-gray-700 mb-4">
+          <div className="md:w-1/2">
+            <div className="h-[600px] rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
               <img
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover rounded-xl"
                 src={product.image_url}
                 alt={product.name}
               />
             </div>
-            <div className="flex -mx-2 mb-4">
-              <div className="w-1/2 px-2">
-                <button
-                  className="bg-indigo-600 flex gap-2 items-center justify-center text-white px-6 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 w-full"
-                  onClick={handleAddToCart}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="size-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
-                    />
-                  </svg>
-                  Add to Cart
-                </button>
-              </div>
-              <div className="w-1/2 px-2">
-                <button className="bg-gray-200 flex gap-2 items-center justify-center text-gray-800 px-6 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 w-full">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="size-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
-                    />
-                  </svg>
-                  Wishlist
-                </button>
-              </div>
-            </div>
           </div>
 
           {/* Right Section - Product Details */}
-          <div className="md:flex-1 px-4">
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
+          <div className="md:w-1/2">
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white">
               {product.name}
             </h2>
-            <div className="flex mb-4">
-              <div className="mr-4">
-                <span className="font-bold text-gray-700 dark:text-gray-300">
-                  Price:
-                </span>
-                <span className="text-gray-600 dark:text-gray-300 ml-2">
-                  ${product.price.toFixed(2)}
-                </span>
-              </div>
-              <div>
-                <span className="font-bold text-gray-700 dark:text-gray-300">
-                  Availability:
-                </span>
-                <span className="text-gray-600 dark:text-gray-300 ml-2">
-                  {product.stock > 0 ? "In Stock" : "Out of Stock"}
-                </span>
+            <p className="text-lg text-gray-600 dark:text-gray-300 mt-2">
+              Supplier: {product.Supplier}
+            </p>
+
+            {/* Rating */}
+            <div className="flex items-center mt-4">
+              <span className="text-yellow-500 text-2xl font-semibold">
+                ⭐ {product.product_rating.toFixed(1)}
+              </span>
+              <span className="text-gray-600 text-lg ml-3">
+                (Customer Reviews)
+              </span>
+            </div>
+
+            {/* Price */}
+            <div className="flex items-center mt-4">
+              <span className="text-3xl font-bold text-black">
+                ${product.price.toFixed(2)}
+              </span>
+            </div>
+
+            {/* Availability */}
+            <p className="text-lg text-gray-700 dark:text-gray-300 mt-3">
+              {product.stock > 0
+                ? `In Stock (${product.stock} available)`
+                : "Out of Stock"}
+            </p>
+
+            {/* Volume */}
+            <p className="text-lg text-gray-600 dark:text-gray-300 mt-2">
+              Volume: {product.volume} ml
+            </p>
+
+            {/* Quantity Selector */}
+            <div className="mt-6">
+              <label className="text-xl font-semibold text-gray-700 dark:text-gray-300">
+                QUANTITY:
+              </label>
+              <div className="flex items-center mt-2">
+                <button
+                  onClick={() => setQuantity((prev) => Math.max(prev - 1, 1))}
+                  className="border border-gray-400 px-5 py-2 text-2xl rounded-lg hover:bg-gray-200 cursor-pointer"
+                >
+                  -
+                </button>
+                <span className="px-6 text-2xl font-semibold">{quantity}</span>
+                <button
+                  onClick={() => setQuantity((prev) => prev + 1)}
+                  className="border border-gray-400 px-5 py-2 text-2xl rounded-lg hover:bg-gray-200 cursor-pointer"
+                >
+                  +
+                </button>
               </div>
             </div>
 
-            {/* Supplier & Volume */}
-            <div className="mb-4">
-              <p className="text-sm text-gray-500">
-                <span className="font-bold text-gray-700 dark:text-gray-300">
-                  Supplier:
-                </span>{" "}
-                {product.Supplier}
-              </p>
-              <p className="text-sm text-gray-500">
-                <span className="font-bold text-gray-700 dark:text-gray-300">
-                  Volume:
-                </span>{" "}
-                {product.volume} ml
-              </p>
+            {/* Action Buttons */}
+            <div className="flex gap-6 mt-8">
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 bg-black text-white py-4 text-xl font-semibold rounded-lg hover:bg-gray-800 transition cursor-pointer"
+              >
+                Add to Cart
+              </button>
             </div>
 
             {/* Product Description */}
-            <div>
-              <span className="font-bold text-gray-700 dark:text-gray-300">
+            <div className="mt-8">
+              <h3 className="text-2xl font-semibold text-gray-800 dark:text-gray-300">
                 Product Description:
-              </span>
-              <p className="text-gray-600 dark:text-gray-300 text-sm mt-2">
+              </h3>
+              <p className="text-lg text-gray-600 dark:text-gray-300 mt-3">
                 {product.description}
               </p>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Review Section */}
-      <Comment />
     </div>
   );
 };
