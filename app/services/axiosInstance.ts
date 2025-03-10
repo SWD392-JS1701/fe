@@ -49,7 +49,18 @@ axiosInstance.interceptors.response.use(
       if (typeof window !== "undefined") {
         window.location.href = "/sign-in";
       }
+      
+    // Handle 403 Forbidden errors
+    if (error.response?.status === 403) {
+      toast.error("You don't have permission to perform this action");
+      return Promise.reject(error);
+    }
 
+    // Handle 404 Not Found errors
+    if (error.response?.status === 404) {
+      toast.error("Resource not found");
+      return Promise.reject(error);
+    }  
     return Promise.reject(error);
   }
 );

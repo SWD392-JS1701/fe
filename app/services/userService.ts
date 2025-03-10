@@ -5,7 +5,7 @@ import { API_URL } from "@/config";
 import { getSession, useSession } from "next-auth/react";
 import { jwtDecode } from "jwt-decode";
 import { User } from "../types/user";
-
+import axiosInstance from "./axiosInstance";
 interface JWTPayload {
   id: string;
   username: string;
@@ -80,7 +80,7 @@ export const getUserById = async (session?: any): Promise<User | null> => {
     console.log("Request headers:", headers);
     console.log("Making request to:", `${API_URL}/users/${decoded.id}`);
 
-    const response = await axios.get<User>(`${API_URL}/users/${decoded.id}`, {
+    const response = await axiosInstance.get<User>(`${API_URL}/users/${decoded.id}`, {
       headers,
     });
 
@@ -111,11 +111,11 @@ export const getUser = async (query: string): Promise<User | null> => {
     const headers = await authHeaders();
     let response;
     if (query.includes("@")) {
-      response = await axios.get<User>(`${API_URL}/user/${query}`, {
+      response = await axiosInstance.get<User>(`${API_URL}/user/${query}`, {
         headers,
       });
     } else {
-      response = await axios.get<User>(`${API_URL}/users/${query}`, {
+      response = await axiosInstance.get<User>(`${API_URL}/users/${query}`, {
         headers,
       });
     }
@@ -129,7 +129,7 @@ export const getUser = async (query: string): Promise<User | null> => {
 export const createUser = async (user: User): Promise<User | null> => {
   try {
     const headers = await authHeaders();
-    const response = await axios.post<User>(`${API_URL}/users`, user, {
+    const response = await axiosInstance.post<User>(`${API_URL}/users`, user, {
       headers,
     });
     return response.data;
@@ -145,7 +145,7 @@ export const updateUser = async (
 ): Promise<User | null> => {
   try {
     const headers = await authHeaders();
-    const response = await axios.patch<User>(
+    const response = await axiosInstance.patch<User>(
       `${API_URL}/users/${userId}`,
       user,
       { headers }
@@ -161,7 +161,7 @@ export const updateUser = async (
 export const deleteUser = async (userId: string): Promise<void> => {
   try {
     const headers = await authHeaders();
-    await axios.delete(`${API_URL}/users/${userId}`, {
+    await axiosInstance.delete(`${API_URL}/users/${userId}`, {
       headers,
     });
   } catch (error) {
