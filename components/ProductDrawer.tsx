@@ -89,10 +89,6 @@ const ProductDrawer: FC<ProductDrawerProps> = ({ product, onClose }) => {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Product Type ID</span>
-                <span className="text-gray-800">{product.product_type_id}</span>
-              </div>
-              <div className="flex justify-between">
                 <span className="text-gray-600">Supplier</span>
                 <span className="text-gray-800">{product.Supplier}</span>
               </div>
