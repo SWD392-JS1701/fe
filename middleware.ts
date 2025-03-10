@@ -4,35 +4,35 @@ import { NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req });
-  const unauthorized = () => new NextResponse(null, { status: 404});
+  const unauthorized = () => new NextResponse(null, { status: 404 });
   const path = req.nextUrl.pathname;
 
-  
   if (!token) {
     return unauthorized();
   }
 
   const role = token.role as string | undefined;
 
-  
   if (!role) {
     return unauthorized();
   }
 
   // Doctor routes protection
-  if (path.startsWith("/doctor") 
-    || path.startsWith("/blog")
-    && role !== "Doctor") {
+  if (
+    path.startsWith("/doctor") ||
+    (path.startsWith("/blog") && role !== "Doctor")
+  ) {
     return unauthorized();
   }
 
   // Admin routes protection
-  if ((path.startsWith("/admin") 
-    || path.startsWith("/employee")
-    || path.startsWith("/overview")
-    || path.startsWith("/schedule")
-      ) && role !== "admin") {
-
+  if (
+    (path.startsWith("/admin") ||
+      path.startsWith("/employee") ||
+      path.startsWith("/overview") ||
+      path.startsWith("/schedule")) &&
+    role !== "admin"
+  ) {
     return unauthorized();
   }
 
@@ -53,5 +53,5 @@ export const config = {
     "/employee/:path*",
     "/overview/:path*",
     "/schedule/:path*",
-  ]
+  ],
 };

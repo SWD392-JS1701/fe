@@ -7,6 +7,7 @@ import { addToCart, updateQuantity } from "@/lib/redux/cartSlice";
 import { RootState } from "@/lib/redux/store";
 import { getProductById } from "@/app/services/productService";
 import { Product } from "@/app/types/product";
+import Comment from "@/components/Comment";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -161,6 +162,9 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Review Section */}
+      <Comment />
     </div>
   );
 };

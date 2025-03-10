@@ -37,9 +37,9 @@ axiosInstance.interceptors.response.use(
       return Promise.reject(error);
     }
 
-      if (typeof window !== "undefined") {
-        window.location.href = "/sign-in";
-      }
+    if (typeof window !== "undefined") {
+      window.location.href = "/sign-in";
+    }
 
     return Promise.reject(error);
   }

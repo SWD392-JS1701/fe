@@ -11,7 +11,6 @@ import { RootState } from "@/lib/redux/store";
 import { signIn } from "next-auth/react";
 import { jwtDecode } from "jwt-decode";
 
-
 interface FormData {
   email: string;
   password: string;
@@ -54,23 +53,23 @@ const SignIn: FC = () => {
     setLoading(true);
 
     try {
-
       const result = await signIn("credentials", {
         redirect: false,
         email: formData.email,
         password: formData.password,
       });
-  
+
       if (result?.error) {
         setError(result.error);
-
       } else {
         // Get the session to check the role
-        const session = await fetch("/api/auth/session").then((res) => res.json());
+        const session = await fetch("/api/auth/session").then((res) =>
+          res.json()
+        );
         if (session?.user?.access_token) {
           const decoded: JWTPayload = jwtDecode(session.user.access_token);
           console.log("Decoded token:", decoded);
-          
+
           if (decoded.role === "Admin") {
             router.push("/overview");
           } else {
@@ -79,11 +78,9 @@ const SignIn: FC = () => {
         }
       }
     } catch (err: any) {
-
       setError(
         err.message || "An error occurred during login. Please try again."
       );
-
     } finally {
       setLoading(false);
     }
