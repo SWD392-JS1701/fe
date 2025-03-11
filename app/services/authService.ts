@@ -1,6 +1,7 @@
 import axiosInstance from "./axiosInstance";
 import { jwtDecode } from "jwt-decode";
 import { DecodedToken } from "../types/token";
+import axios from "axios";
 
 export const register = async (
   username: string,
@@ -41,6 +42,7 @@ export const login = async (email: string, password: string) => {
     });
 
     const data = response.data;
+    console.log(data);
     return data;
   } catch (error: any) {
     console.error("Login API Error:", error);
@@ -50,20 +52,6 @@ export const login = async (email: string, password: string) => {
   }
 };
 
-export const refreshToken = async () => {
-  try {
-    const response = await axiosInstance.post("/auth/refresh-token", {
-      token: getAccessToken(),
-    });
-    return response.data;
-  } catch (error: any) {
-    console.error("Refresh Token API Error:", error);
-    throw new Error(
-      error.response?.data?.message ||
-        "Failed to refresh token. Please try again."
-    );
-  }
-};
 
 export const resetPassword = async (token: string, newPassword: string) => {
   try {

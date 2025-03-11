@@ -95,6 +95,5 @@ export const searchProducts = async (
     return [];
   }
 };
-const products = await searchProductsByName("ne");
-console.log(products);
+
 

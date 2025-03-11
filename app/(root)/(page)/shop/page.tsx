@@ -33,6 +33,7 @@ const ShopPage = () => {
         setProducts(data);
         // Set initial price range based on products
         if (data.length > 0) {
+          
           const prices = data.map(p => p.price);
           const minPrice = Math.floor(Math.min(...prices));
           const maxPrice = Math.ceil(Math.max(...prices));
