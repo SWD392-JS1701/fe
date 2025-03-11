@@ -52,53 +52,9 @@ const DoctorNavbar: FC = () => {
     >
       {/* Top navbar */}
       <div className="container mx-auto flex justify-between items-center px-6">
-        {/* Search bar */}
+        
         <div className="relative w-full max-w-lg">
-          {!isOpen ? (
-            <button
-              onClick={() => setIsOpen(true)}
-              className="p-2 rounded-full bg-white hover:bg-gray-300"
-            >
-              <Search size={24} className="text-gray-600 cursor-pointer" />
-            </button>
-          ) : (
-            <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: "100%", opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
-              className="relative w-full"
-            >
-              <input
-                type="text"
-                autoFocus
-                placeholder="Search products, brands"
-                className={`w-full pl-12 pr-10 py-3 border rounded-full focus:outline-none focus:ring-2 ${
-                  scrollCount === maxScrollCount
-                    ? "bg-white text-black focus:ring-gray-600"
-                    : "bg-gray-100 text-gray-600 focus:ring-gray-400"
-                }`}
-              />
-              <Search
-                className={`absolute left-4 top-1/2 transform -translate-y-1/2 ${
-                  scrollCount === maxScrollCount
-                    ? "text-black"
-                    : "text-gray-400"
-                }`}
-                size={20}
-              />
-              <button
-                onClick={() => setIsOpen(false)}
-                className={`absolute right-4 top-1/2 transform -translate-y-1/2 ${
-                  scrollCount === maxScrollCount
-                    ? "text-black hover:text-gray-800"
-                    : "text-gray-600 hover:text-black"
-                }`}
-              >
-                <X className="cursor-pointer" size={20} />
-              </button>
-            </motion.div>
-          )}
+          
         </div>
 
         {/* Logo */}
