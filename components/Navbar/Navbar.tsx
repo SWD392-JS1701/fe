@@ -270,7 +270,7 @@ const Navbar: FC = () => {
         <Link href="/brands">BRANDS</Link>
         <Link href="/view-blog">VIEW BLOG</Link>
         <Link href="/library">SKIN TYPE LIBRARY</Link>
-        <Link href="/quiz">TAKE THE QUIZ</Link>
+        <Link href="/skin-type-quiz">TAKE THE QUIZ</Link>
         <div
           className="absolute bottom-0 h-[2px] bg-white transition-all duration-500 ease-in-out"
           style={{
