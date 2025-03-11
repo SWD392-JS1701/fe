@@ -1,4 +1,3 @@
-
 import axiosInstance from "./axiosInstance";
 import { jwtDecode } from "jwt-decode";
 import { DecodedToken } from "../types/token";
@@ -43,11 +42,25 @@ export const login = async (email: string, password: string) => {
 
     const data = response.data;
     return data;
-
   } catch (error: any) {
     console.error("Login API Error:", error);
     throw new Error(
       error.response?.data?.message || "Failed to fetch. Please try again."
+    );
+  }
+};
+
+export const refreshToken = async () => {
+  try {
+    const response = await axiosInstance.post("/auth/refresh-token", {
+      token: getAccessToken(),
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Refresh Token API Error:", error);
+    throw new Error(
+      error.response?.data?.message ||
+        "Failed to refresh token. Please try again."
     );
   }
 };
@@ -105,8 +118,6 @@ const isTokenExpired = (token: string): boolean => {
     return true;
   }
 };
-
-
 
 export const getUserRole = (): string | null => {
   const token = getAccessToken();
