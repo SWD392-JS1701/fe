@@ -1,6 +1,6 @@
-import {  getUserRole } from "@/app/services/authService";
+import { getUserRole } from "@/app/services/authService";
 import { useEffect, useState } from "react";
-import { useAuthRedirect } from"@/app/services/userService";
+import { useAuthRedirect } from "@/app/services/userService";
 import { useRouter } from "next/navigation";
 
 export function withAuth(Component: React.FC, allowedRoles: string[]) {
@@ -15,14 +15,14 @@ export function withAuth(Component: React.FC, allowedRoles: string[]) {
       setRole(userRole);
 
       if (!allowedRoles.includes(userRole || "")) {
-        router.replace("/no"); 
+        router.replace("/no");
       } else {
-        setIsAuthorized(true); 
+        setIsAuthorized(true);
       }
     }, [router]);
 
     if (isChecking || !isAuthorized) {
-      return null; 
+      return null;
     }
 
     return <Component />;

@@ -171,7 +171,7 @@ export const authOptions: NextAuthOptions = {
   events: {
     async signOut({ token }) {
       console.log("User signed out, cleaning up...");
-      // You can add cleanup logic here if needed
+     
     },
     async session({ session, token }) {
       if (token.error === "RefreshAccessTokenError") {

@@ -1,9 +1,8 @@
-// pages/product/[id].tsx (or wherever ProductDetailPage is located)
 import React, { FC } from "react";
 import { getProductById } from "@/app/services/productService";
 import Image from "next/image";
 import Link from "next/link";
-import ProductTabs from "@/components/ProductTabs"; // Adjust path as needed
+import ProductTabs from "@/components/ProductTabs";
 
 interface ProductDetailPageProps {
   params: Promise<{ id: string }>;
