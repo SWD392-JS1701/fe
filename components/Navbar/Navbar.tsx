@@ -55,8 +55,8 @@ const Navbar: FC = () => {
   }, [searchTerm]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-       // Fetch animation JSON từ thư mục public
+    if (typeof window !== "undefined") {
+      // Fetch animation JSON từ thư mục public
       fetch("/Logo.json")
         .then((response) => response.json())
         .then((data) => setLogoAnimation(data))
@@ -65,7 +65,7 @@ const Navbar: FC = () => {
   }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     let lastScrollY = window.scrollY;
     const handleScroll = () => {
@@ -98,7 +98,7 @@ const Navbar: FC = () => {
   };
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchTerm.trim()) {
+    if (e.key === "Enter" && searchTerm.trim()) {
       setIsOpen(false);
       router.push(`/shop?search=${encodeURIComponent(searchTerm.trim())}`);
     }
@@ -209,11 +209,11 @@ const Navbar: FC = () => {
             <div
               className="cursor-pointer w-[200px] h-[50px] transition-all duration-500"
               style={{
-                filter: `invert(${scrollCount / maxScrollCount})`,// Tăng dần mức độ đảo màu
-                transition: "filter 0.5s ease-in-out",// Làm mượt hiệu ứng
+                filter: `invert(${scrollCount / maxScrollCount})`, // Tăng dần mức độ đảo màu
+                transition: "filter 0.5s ease-in-out", // Làm mượt hiệu ứng
               }}
             >
-              {typeof window !== 'undefined' && logoAnimation && (
+              {typeof window !== "undefined" && logoAnimation && (
                 <Lottie animationData={logoAnimation} loop autoplay />
               )}
             </div>
@@ -268,6 +268,7 @@ const Navbar: FC = () => {
       <div className="flex justify-center items-center py-2 space-x-20 relative">
         <Link href="/shop">SHOP</Link>
         <Link href="/brands">BRANDS</Link>
+        <Link href="/view-blog">VIEW BLOG</Link>
         <Link href="/library">SKIN TYPE LIBRARY</Link>
         <Link href="/quiz">TAKE THE QUIZ</Link>
         <div
