@@ -1,34 +1,72 @@
 "use client";
 
 import Link from "next/link";
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState, KeyboardEvent } from "react";
 import { Search, X } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/redux/store";
 import { useSession, signOut } from "next-auth/react";
-import Lottie from "lottie-react";
+import dynamic from "next/dynamic";
+import { searchProductsByName } from "@/app/services/productService";
+import { Product } from "@/app/types/product";
+import debounce from "lodash/debounce";
+
+// Dynamically import Lottie with no SSR
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 const Navbar: FC = () => {
   const [scrollCount, setScrollCount] = useState(0);
   const maxScrollCount = 3;
   const maxBorderWidth = 250;
   const [isOpen, setIsOpen] = useState(false);
-  const [logoAnimation, setLogoAnimation] = useState(null); // Thêm state để lưu JSON animation
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [logoAnimation, setLogoAnimation] = useState<any>(null);
   const cartCount = useSelector((state: RootState) => state.cart.items.length);
   const router = useRouter();
   const { data: session } = useSession();
 
+  // Debounced search function
+  const debouncedSearch = debounce(async (term: string) => {
+    if (term.trim().length === 0) {
+      setSearchResults([]);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const results = await searchProductsByName(term);
+      setSearchResults(results);
+    } catch (error) {
+      console.error("Error searching products:", error);
+      setSearchResults([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, 300);
+
   useEffect(() => {
-    // Fetch animation JSON từ thư mục public
-    fetch("/Logo.json")
-      .then((response) => response.json())
-      .then((data) => setLogoAnimation(data))
-      .catch((error) => console.error("Error loading animation:", error));
+    debouncedSearch(searchTerm);
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [searchTerm]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+       // Fetch animation JSON từ thư mục public
+      fetch("/Logo.json")
+        .then((response) => response.json())
+        .then((data) => setLogoAnimation(data))
+        .catch((error) => console.error("Error loading animation:", error));
+    }
   }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     let lastScrollY = window.scrollY;
     const handleScroll = () => {
       const scrollY = window.scrollY;
@@ -50,6 +88,20 @@ const Navbar: FC = () => {
   const handleLogout = async () => {
     await signOut({ redirect: false });
     router.push("/");
+  };
+
+  const handleSearchItemClick = (productId: string) => {
+    setIsOpen(false);
+    setSearchTerm("");
+    setSearchResults([]);
+    router.push(`/products/${productId}`);
+  };
+
+  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchTerm.trim()) {
+      setIsOpen(false);
+      router.push(`/shop?search=${encodeURIComponent(searchTerm.trim())}`);
+    }
   };
 
   return (
@@ -81,7 +133,10 @@ const Navbar: FC = () => {
               <input
                 type="text"
                 autoFocus
-                placeholder="Search products, brands"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Search products, brands (Press Enter to search)"
                 className={`w-full pl-12 pr-10 py-3 border rounded-full focus:outline-none focus:ring-2 ${
                   scrollCount === maxScrollCount
                     ? "bg-white text-black focus:ring-gray-600"
@@ -93,11 +148,57 @@ const Navbar: FC = () => {
                 size={20}
               />
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  setIsOpen(false);
+                  setSearchTerm("");
+                  setSearchResults([]);
+                }}
                 className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-black"
               >
                 <X className="cursor-pointer" size={20} />
               </button>
+
+              {/* Search Results Dropdown */}
+              <AnimatePresence>
+                {isOpen && (searchResults.length > 0 || isLoading) && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute w-full mt-2 bg-white rounded-lg shadow-lg overflow-hidden z-50"
+                  >
+                    {isLoading ? (
+                      <div className="p-4 text-center text-gray-500">
+                        Searching...
+                      </div>
+                    ) : (
+                      <div className="max-h-96 overflow-y-auto">
+                        {searchResults.map((product) => (
+                          <div
+                            key={product._id}
+                            onClick={() => handleSearchItemClick(product._id)}
+                            className="flex items-center p-4 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                          >
+                            <img
+                              src={product.image_url}
+                              alt={product.name}
+                              className="w-12 h-12 object-cover rounded"
+                            />
+                            <div className="ml-4">
+                              <p className="text-sm font-medium text-gray-900">
+                                {product.name}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                ${product.price.toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           )}
         </div>
@@ -108,11 +209,11 @@ const Navbar: FC = () => {
             <div
               className="cursor-pointer w-[200px] h-[50px] transition-all duration-500"
               style={{
-                filter: `invert(${scrollCount / maxScrollCount})`, // Tăng dần mức độ đảo màu
-                transition: "filter 0.5s ease-in-out", // Làm mượt hiệu ứng
+                filter: `invert(${scrollCount / maxScrollCount})`,// Tăng dần mức độ đảo màu
+                transition: "filter 0.5s ease-in-out",// Làm mượt hiệu ứng
               }}
             >
-              {logoAnimation && (
+              {typeof window !== 'undefined' && logoAnimation && (
                 <Lottie animationData={logoAnimation} loop autoplay />
               )}
             </div>

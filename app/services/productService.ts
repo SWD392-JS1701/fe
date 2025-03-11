@@ -60,3 +60,41 @@ export const deleteProduct = async (productId: string): Promise<void> => {
     console.error("Error deleting product:", error);
   }
 };
+export const searchProductsByName = async (name: string): Promise<Product[]> => {
+  try {
+    const response = await axios.get(`${API_URL}/products/searchProduct?name=${encodeURIComponent(name)}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error searching products by name:", error);
+    return [];
+  }
+};
+
+export const searchProducts = async (
+  name?: string,
+  minPrice?: number,
+  maxPrice?: number,
+  minRating?: number,
+  maxRating?: number,
+  supplier?: string
+): Promise<Product[]> => {
+  try {
+    // Construct query parameters dynamically
+    const params = new URLSearchParams();
+    if (name) params.append("name", name);
+    if (minPrice !== undefined) params.append("minPrice", minPrice.toString());
+    if (maxPrice !== undefined) params.append("maxPrice", maxPrice.toString());
+    if (minRating !== undefined) params.append("minRating", minRating.toString());
+    if (maxRating !== undefined) params.append("maxRating", maxRating.toString());
+    if (supplier) params.append("supplier", supplier);
+
+    const response = await axios.get(`${API_URL}/searchProduct/search?${params.toString()}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error searching products:", error);
+    return [];
+  }
+};
+const products = await searchProductsByName("ne");
+console.log(products);
+

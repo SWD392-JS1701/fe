@@ -1,25 +1,102 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { getAllProducts } from "@/app/services/productService"; // API lấy sản phẩm
+import React, { useEffect, useState, useMemo } from "react";
+import { getAllProducts, searchProductsByName } from "@/app/services/productService";
 import ProductCard from "@/components/ProductCard";
 import { Product } from "@/app/types/product";
 import { motion } from "framer-motion";
+import { useSearchParams } from "next/navigation";
+
 const ShopPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSort, setShowSort] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
-  const [selectedSort, setSelectedSort] = useState("Staff Faves");
+  const [selectedSort, setSelectedSort] = useState("Just Dropped");
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
+  const [currentPriceRange, setCurrentPriceRange] = useState({ min: 0, max: 1000 });
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const data = await getAllProducts();
-      setProducts(data);
-      setLoading(false);
+      setLoading(true);
+      try {
+        const searchTerm = searchParams.get('search');
+        let data: Product[];
+        
+        if (searchTerm) {
+          data = await searchProductsByName(searchTerm);
+        } else {
+          data = await getAllProducts();
+        }
+        
+        setProducts(data);
+        // Set initial price range based on products
+        if (data.length > 0) {
+          const prices = data.map(p => p.price);
+          const minPrice = Math.floor(Math.min(...prices));
+          const maxPrice = Math.ceil(Math.max(...prices));
+          setPriceRange({ min: minPrice, max: maxPrice });
+          setCurrentPriceRange({ min: minPrice, max: maxPrice });
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
     };
+    
     fetchProducts();
-  }, []);
+  }, [searchParams]);
+
+  // Sort and filter products
+  const filteredAndSortedProducts = useMemo(() => {
+    let productsToSort = [...products].filter(
+      product => 
+        product.price >= currentPriceRange.min && 
+        product.price <= currentPriceRange.max
+    );
+    
+    switch (selectedSort) {
+      case "Just Dropped":
+        return productsToSort.sort((a, b) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      
+      case "Price: Low - High":
+        return productsToSort.sort((a, b) => a.price - b.price);
+      
+      case "Price: High - Low":
+        return productsToSort.sort((a, b) => b.price - a.price);
+      
+      case "Customer Rating":
+        return productsToSort.sort((a, b) => b.product_rating - a.product_rating);
+      
+      default:
+        return productsToSort;
+    }
+  }, [products, selectedSort, currentPriceRange]);
+
+  const handleSort = (sortOption: string) => {
+    setSelectedSort(sortOption);
+    setShowSort(false);
+  };
+
+  const handlePriceRangeChange = (type: 'min' | 'max', value: number) => {
+    setCurrentPriceRange(prev => ({
+      ...prev,
+      [type]: value
+    }));
+  };
+
+  const handleApplyFilters = () => {
+    setShowFilter(false);
+  };
+
+  const handleResetFilters = () => {
+    setCurrentPriceRange(priceRange);
+  };
 
   return (
     <div className="relative p-8 bg-gray-100 min-h-screen mt-30">
@@ -27,10 +104,21 @@ const ShopPage = () => {
       <div className="mb-4 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-black italic text-black tracking-tight">
-            {products.length}{" "}
-            <span className="font-extrabold italic">Item</span>
+            {filteredAndSortedProducts.length}{" "}
+            <span className="font-extrabold italic">
+              {filteredAndSortedProducts.length === 1 ? "Item" : "Items"}
+            </span>
+            {searchParams.get('search') && (
+              <span className="text-lg font-normal ml-2">
+                for "{searchParams.get('search')}"
+              </span>
+            )}
           </h1>
-          <p className="text-gray-600">Browse our collection of products</p>
+          <p className="text-gray-600">
+            {searchParams.get('search')
+              ? `Search results for "${searchParams.get('search')}"`
+              : "Browse our collection of products"}
+          </p>
         </div>
         {/* Sort & Filter Buttons */}
         <div className="flex gap-4">
@@ -61,14 +149,18 @@ const ShopPage = () => {
           <p className="text-center text-gray-500 text-lg">
             Loading products...
           </p>
+        ) : filteredAndSortedProducts.length === 0 ? (
+          <p className="text-center text-gray-500 text-lg col-span-full">
+            No products found.
+          </p>
         ) : (
-          products.map((product) => (
+          filteredAndSortedProducts.map((product) => (
             <ProductCard key={product._id} product={product} />
           ))
         )}
       </div>
 
-      {/* Bảng 1 (Sort) */}
+      {/* Sort Panel */}
       <div
         className={`fixed top-0 right-0 h-full bg-white shadow-lg p-6 
           w-1/4 transition-transform duration-700 ease-in-out z-50 ${
@@ -83,20 +175,20 @@ const ShopPage = () => {
           ✕
         </button>
         <h2 className="text-2xl font-bold mb-4">Sort by</h2>
-        <ul className="relative space-y-2 bg-white p-2 rounded-md ">
+        <ul className="relative space-y-2 bg-white p-2 rounded-md">
           {[
-            "Favourite",
+            //"Favourite",
             "Just Dropped",
             "Price: Low - High",
             "Price: High - Low",
             "Customer Rating",
-            "Brand: A - Z",
-            "All items",
+            //"Brand: A - Z",
+            //"All items",
           ].map((sortOption) => (
             <li
               key={sortOption}
               className="relative flex items-center px-4 py-2 cursor-pointer rounded-md transition-colors duration-300"
-              onClick={() => setSelectedSort(sortOption)}
+              onClick={() => handleSort(sortOption)}
             >
               {selectedSort === sortOption && (
                 <motion.div
@@ -115,15 +207,9 @@ const ShopPage = () => {
             </li>
           ))}
         </ul>
-        <button
-          className="mt-6 bg-black text-white px-4 py-2 rounded-md text-lg cursor-pointer"
-          onClick={() => setShowSort(false)}
-        >
-          Done
-        </button>
       </div>
 
-      {/* Bảng 2 (Filter) */}
+      {/* Filter Panel */}
       <div
         className={`fixed top-0 right-0 h-full bg-white shadow-lg p-6 
           w-1/4 transition-transform duration-700 ease-in-out z-50 ${
@@ -138,7 +224,7 @@ const ShopPage = () => {
           ✕
         </button>
         <h2 className="text-2xl font-bold mb-4">Filter</h2>
-        <div className="space-y-4">
+        <div className="space-y-6">
           <label className="block">
             <span className="text-gray-700">Category</span>
             <select className="block w-full border rounded-md p-3 mt-2">
@@ -148,17 +234,59 @@ const ShopPage = () => {
               <option>Fragrance</option>
             </select>
           </label>
-          <label className="block">
-            <span className="text-gray-700">Price Range</span>
-            <input type="range" className="w-full" />
-          </label>
+
+          {/* Price Range Filter */}
+          <div className="space-y-4">
+            <span className="text-gray-700 block">Price Range</span>
+            <div className="flex items-center space-x-4">
+              <div className="flex-1">
+                <label className="text-sm text-gray-600">Min Price</label>
+                <input
+                  type="number"
+                  min={priceRange.min}
+                  max={currentPriceRange.max}
+                  value={currentPriceRange.min}
+                  onChange={(e) => handlePriceRangeChange('min', Number(e.target.value))}
+                  className="w-full border rounded-md p-2 mt-1"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="text-sm text-gray-600">Max Price</label>
+                <input
+                  type="number"
+                  min={currentPriceRange.min}
+                  max={priceRange.max}
+                  value={currentPriceRange.max}
+                  onChange={(e) => handlePriceRangeChange('max', Number(e.target.value))}
+                  className="w-full border rounded-md p-2 mt-1"
+                />
+              </div>
+            </div>
+            <input
+              type="range"
+              min={priceRange.min}
+              max={priceRange.max}
+              value={currentPriceRange.max}
+              onChange={(e) => handlePriceRangeChange('max', Number(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div className="flex space-x-4">
+            <button
+              className="flex-1 bg-black text-white px-4 py-2 rounded-md text-lg cursor-pointer"
+              onClick={handleApplyFilters}
+            >
+              Apply Filters
+            </button>
+            <button
+              className="flex-1 bg-gray-200 text-black px-4 py-2 rounded-md text-lg cursor-pointer"
+              onClick={handleResetFilters}
+            >
+              Reset
+            </button>
+          </div>
         </div>
-        <button
-          className="mt-6 bg-black text-white px-4 py-2 rounded-md text-lg cursor-pointer"
-          onClick={() => setShowFilter(false)}
-        >
-          Done
-        </button>
       </div>
     </div>
   );
