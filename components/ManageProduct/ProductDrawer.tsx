@@ -10,23 +10,33 @@ interface ProductDrawerProps {
 }
 
 const ProductDrawer: FC<ProductDrawerProps> = ({ product, onClose }) => {
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return "N/A";
+
+    try {
+      const date = new Date(dateString);
+      // Check if date is valid
+      if (isNaN(date.getTime())) return "Invalid Date";
+
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Invalid Date";
+    }
   };
 
   return (
     <>
-      {/* Overlay */}
+      {/* Overlay with blur effect */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: 0.5 }}
+        animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black z-40"
+        className="fixed inset-0 backdrop-blur-md bg-white/30 z-40"
         onClick={onClose}
       />
 
@@ -36,7 +46,7 @@ const ProductDrawer: FC<ProductDrawerProps> = ({ product, onClose }) => {
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="fixed top-0 right-0 w-100 bg-white h-full shadow-lg z-50 p-6 overflow-y-auto"
+        className="fixed top-0 right-0 w-full max-w-md bg-white h-full shadow-lg z-50 p-6 overflow-y-auto"
       >
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-4">
@@ -90,7 +100,9 @@ const ProductDrawer: FC<ProductDrawerProps> = ({ product, onClose }) => {
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Supplier</span>
-                <span className="text-gray-800">{product.Supplier}</span>
+                <span className="text-gray-800">
+                  {product.Supplier || product.supplier_name || "N/A"}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Expired Date</span>
@@ -102,18 +114,22 @@ const ProductDrawer: FC<ProductDrawerProps> = ({ product, onClose }) => {
                 <span className="text-gray-600">Volume</span>
                 <span className="text-gray-800">{product.volume}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Created At</span>
-                <span className="text-gray-800">
-                  {formatDate(product.created_at)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Updated At</span>
-                <span className="text-gray-800">
-                  {formatDate(product.updated_at)}
-                </span>
-              </div>
+              {product.created_at && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Created At</span>
+                  <span className="text-gray-800">
+                    {formatDate(product.created_at)}
+                  </span>
+                </div>
+              )}
+              {product.updated_at && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Updated At</span>
+                  <span className="text-gray-800">
+                    {formatDate(product.updated_at)}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -162,7 +162,6 @@ const SchedulePage: FC = () => {
         const doctorUsers = users.filter((user) => user.role === "Doctor");
         setDoctors(doctorUsers);
         const apiSchedules = await getSchedule();
-        console.log("Raw API Schedule Response:", apiSchedules);
         if (!Array.isArray(apiSchedules)) {
           throw new Error("Invalid schedule data: Expected an array.");
         }
