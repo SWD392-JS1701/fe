@@ -48,10 +48,7 @@ const authHeaders = async (session?: any) => {
 
 export const getAllUsers = async (session?: any): Promise<User[]> => {
   try {
-    const headers = await authHeaders(session);
-    const response = await axios.get<User[]>(`${API_URL}/users`, {
-      headers,
-    });
+    const response = await axiosInstance.get<User[]>('/users');
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);
