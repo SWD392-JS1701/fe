@@ -1,146 +1,265 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
+import { getBlogs, deleteBlog, createBlog } from "@/app/services/blogService";
+import { useSession } from "next-auth/react";
 
-interface BlogPost {
-  id: number;
+interface Blog {
+  _id: string;
   title: string;
-  author: string;
   content: string;
-  image: string;
+  image_url: string;
+  staff_id: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  created_at: string;
+  updated_at: string;
 }
 
-const initialBlogs: BlogPost[] = [
-  {
-    id: 1,
-    title: "The Secret to Glowing Skin",
-    author: "Alice Johnson",
-    content: "Discover the best skincare routine for a healthy glow...",
-    image: "https://via.placeholder.com/600x300",
-  },
-  {
-    id: 2,
-    title: "Why Hydration Matters",
-    author: "John Doe",
-    content:
-      "Keeping your skin hydrated is the key to a youthful appearance...",
-    image: "https://via.placeholder.com/600x300",
-  },
-  {
-    id: 3,
-    title: "Best Skincare Products of 2025",
-    author: "Emily Brown",
-    content: "Here are the top-rated skincare products for 2025...",
-    image: "https://via.placeholder.com/600x300",
-  },
-  {
-    id: 4,
-    title: "Morning vs. Night Skincare",
-    author: "Sarah Lee",
-    content:
-      "Should you change your skincare routine based on the time of day?",
-    image: "https://via.placeholder.com/600x300",
-  },
-  {
-    id: 5,
-    title: "Anti-Aging Secrets",
-    author: "Michael Roberts",
-    content: "Explore the best anti-aging skincare routines backed by science.",
-    image: "https://via.placeholder.com/600x300",
-  },
-];
+// Extend the Session User type to include _id
+declare module "next-auth" {
+  interface User {
+    _id: string;
+  }
+}
 
 const BlogPage = () => {
-  const [blogs, setBlogs] = useState<BlogPost[]>(initialBlogs);
-  const [selectedBlog, setSelectedBlog] = useState<BlogPost | null>(
-    initialBlogs[0]
-  );
+  const router = useRouter();
+  const { data: session } = useSession();
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'view' | 'create'>('view');
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const deleteBlog = (id: number) => {
-    setBlogs(blogs.filter((blog) => blog.id !== id));
-    if (selectedBlog?.id === id) {
-      setSelectedBlog(blogs.length > 1 ? blogs[0] : null);
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
+
+  const fetchBlogs = async () => {
+    try {
+      const data = await getBlogs();
+      setBlogs(data);
+    } catch (error) {
+      toast.error("Failed to load blogs");
+      console.error("Error fetching blogs:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const editBlog = (id: number) => {
-    alert(`Edit blog with ID: ${id}`);
+  const handleDeleteBlog = async (id: string) => {
+    try {
+      await deleteBlog(id);
+      toast.success("Blog deleted successfully");
+      fetchBlogs();
+    } catch (error) {
+      toast.error("Failed to delete blog");
+      console.error("Error deleting blog:", error);
+    }
   };
 
-  return (
-    <div className="min-h-screen py-30 bg-gray-100 p-8 flex flex-col">
-      <div className="container mx-auto flex flex-col h-[85vh]">
-        {/* Create New Blog Button */}
-        <div className="mb-4">
-          <button className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition">
-            Create New Blog
-          </button>
-        </div>
+  const handleEditBlog = (id: string) => {
+    router.push(`/blog/edit/${id}`);
+  };
 
-        {/* Main Content Area */}
-        <div className="flex flex-grow space-x-8">
-          {/* Left Side - Blog List (Fixed 2/3 width, scrollable) */}
-          <div className="w-2/3 bg-white p-6 rounded-lg shadow-lg h-full flex flex-col">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">All Blogs</h2>
-            <div
-              className="overflow-y-auto flex-grow pr-2 scrollbar-thin scrollbar-thumb-gray-300"
-              style={{ maxHeight: "90vh" }}
-            >
-              <ul className="space-y-4">
-                {blogs.map((blog) => (
-                  <li
-                    key={blog.id}
-                    className="flex justify-between items-center bg-gray-50 p-4 rounded-lg shadow-sm hover:bg-gray-100 transition cursor-pointer"
-                  >
-                    <button
-                      onClick={() => setSelectedBlog(blog)}
-                      className="text-lg text-blue-600 font-semibold flex-grow text-left"
-                    >
+  const handleViewBlog = (id: string) => {
+    router.push(`/blog/${id}`);
+  };
+
+  const handleCreateBlog = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    if (!session?.user?.id) {
+      toast.error('You must be logged in to create a blog');
+      return;
+    }
+
+    try {
+      await createBlog(session.user.id, formData.title, formData.content);
+      toast.success('Blog created successfully');
+      setFormData({ title: '', content: '' });
+      setActiveTab('view');
+      fetchBlogs();
+    } catch (error) {
+      toast.error('Failed to create blog');
+      console.error('Error creating blog:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'create':
+        return (
+          <>
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-900">Create New Blog</h2>
+              <button
+                onClick={() => setActiveTab('view')}
+                className="px-6 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-200 shadow-sm"
+              >
+                Cancel
+              </button>
+            </div>
+            <form onSubmit={handleCreateBlog} className="space-y-6">
+              <div>
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
+                  Content
+                </label>
+                <textarea
+                  id="content"
+                  value={formData.content}
+                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  rows={12}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  required
+                />
+              </div>
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-sm disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Creating...' : 'Create Blog'}
+                </button>
+              </div>
+            </form>
+          </>
+        );
+      case 'view':
+        return (
+          <>
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-900">All Blogs</h2>
+              <button
+                onClick={() => setActiveTab('create')}
+                className="px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-sm"
+              >
+                Create New Blog
+              </button>
+            </div>
+            <div className="space-y-4">
+              {blogs.map((blog) => (
+                <div
+                  key={blog._id}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-100 p-6 rounded-lg hover:border-indigo-100 hover:shadow-md transition duration-200"
+                >
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
                       {blog.title}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      Written by <span className="font-medium">{blog.staff_id.name}</span>
+                    </p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleViewBlog(blog._id)}
+                      className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200"
+                    >
+                      View
                     </button>
-                    <div className="flex space-x-3">
-                      <button
-                        onClick={() => editBlog(blog.id)}
-                        className="text-sm bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => deleteBlog(blog.id)}
-                        className="text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+                    <button
+                      onClick={() => handleEditBlog(blog._id)}
+                      className="px-4 py-2 text-sm font-medium text-yellow-600 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors duration-200"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteBlog(blog._id)}
+                      className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors duration-200"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {blogs.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-gray-500">No blogs found. Create your first blog!</p>
+                </div>
+              )}
+            </div>
+          </>
+        );
+      default:
+        return null;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen py-30 bg-gray-100 p-8 flex justify-center items-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <div className="h-screen pt-28">
+        <div className="flex h-[calc(100%-1rem)]">
+          {/* Vertical Navigation Bar */}
+          <div className="w-64 bg-white shadow-lg">
+            <div className="p-6">
+              <h1 className="text-2xl font-bold text-gray-900 mb-8">Blog Management</h1>
+              <nav className="space-y-2">
+                <button
+                  onClick={() => setActiveTab('view')}
+                  className={`w-full px-4 py-3 text-left rounded-lg transition-all duration-200 ${
+                    activeTab === 'view'
+                      ? 'bg-indigo-50 text-indigo-700 font-medium'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  View All Blogs
+                </button>
+                <button
+                  onClick={() => setActiveTab('create')}
+                  className={`w-full px-4 py-3 text-left rounded-lg transition-all duration-200 ${
+                    activeTab === 'create'
+                      ? 'bg-indigo-50 text-indigo-700 font-medium'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  Create New Blog
+                </button>
+              </nav>
             </div>
           </div>
 
-          {/* Right Side - Selected Blog (Fixed 1/3 width) */}
-          <div className="w-1/3 bg-white p-6 rounded-lg shadow-lg h-full">
-            {selectedBlog ? (
-              <>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {selectedBlog.title}
-                </h1>
-                <p className="text-gray-600 text-sm mb-4">
-                  Written by <strong>{selectedBlog.author}</strong>
-                </p>
-                <Image
-                  src={selectedBlog.image}
-                  alt={selectedBlog.title}
-                  width={300}
-                  height={200}
-                  className="rounded-lg mb-4"
-                />
-                <p className="text-gray-700">{selectedBlog.content}</p>
-              </>
-            ) : (
-              <p className="text-gray-500">No blog selected.</p>
-            )}
+          {/* Main Content Area - Whiteboard Style */}
+          <div className="flex-1 px-8 bg-gray-50">
+            <div className="h-full w-full bg-white rounded-xl shadow-md border border-gray-100 overflow-auto">
+              <div className="min-h-full p-8">
+                {renderContent()}
+              </div>
+            </div>
           </div>
         </div>
       </div>

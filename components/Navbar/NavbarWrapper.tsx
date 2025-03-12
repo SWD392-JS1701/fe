@@ -24,7 +24,7 @@ const NavbarWrapper = () => {
 
   // Render the appropriate navbar based on role
   switch (userRole) {
-    case "admin":
+    case "Admin":
       return <AdminNavbar />;
     case "Doctor":
       return <DoctorNavbar />;

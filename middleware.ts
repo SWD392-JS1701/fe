@@ -31,7 +31,7 @@ export async function middleware(req: NextRequest) {
       path.startsWith("/employee") ||
       path.startsWith("/overview") ||
       path.startsWith("/schedule")) &&
-    role !== "admin"
+    role !== "Admin"
   ) {
     return unauthorized();
   }
