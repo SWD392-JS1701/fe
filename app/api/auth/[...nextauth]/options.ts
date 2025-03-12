@@ -128,10 +128,10 @@ export const authOptions: NextAuthOptions = {
           const refreshedToken = await refreshAccessToken(token);
           if (refreshedToken.error) {
             // If refresh failed, but old token is still valid, keep using it
-            if (token.accessTokenExpires && Date.now() < token.accessTokenExpires) {
+            /*if (token.accessTokenExpires && Date.now() < token.accessTokenExpires) {
               console.log("Refresh failed but current token still valid");
               return token;
-            }
+            }*/
             // If refresh failed and token is expired, force sign out
             console.log("Refresh failed and token expired");
             throw new Error("RefreshAccessTokenError");

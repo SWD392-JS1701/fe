@@ -30,7 +30,7 @@ export const createBlog = async (
   content: string
 ) => {
   try {
-    const response = await axiosInstance.post("/blogs", {
+    const response = await axiosInstance.post("/blogs/blogcreate", {
       staff_id,
       title,
       content,
