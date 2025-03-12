@@ -5,11 +5,32 @@ export interface Product {
   description: string;
   price: number;
   stock: number;
-  product_type_id: number;
+  product_type_id: string;
   image_url: string;
-  Supplier: string;
+  Supplier?: string;
+  supplier_name?: string;
   expired_date: string;
   volume: number;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ProductUpdateRequest {
+  name: string;
+  product_rating: number;
+  description: string;
+  price: number;
+  stock: number;
+  product_type_id: string;
+  image_url: string;
+  supplier_name?: string;
+  expired_date: string;
+  volume: number;
+}
+
+export interface ProductType {
+  _id: string;
+  name: string;
+  description: string;
+  __v: number;
 }

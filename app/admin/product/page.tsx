@@ -10,12 +10,14 @@ import Swal from "sweetalert2";
 import { Product } from "@/app/types/product";
 import { getAllProducts, deleteProduct } from "@/app/services/productService";
 import ProductDrawer from "@/components/ProductDrawer";
+import EditProductModal from "@/components/ProductEditModal";
 
 const ProductsPage: FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   const itemsPerPage = 6;
 
   useEffect(() => {
@@ -50,6 +52,25 @@ const ProductsPage: FC = () => {
 
   const closeDrawer = () => {
     setSelectedProduct(null);
+  };
+
+  const openEditModal = (product: Product) => {
+    setProductToEdit(product);
+  };
+
+  const closeEditModal = () => {
+    setProductToEdit(null);
+  };
+
+  const handleUpdateProduct = (updatedProduct: Product) => {
+    setProducts((prevProducts) =>
+      prevProducts.map((product) =>
+        product._id === updatedProduct._id ? updatedProduct : product
+      )
+    );
+    if (selectedProduct && selectedProduct._id === updatedProduct._id) {
+      setSelectedProduct(updatedProduct);
+    }
   };
 
   const handleDelete = async (productId: string) => {
@@ -166,7 +187,7 @@ const ProductsPage: FC = () => {
                     />
                     <div>
                       <Link href={`/admin/product/${product._id}`}>
-                        <p className="text-gray-800 font-medium hover:text-blue-600 ">
+                        <p className="text-gray-800 font-medium hover:text-blue-600">
                           {product.name}
                         </p>
                       </Link>
@@ -206,14 +227,13 @@ const ProductsPage: FC = () => {
                       >
                         <Eye size={16} />
                       </button>
-                      <Link href={`/admin/products/edit/${product._id}`}>
-                        <button
-                          className="text-blue-600 hover:text-blue-800"
-                          aria-label="Edit product"
-                        >
-                          <Pencil size={16} />
-                        </button>
-                      </Link>
+                      <button
+                        onClick={() => openEditModal(product)}
+                        className="text-blue-600 hover:text-blue-800"
+                        aria-label="Edit product"
+                      >
+                        <Pencil size={16} />
+                      </button>
                       <button
                         onClick={() => handleDelete(product._id)}
                         className="text-red-600 hover:text-red-800"
@@ -285,6 +305,13 @@ const ProductsPage: FC = () => {
       <AnimatePresence>
         {selectedProduct && (
           <ProductDrawer product={selectedProduct} onClose={closeDrawer} />
+        )}
+        {productToEdit && (
+          <EditProductModal
+            product={productToEdit}
+            onClose={closeEditModal}
+            onUpdate={handleUpdateProduct}
+          />
         )}
       </AnimatePresence>
     </div>

@@ -1,7 +1,7 @@
 import { API_URL } from "@/config";
 import axios from "axios";
 
-import { Product } from "../types/product";
+import { Product, ProductType, ProductUpdateRequest } from "../types/product";
 
 export const getAllProducts = async (): Promise<Product[]> => {
   try {
@@ -39,10 +39,10 @@ export const createProduct = async (
 
 export const updateProduct = async (
   productId: string,
-  product: Product
+  product: ProductUpdateRequest
 ): Promise<Product | null> => {
   try {
-    const response = await axios.patch(
+    const response = await axios.put(
       `${API_URL}/products/${productId}`,
       product
     );
@@ -60,9 +60,14 @@ export const deleteProduct = async (productId: string): Promise<void> => {
     console.error("Error deleting product:", error);
   }
 };
-export const searchProductsByName = async (name: string): Promise<Product[]> => {
+
+export const searchProductsByName = async (
+  name: string
+): Promise<Product[]> => {
   try {
-    const response = await axios.get(`${API_URL}/products/searchProduct?name=${encodeURIComponent(name)}`);
+    const response = await axios.get(
+      `${API_URL}/products/searchProduct?name=${encodeURIComponent(name)}`
+    );
     return response.data;
   } catch (error) {
     console.error("Error searching products by name:", error);
@@ -84,11 +89,15 @@ export const searchProducts = async (
     if (name) params.append("name", name);
     if (minPrice !== undefined) params.append("minPrice", minPrice.toString());
     if (maxPrice !== undefined) params.append("maxPrice", maxPrice.toString());
-    if (minRating !== undefined) params.append("minRating", minRating.toString());
-    if (maxRating !== undefined) params.append("maxRating", maxRating.toString());
+    if (minRating !== undefined)
+      params.append("minRating", minRating.toString());
+    if (maxRating !== undefined)
+      params.append("maxRating", maxRating.toString());
     if (supplier) params.append("supplier", supplier);
 
-    const response = await axios.get(`${API_URL}/searchProduct/search?${params.toString()}`);
+    const response = await axios.get(
+      `${API_URL}/searchProduct/search?${params.toString()}`
+    );
     return response.data;
   } catch (error) {
     console.error("Error searching products:", error);
@@ -96,4 +105,64 @@ export const searchProducts = async (
   }
 };
 
+export const getAllProductTypes = async (): Promise<ProductType[]> => {
+  try {
+    const response = await axios.get(`${API_URL}/producttypes`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching product types:", error);
+    return [];
+  }
+};
 
+export const getProductTypeById = async (
+  productTypeId: string
+): Promise<ProductType | null> => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/producttypes/${productTypeId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching product type details:", error);
+    return null;
+  }
+};
+
+export const createProductType = async (
+  productType: ProductType
+): Promise<ProductType | null> => {
+  try {
+    const response = await axios.post(`${API_URL}/producttypes`, productType);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating product type:", error);
+    return null;
+  }
+};
+
+export const updateProductType = async (
+  productTypeId: string,
+  productType: ProductType
+): Promise<ProductType | null> => {
+  try {
+    const response = await axios.put(
+      `${API_URL}/producttypes/${productTypeId}`,
+      productType
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating product type:", error);
+    return null;
+  }
+};
+
+export const deleteProductType = async (
+  productTypeId: string
+): Promise<void> => {
+  try {
+    await axios.delete(`${API_URL}/producttypes/${productTypeId}`);
+  } catch (error) {
+    console.error("Error deleting product type:", error);
+  }
+};
