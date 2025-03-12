@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
-import { getBlogs, deleteBlog, createBlog } from "@/app/services/blogService";
+import { getBlogs, deleteBlog, createBlog, updateBlog } from "@/app/services/blogService";
 import { useSession } from "next-auth/react";
 
 interface Blog {
@@ -12,13 +12,10 @@ interface Blog {
   title: string;
   content: string;
   image_url: string;
-  staff_id: {
-    _id: string;
-    name: string;
-    email: string;
-  };
+  doctor_id: string;
   created_at: string;
   updated_at: string;
+  author: string;  
 }
 
 // Extend the Session User type to include _id
@@ -33,16 +30,36 @@ const BlogPage = () => {
   const { data: session } = useSession();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'view' | 'create'>('view');
-  const [formData, setFormData] = useState({
-    title: '',
-    content: '',
+  const [activeTab, setActiveTab] = useState<'view' | 'create' | 'edit'>('view');
+  const [formData, setFormData] = useState(() => {
+    // Try to load saved draft from localStorage
+    if (typeof window !== 'undefined') {
+      const savedDraft = localStorage.getItem('blogDraft');
+      if (savedDraft) {
+        try {
+          return JSON.parse(savedDraft);
+        } catch (e) {
+          console.error('Error parsing saved draft:', e);
+        }
+      }
+    }
+    return { title: '', content: '' };
   });
+  const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchBlogs();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'create') {
+      // Only save if there's actual content
+      if (formData.title.trim() || formData.content.trim()) {
+        localStorage.setItem('blogDraft', JSON.stringify(formData));
+      }
+    }
+  }, [formData, activeTab]);
 
   const fetchBlogs = async () => {
     try {
@@ -67,12 +84,29 @@ const BlogPage = () => {
     }
   };
 
-  const handleEditBlog = (id: string) => {
-    router.push(`/blog/edit/${id}`);
+  const handleEditBlog = (blog: Blog) => {
+    setSelectedBlog(blog);
+    setFormData({
+      title: blog.title,
+      content: blog.content,
+    });
+    setActiveTab('edit');
   };
 
   const handleViewBlog = (id: string) => {
     router.push(`/blog/${id}`);
+  };
+
+  const handleTabChange = (tab: 'view' | 'create' | 'edit') => {
+    if (tab !== 'edit') {
+      setFormData({ title: '', content: '' });
+      setSelectedBlog(null);
+      // Clear saved draft when leaving create tab
+      if (activeTab === 'create') {
+        localStorage.removeItem('blogDraft');
+      }
+    }
+    setActiveTab(tab);
   };
 
   const handleCreateBlog = async (e: React.FormEvent) => {
@@ -88,7 +122,9 @@ const BlogPage = () => {
       await createBlog(session.user.id, formData.title, formData.content);
       toast.success('Blog created successfully');
       setFormData({ title: '', content: '' });
-      setActiveTab('view');
+      // Clear saved draft after successful creation
+      localStorage.removeItem('blogDraft');
+      handleTabChange('view');
       fetchBlogs();
     } catch (error) {
       toast.error('Failed to create blog');
@@ -98,19 +134,119 @@ const BlogPage = () => {
     }
   };
 
+  const handleUpdateBlog = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    if (!session?.user?.id || !selectedBlog) {
+      toast.error('You must be logged in to update a blog');
+      return;
+    }
+
+    try {
+      await updateBlog(selectedBlog._id, {
+        title: formData.title,
+        content: formData.content
+      });
+      toast.success('Blog updated successfully');
+      setFormData({ title: '', content: '' });
+      setSelectedBlog(null);
+      handleTabChange('view');
+      fetchBlogs();
+    } catch (error) {
+      toast.error('Failed to update blog');
+      console.error('Error updating blog:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const renderContent = () => {
     switch (activeTab) {
+      case 'edit':
+        if (!selectedBlog) return null;
+        return (
+          <>
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-900">Edit Blog</h2>
+              <button
+                onClick={() => handleTabChange('view')}
+                className="px-6 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-200 shadow-sm"
+              >
+                Cancel
+              </button>
+            </div>
+            <form onSubmit={handleUpdateBlog} className="space-y-6">
+              <div>
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
+                  Content
+                </label>
+                <textarea
+                  id="content"
+                  value={formData.content}
+                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  rows={12}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  required
+                />
+              </div>
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-sm disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Updating...' : 'Update Blog'}
+                </button>
+              </div>
+            </form>
+          </>
+        );
       case 'create':
         return (
           <>
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900">Create New Blog</h2>
-              <button
-                onClick={() => setActiveTab('view')}
-                className="px-6 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-200 shadow-sm"
-              >
-                Cancel
-              </button>
+              <div className="flex gap-3">
+                {localStorage.getItem('blogDraft') && formData.title === '' && formData.content === '' && (
+                  <button
+                    onClick={() => {
+                      const savedDraft = localStorage.getItem('blogDraft');
+                      if (savedDraft) {
+                        try {
+                          setFormData(JSON.parse(savedDraft));
+                          toast.success('Draft restored successfully');
+                        } catch (e) {
+                          console.error('Error restoring draft:', e);
+                          toast.error('Failed to restore draft');
+                        }
+                      }
+                    }}
+                    className="px-6 py-2.5 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors duration-200 shadow-sm"
+                  >
+                    Restore Draft
+                  </button>
+                )}
+                <button
+                  onClick={() => handleTabChange('view')}
+                  className="px-6 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-200 shadow-sm"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
             <form onSubmit={handleCreateBlog} className="space-y-6">
               <div>
@@ -157,7 +293,7 @@ const BlogPage = () => {
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900">All Blogs</h2>
               <button
-                onClick={() => setActiveTab('create')}
+                onClick={() => handleTabChange('create')}
                 className="px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-sm"
               >
                 Create New Blog
@@ -174,7 +310,15 @@ const BlogPage = () => {
                       {blog.title}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      Written by <span className="font-medium">{blog.staff_id.name}</span>
+                      Written by <span className="font-medium">{blog.author || 'Unknown Author'}</span>
+                      <span className="mx-2">•</span>
+                      <time dateTime={blog.created_at}>
+                        {new Date(blog.created_at).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </time>
                     </p>
                   </div>
                   <div className="flex gap-3">
@@ -185,7 +329,7 @@ const BlogPage = () => {
                       View
                     </button>
                     <button
-                      onClick={() => handleEditBlog(blog._id)}
+                      onClick={() => handleEditBlog(blog)}
                       className="px-4 py-2 text-sm font-medium text-yellow-600 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors duration-200"
                     >
                       Edit
@@ -230,7 +374,7 @@ const BlogPage = () => {
               <h1 className="text-2xl font-bold text-gray-900 mb-8">Blog Management</h1>
               <nav className="space-y-2">
                 <button
-                  onClick={() => setActiveTab('view')}
+                  onClick={() => handleTabChange('view')}
                   className={`w-full px-4 py-3 text-left rounded-lg transition-all duration-200 ${
                     activeTab === 'view'
                       ? 'bg-indigo-50 text-indigo-700 font-medium'
@@ -240,7 +384,7 @@ const BlogPage = () => {
                   View All Blogs
                 </button>
                 <button
-                  onClick={() => setActiveTab('create')}
+                  onClick={() => handleTabChange('create')}
                   className={`w-full px-4 py-3 text-left rounded-lg transition-all duration-200 ${
                     activeTab === 'create'
                       ? 'bg-indigo-50 text-indigo-700 font-medium'

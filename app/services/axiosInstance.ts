@@ -3,6 +3,8 @@ import { getSession, signOut } from 'next-auth/react';
 import { API_URL } from '@/config';
 import { toast } from "react-hot-toast";
 
+
+
 // Create axios instance
 const axiosInstance = axios.create({
   baseURL: API_URL,
@@ -26,8 +28,8 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // If we get a 401 and haven't retried yet
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // If we get a 401 or 403 and haven't retried yet
+    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
