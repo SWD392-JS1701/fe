@@ -2,7 +2,7 @@ import React, { FC } from "react";
 import { getProductById } from "@/app/services/productService";
 import Image from "next/image";
 import Link from "next/link";
-import ProductTabs from "@/components/ProductTabs";
+import ProductTabs from "@/components/ManageProduct/ProductTabs";
 
 interface ProductDetailPageProps {
   params: Promise<{ id: string }>;

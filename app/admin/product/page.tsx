@@ -3,14 +3,14 @@
 import React, { FC, useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Trash2, Plus } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
 
 import { Product } from "@/app/types/product";
 import { getAllProducts, deleteProduct } from "@/app/services/productService";
-import ProductDrawer from "@/components/ProductDrawer";
-import EditProductModal from "@/components/ProductEditModal";
+import ProductDrawer from "@/components/ManageProduct/ProductDrawer";
+import EditProductModal from "@/components/ManageProduct/ProductEditModal";
 
 const ProductsPage: FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -18,6 +18,8 @@ const ProductsPage: FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
   const itemsPerPage = 6;
 
   useEffect(() => {
@@ -28,11 +30,22 @@ const ProductsPage: FC = () => {
     fetchProducts();
   }, []);
 
+  // Filter products by name and date range
   const filteredProducts = useMemo(() => {
-    return products.filter((product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm, products]);
+    return products.filter((product) => {
+      const productDate = new Date(product.expired_date);
+      const start = startDate ? new Date(startDate) : null;
+      const end = endDate ? new Date(endDate) : null;
+
+      const matchesSearch = product.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesDate =
+        (!start || productDate >= start) && (!end || productDate <= end);
+
+      return matchesSearch && matchesDate;
+    });
+  }, [searchTerm, products, startDate, endDate]);
 
   const totalItems = filteredProducts.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -120,10 +133,48 @@ const ProductsPage: FC = () => {
     });
   };
 
+  const handleAddProduct = () => {
+    console.log("Add new product clicked");
+  };
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen relative">
+      {/* Breadcrumb and Add Button */}
+      <div className="bg-gray-100 p-4 mb-4 flex justify-between items-center rounded-lg">
+        <nav className="text-gray-600 text-sm">
+          <Link href="/admin//overview" className="hover:text-gray-800">
+            <span>Dashboard</span>
+          </Link>
+          <span className="text-gray-400"> {" > "} </span>{" "}
+          <span className="text-gray-800">Products</span>
+        </nav>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="px-2 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <span>-</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="px-2 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+          <button
+            onClick={handleAddProduct}
+            className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+          >
+            <Plus size={16} className="mr-2" /> Add
+          </button>
+        </div>
+      </div>
+
+      {/* Header */}
       <div className="bg-white rounded-lg shadow-md p-6">
-        {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-xl font-semibold text-gray-800">
