@@ -12,13 +12,10 @@ interface Blog {
   title: string;
   content: string;
   image_url: string;
-  staff_id: {
-    _id: string;
-    name: string;
-    email: string;
-  };
+  doctor_id: string;
   created_at: string;
   updated_at: string;
+  author: string;  // Virtual field from user_Id.first_name + user_Id.last_name
 }
 
 export default function ViewBlogPage() {
@@ -31,6 +28,7 @@ export default function ViewBlogPage() {
     const fetchBlog = async () => {
       try {
         const response = await axiosInstance.get(`${API_URL}/blogs/${params.id}`);
+        console.log('Blog data:', response.data); // Add this to debug
         setBlog(response.data);
       } catch (err) {
         console.error("Error fetching blog:", err);
@@ -48,12 +46,12 @@ export default function ViewBlogPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
+      <div className="min-h-screen bg-gray-50 pt-28">
         <div className="max-w-4xl mx-auto px-4">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
             <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
-            <div className="h-96 bg-gray-200 rounded mb-8"></div>
+            <div className="h-64 bg-gray-200 rounded mb-8"></div>
             <div className="space-y-4">
               <div className="h-4 bg-gray-200 rounded w-full"></div>
               <div className="h-4 bg-gray-200 rounded w-5/6"></div>
@@ -67,7 +65,7 @@ export default function ViewBlogPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
+      <div className="min-h-screen bg-gray-50 pt-28">
         <div className="max-w-4xl mx-auto px-4">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6">
             <h2 className="text-red-800 text-lg font-semibold mb-2">Error</h2>
@@ -80,7 +78,7 @@ export default function ViewBlogPage() {
 
   if (!blog) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
+      <div className="min-h-screen bg-gray-50 pt-28">
         <div className="max-w-4xl mx-auto px-4">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
             <h2 className="text-yellow-800 text-lg font-semibold mb-2">Not Found</h2>
@@ -92,11 +90,11 @@ export default function ViewBlogPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 pt-28">
       <div className="max-w-4xl mx-auto px-4">
         <article className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Blog Header */}
-          <div className="relative h-[400px] w-full">
+          <div className="relative h-[300px] w-full">
             <Image
               src={blog.image_url || "/placeholder.jpg"}
               alt={blog.title}
@@ -113,7 +111,7 @@ export default function ViewBlogPage() {
             {/* Author Info */}
             <div className="flex items-center text-gray-600 mb-6">
               <div className="flex items-center">
-                <span className="font-medium">{blog.staff_id.name}</span>
+                <span className="font-medium">{blog.author}</span>
                 <span className="mx-2">•</span>
                 <time dateTime={blog.created_at}>
                   {new Date(blog.created_at).toLocaleDateString('en-US', {

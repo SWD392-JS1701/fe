@@ -80,7 +80,7 @@ const EmployeePage = () => {
     fetchUsers();
   }, []);
 
-  const filteredUsers = users.filter((user) => user.role !== "admin");
+  const filteredUsers = users.filter((user) => user.role !== "Admin");
 
   const handleRecruit = async (user: User) => {
     if (loading) return;

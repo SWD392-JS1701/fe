@@ -62,7 +62,7 @@ const AdminNavbar = () => {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <span className="text-gray-700">{session?.user?.name || "Admin"}</span>
+              <span className="text-gray-700">{ "Admin"}</span>
             </div>
 
             {/* Dropdown Menu */}
