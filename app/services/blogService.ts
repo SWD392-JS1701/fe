@@ -3,6 +3,7 @@ import axiosInstance from "./axiosInstance";
 export const getBlogs = async () => {
   try {
     const response = await axiosInstance.get("/blogs");
+    console.log("API Response for getBlogs:", response.data);
     return response.data;
   } catch (error: any) {
     console.error("Get Blogs API Error:", error);
@@ -15,6 +16,7 @@ export const getBlogs = async () => {
 export const getBlogById = async (id: string) => {
   try {
     const response = await axiosInstance.get(`/blogs/${id}`);
+    console.log("API Response for getBlogById:", response.data);
     return response.data;
   } catch (error: any) {
     console.error("Get Blog By ID API Error:", error);
@@ -25,13 +27,13 @@ export const getBlogById = async (id: string) => {
 };
 
 export const createBlog = async (
-  staff_id: string,
+  doctor_id: string,
   title: string,
   content: string
 ) => {
   try {
     const response = await axiosInstance.post("/blogs/blogcreate", {
-      staff_id,
+      doctor_id,
       title,
       content,
     });

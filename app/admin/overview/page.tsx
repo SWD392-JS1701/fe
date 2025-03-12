@@ -11,7 +11,7 @@ const AdminPage = () => {
     { name: "Accessories", quantity: 300 },
   ];
 
-  // Authentication is now handled by the layout
+  
   const { data: session } = useSession();
 
   return (
