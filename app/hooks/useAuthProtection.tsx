@@ -26,22 +26,21 @@ export const useAuthProtection = (mode: 'protected' | 'public') => {
 
     if (mode === 'public' && session) {
       // If the page is public (like sign-in/sign-up) and user is logged in,
-      // redirect to home or their role-specific page
+      
       if (session.user?.role === 'Admin') {
         router.replace('/admin/overview');
-        toast.error('You are already logged in');
+        
       } else if (session.user?.role === 'Doctor') {
-        router.replace('/doctor/overview');
-        toast.error('You are already logged in');
+        router.replace('/');
+        
       } else {
         router.replace('/');
-        toast.error('You are already logged in');
+        
       }
     } else if (mode === 'protected' && !session) {
-      // If the page is protected and user is not logged in,
-      // redirect to sign-in
+      
       router.replace('/sign-in');
-      toast.error('Please sign in to access this page');
+      
     }
   }, [session, status, mode, router]);
 
