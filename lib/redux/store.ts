@@ -1,31 +1,45 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit";
+import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { getUserFromToken } from "@/lib/redux/auth";
 import cartReducer from "./cartSlice";
+
+export interface User {
+  id: string;
+  username?: string;
+  role?: string;
+  access_token?: string;
+}
 
 // create slice to organize sign-in state
 interface AuthState {
   isAuthenticated: boolean;
+  user: User | null;
 }
 
 const initialState: AuthState = {
-  isAuthenticated:
-    typeof window !== "undefined" && !!localStorage.getItem("access_token"),
+  isAuthenticated: false,
+  user: null,
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    login(state) {
+    login(state, action: PayloadAction<User>) {
       state.isAuthenticated = true;
+      state.user = action.payload;
     },
     logout(state) {
       state.isAuthenticated = false;
-      localStorage.removeItem("access_token");
+      state.user = null;
+    },
+    setUser(state, action: PayloadAction<User | null>) {
+      state.user = action.payload;
+      state.isAuthenticated = !!action.payload;
     },
   },
 });
 
-export const { login, logout } = authSlice.actions;
+export const { login, logout, setUser } = authSlice.actions;
 
 // Cấu hình Redux store
 export const store = configureStore({

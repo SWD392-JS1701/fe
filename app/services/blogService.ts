@@ -3,7 +3,6 @@ import axiosInstance from "./axiosInstance";
 export const getBlogs = async () => {
   try {
     const response = await axiosInstance.get("/blogs");
-    console.log("API Response for getBlogs:", response.data);
     return response.data;
   } catch (error: any) {
     console.error("Get Blogs API Error:", error);
