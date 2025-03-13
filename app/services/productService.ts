@@ -1,15 +1,28 @@
 import { API_URL } from "@/config";
 import axios from "axios";
-
-import { Product, ProductType, ProductUpdateRequest } from "../types/product";
+import {
+  Product,
+  ProductUpdateRequest,
+  ProductType,
+  CreateProductRequest,
+} from "../types/product";
 
 export const getAllProducts = async (): Promise<Product[]> => {
   try {
-    const response = await axios.get(`${API_URL}/products`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching products:", error);
-    return [];
+    const response = await axios.get(`${API_URL}/products`, {
+      headers: {
+        accept: "*/*",
+      },
+    });
+    return (response.data as Product[]).map((product) => ({
+      ...product,
+      supplier_name: product.supplier_name || product.Supplier,
+    }));
+  } catch (error: any) {
+    console.error("Error fetching products:", error.message || error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch products"
+    );
   }
 };
 
@@ -17,23 +30,48 @@ export const getProductById = async (
   productId: string
 ): Promise<Product | null> => {
   try {
-    const response = await axios.get(`${API_URL}/products/${productId}`);
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching product details:", error);
-    return null;
+    const response = await axios.get(`${API_URL}/products/${productId}`, {
+      headers: {
+        accept: "*/*",
+      },
+    });
+    const product = response.data as Product;
+    return {
+      ...product,
+      supplier_name: product.supplier_name || product.Supplier,
+    };
+  } catch (error: any) {
+    console.error("Error fetching product details:", error.message || error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch product details"
+    );
   }
 };
 
 export const createProduct = async (
-  product: Product
-): Promise<Product | null> => {
+  product: CreateProductRequest
+): Promise<Product> => {
   try {
-    const response = await axios.post(`${API_URL}/products`, product);
-    return response.data;
-  } catch (error) {
-    console.error("Error creating product:", error);
-    return null;
+    const response = await axios.post(`${API_URL}/products`, product, {
+      headers: {
+        accept: "*/*",
+        "Content-Type": "application/json",
+      },
+    });
+    const createdProduct = response.data as Product;
+    return {
+      ...createdProduct,
+      supplier_name: createdProduct.supplier_name || createdProduct.Supplier,
+    };
+  } catch (error: any) {
+    console.error("Error creating product:", {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+    throw new Error(
+      error.response?.data?.message || "Failed to create product"
+    );
   }
 };
 
@@ -44,20 +82,39 @@ export const updateProduct = async (
   try {
     const response = await axios.put(
       `${API_URL}/products/${productId}`,
-      product
+      product,
+      {
+        headers: {
+          accept: "*/*",
+          "Content-Type": "application/json",
+        },
+      }
     );
-    return response.data;
-  } catch (error) {
-    console.error("Error updating product:", error);
-    return null;
+    const updatedProduct = response.data as Product;
+    return {
+      ...updatedProduct,
+      supplier_name: updatedProduct.supplier_name || updatedProduct.Supplier,
+    };
+  } catch (error: any) {
+    console.error("Error updating product:", error.message || error);
+    throw new Error(
+      error.response?.data?.message || "Failed to update product"
+    );
   }
 };
 
 export const deleteProduct = async (productId: string): Promise<void> => {
   try {
-    await axios.delete(`${API_URL}/products/${productId}`);
-  } catch (error) {
-    console.error("Error deleting product:", error);
+    await axios.delete(`${API_URL}/products/${productId}`, {
+      headers: {
+        accept: "*/*",
+      },
+    });
+  } catch (error: any) {
+    console.error("Error deleting product:", error.message || error);
+    throw new Error(
+      error.response?.data?.message || "Failed to delete product"
+    );
   }
 };
 
@@ -66,12 +123,22 @@ export const searchProductsByName = async (
 ): Promise<Product[]> => {
   try {
     const response = await axios.get(
-      `${API_URL}/products/searchProduct?name=${encodeURIComponent(name)}`
+      `${API_URL}/products/searchProduct?name=${encodeURIComponent(name)}`,
+      {
+        headers: {
+          accept: "*/*",
+        },
+      }
     );
-    return response.data;
-  } catch (error) {
+    return (response.data as Product[]).map((product) => ({
+      ...product,
+      supplier_name: product.supplier_name || product.Supplier,
+    }));
+  } catch (error: any) {
     console.error("Error searching products by name:", error);
-    return [];
+    throw new Error(
+      error.response?.data?.message || "Failed to search products by name"
+    );
   }
 };
 
@@ -84,7 +151,6 @@ export const searchProducts = async (
   supplier?: string
 ): Promise<Product[]> => {
   try {
-    // Construct query parameters dynamically
     const params = new URLSearchParams();
     if (name) params.append("name", name);
     if (minPrice !== undefined) params.append("minPrice", minPrice.toString());
@@ -96,22 +162,38 @@ export const searchProducts = async (
     if (supplier) params.append("supplier", supplier);
 
     const response = await axios.get(
-      `${API_URL}/searchProduct/search?${params.toString()}`
+      `${API_URL}/searchProduct/search?${params.toString()}`,
+      {
+        headers: {
+          accept: "*/*",
+        },
+      }
     );
-    return response.data;
-  } catch (error) {
+    return (response.data as Product[]).map((product) => ({
+      ...product,
+      supplier_name: product.supplier_name || product.Supplier,
+    }));
+  } catch (error: any) {
     console.error("Error searching products:", error);
-    return [];
+    throw new Error(
+      error.response?.data?.message || "Failed to search products"
+    );
   }
 };
 
 export const getAllProductTypes = async (): Promise<ProductType[]> => {
   try {
-    const response = await axios.get(`${API_URL}/producttypes`);
+    const response = await axios.get(`${API_URL}/producttypes`, {
+      headers: {
+        accept: "*/*",
+      },
+    });
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching product types:", error);
-    return [];
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch product types"
+    );
   }
 };
 
@@ -120,12 +202,19 @@ export const getProductTypeById = async (
 ): Promise<ProductType | null> => {
   try {
     const response = await axios.get(
-      `${API_URL}/producttypes/${productTypeId}`
+      `${API_URL}/producttypes/${productTypeId}`,
+      {
+        headers: {
+          accept: "*/*",
+        },
+      }
     );
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching product type details:", error);
-    return null;
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch product type details"
+    );
   }
 };
 
@@ -133,11 +222,18 @@ export const createProductType = async (
   productType: ProductType
 ): Promise<ProductType | null> => {
   try {
-    const response = await axios.post(`${API_URL}/producttypes`, productType);
+    const response = await axios.post(`${API_URL}/producttypes`, productType, {
+      headers: {
+        accept: "*/*",
+        "Content-Type": "application/json",
+      },
+    });
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating product type:", error);
-    return null;
+    throw new Error(
+      error.response?.data?.message || "Failed to create product type"
+    );
   }
 };
 
@@ -148,12 +244,20 @@ export const updateProductType = async (
   try {
     const response = await axios.put(
       `${API_URL}/producttypes/${productTypeId}`,
-      productType
+      productType,
+      {
+        headers: {
+          accept: "*/*",
+          "Content-Type": "application/json",
+        },
+      }
     );
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating product type:", error);
-    return null;
+    throw new Error(
+      error.response?.data?.message || "Failed to update product type"
+    );
   }
 };
 
@@ -161,8 +265,15 @@ export const deleteProductType = async (
   productTypeId: string
 ): Promise<void> => {
   try {
-    await axios.delete(`${API_URL}/producttypes/${productTypeId}`);
-  } catch (error) {
+    await axios.delete(`${API_URL}/producttypes/${productTypeId}`, {
+      headers: {
+        accept: "*/*",
+      },
+    });
+  } catch (error: any) {
     console.error("Error deleting product type:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to delete product type"
+    );
   }
 };
