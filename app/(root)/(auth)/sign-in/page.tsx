@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState, FC, ChangeEvent, FormEvent } from "react";
+import React, { useState, FC, ChangeEvent, FormEvent, useEffect } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { jwtDecode } from "jwt-decode";
-import { useAuthProtection } from "@/app/hooks/useAuthProtection";
 
 interface FormData {
   email: string;
@@ -28,10 +27,23 @@ const SignIn: FC = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const { data: session, status } = useSession();
   
-  // redirect logged-in users away from this page
-  useAuthProtection('public');
+  // Only apply auth protection if we're not in the process of submitting
+  useEffect(() => {
+    if (status === 'loading' || isSubmitting) return;
+    
+    if (session?.user?.access_token) {
+      const decoded: JWTPayload = jwtDecode(session.user.access_token);
+      if (decoded.role === "Admin") {
+        router.push("/admin/overview");
+      } else {
+        router.push("/");
+      }
+    }
+  }, [session, status, router, isSubmitting]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setError(null);
@@ -42,6 +54,7 @@ const SignIn: FC = () => {
     e.preventDefault();
     setError(null);
     setLoading(true);
+    setIsSubmitting(true);
 
     try {
       const result = await signIn("credentials", {
@@ -52,21 +65,6 @@ const SignIn: FC = () => {
 
       if (result?.error) {
         setError(result.error);
-      } else {
-        // Get the session to check the role
-        const session = await fetch("/api/auth/session").then((res) =>
-          res.json()
-        );
-        if (session?.user?.access_token) {
-          const decoded: JWTPayload = jwtDecode(session.user.access_token);
-          console.log("Decoded token:", decoded);
-
-          if (decoded.role === "Admin") {
-            router.push("/admin/overview");
-          } else {
-            router.push("/");
-          }
-        }
       }
     } catch (err: any) {
       setError(
@@ -74,6 +72,7 @@ const SignIn: FC = () => {
       );
     } finally {
       setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
