@@ -25,7 +25,7 @@ interface User {
   emailSubscription: string;
   totalSpent: number;
   orderCount: number;
-  addressCount?: number; // Made optional to match your ProfilePage defaultUser
+  addressCount?: number;
 }
 
 interface UserProfileProps {

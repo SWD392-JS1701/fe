@@ -189,3 +189,24 @@ export const deleteOrderDetail = async (id: string): Promise<void> => {
     );
   }
 };
+
+export const getOrdersByUserId = async (userId: string): Promise<Order[]> => {
+  try {
+    const response = await axios.get(`${API_URL}/order/user/${userId}`, {
+      headers: {
+        accept: "*/*",
+      },
+    });
+    if (response.data && Array.isArray(response.data.orders)) {
+      return response.data.orders as Order[];
+    } else {
+      console.warn("Unexpected response format:", response.data);
+      return [];
+    }
+  } catch (error: any) {
+    console.error("Error fetching orders by user ID:", error.message || error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch orders by user ID"
+    );
+  }
+};
