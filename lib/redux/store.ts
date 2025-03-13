@@ -24,11 +24,16 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    login(state) {
+    login(state, action: PayloadAction<User>) {
       state.isAuthenticated = true;
+      state.user = action.payload;
+      if (action.payload.access_token) {
+        localStorage.setItem("access_token", action.payload.access_token);
+      }
     },
     logout(state) {
       state.isAuthenticated = false;
+      state.user = null;
       localStorage.removeItem("access_token");
     },
     setUser(state, action: PayloadAction<User | null>) {
@@ -37,7 +42,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { login, logout } = authSlice.actions;
+export const { login, logout, setUser } = authSlice.actions;
 
 // Cấu hình Redux store
 export const store = configureStore({
