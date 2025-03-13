@@ -28,6 +28,7 @@ const Navbar: FC = () => {
   const cartCount = useSelector((state: RootState) => state.cart.items.length);
   const router = useRouter();
   const { data: session } = useSession();
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   // Debounced search function
   const debouncedSearch = debounce(async (term: string) => {
@@ -222,23 +223,87 @@ const Navbar: FC = () => {
 
         {/* Icons */}
         <div className="flex-1 flex justify-end items-center space-x-3">
-          <Link href={session ? "/profile" : "/sign-in"}>
-            <svg
-              className={`w-6 h-6 transition-all duration-500 ${
-                scrollCount === maxScrollCount ? "text-white" : "text-gray-800"
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
-          </Link>
+        <div className="relative group">
+            <Link href={session ? "/profile" : "/sign-in"}>
+              <svg
+                className={`w-6 h-6 transition-all duration-500 ${
+                  scrollCount === maxScrollCount
+                    ? "text-white"
+                    : "text-gray-800"
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+            </Link>
+            <div className="absolute w-full h-5 bg-transparent"></div>
+
+            {/* Dropdown Menu */}
+            <div className="absolute right-0 hidden group-hover:block w-48 bg-white rounded-md shadow-lg z-50">
+              {session ? (
+                <>
+                  <div className="px-4 py-3 border-b border-gray-200">
+                    <Link
+                      href="/rewards"
+                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
+                    >
+                      My Rewards
+                    </Link>
+                    <Link
+                      href="/routine"
+                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
+                    >
+                      My Routine Steps
+                    </Link>
+                    <Link
+                      href="/shop-routine"
+                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
+                    >
+                      Shop My Routine
+                    </Link>
+                    <Link
+                      href="/skin-type-quiz"
+                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
+                    >
+                      Retake the Quiz
+                    </Link>
+                  </div>
+                  <button
+
+                    onClick={handleLogout}
+
+                    className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
+                  >
+                    LOGOUT
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/sign-in"
+                    className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
+                  >
+                    LOGIN
+                  </Link>
+                  <Link
+                    href="/sign-up"
+                    className="block w-full text-center py-3 text-sm border text-black border-gray-200 hover:bg-gray-50"
+                  >
+                    SIGN UP
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+
           <Link href="/cart" className="relative">
             <svg
               className={`w-6 h-6 transition-all duration-500 ${

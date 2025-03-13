@@ -55,8 +55,8 @@ const ProfilePage: FC = () => {
   useAuthRedirect();
 
   useEffect(() => {
-    console.log("Session Status:", status);
-    console.log("Session Data:", session);
+    // console.log("Session Status:", status);
+    // console.log("Session Data:", session);
 
     if (status === "loading") return;
 
@@ -67,12 +67,12 @@ const ProfilePage: FC = () => {
 
     const getUserProfile = async () => {
       try {
-        console.log("Calling getUserById with session:", {
-          id: session?.user?.id,
-          email: session?.user?.email,
-          role: session?.user?.role,
-          token: session?.user?.access_token ? "present" : "missing",
-        });
+        // console.log("Calling getUserById with session:", {
+        //   id: session?.user?.id,
+        //   email: session?.user?.email,
+        //   role: session?.user?.role,
+        //   token: session?.user?.access_token ? "present" : "missing",
+        // });
 
         const userData = await getUserById(session);
 

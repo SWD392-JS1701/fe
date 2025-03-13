@@ -98,13 +98,21 @@ const BlogPage = () => {
   };
 
   const handleTabChange = (tab: 'view' | 'create' | 'edit') => {
-    if (tab !== 'edit') {
+    if (tab === 'create') {
+      // Try to restore draft when switching to create tab
+      const savedDraft = localStorage.getItem('blogDraft');
+      if (savedDraft) {
+        try {
+          setFormData(JSON.parse(savedDraft));
+          toast.success('Draft restored successfully');
+        } catch (e) {
+          console.error('Error restoring draft:', e);
+          toast.error('Failed to restore draft');
+        }
+      }
+    } else if (tab !== 'edit') {
       setFormData({ title: '', content: '' });
       setSelectedBlog(null);
-      // Clear saved draft when leaving create tab
-      if (activeTab === 'create') {
-        localStorage.removeItem('blogDraft');
-      }
     }
     setActiveTab(tab);
   };
@@ -121,9 +129,8 @@ const BlogPage = () => {
     try {
       await createBlog(session.user.id, formData.title, formData.content);
       toast.success('Blog created successfully');
-      setFormData({ title: '', content: '' });
-      // Clear saved draft after successful creation
       localStorage.removeItem('blogDraft');
+      setFormData({ title: '', content: '' });
       handleTabChange('view');
       fetchBlogs();
     } catch (error) {
@@ -221,25 +228,6 @@ const BlogPage = () => {
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900">Create New Blog</h2>
               <div className="flex gap-3">
-                {localStorage.getItem('blogDraft') && formData.title === '' && formData.content === '' && (
-                  <button
-                    onClick={() => {
-                      const savedDraft = localStorage.getItem('blogDraft');
-                      if (savedDraft) {
-                        try {
-                          setFormData(JSON.parse(savedDraft));
-                          toast.success('Draft restored successfully');
-                        } catch (e) {
-                          console.error('Error restoring draft:', e);
-                          toast.error('Failed to restore draft');
-                        }
-                      }
-                    }}
-                    className="px-6 py-2.5 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors duration-200 shadow-sm"
-                  >
-                    Restore Draft
-                  </button>
-                )}
                 <button
                   onClick={() => handleTabChange('view')}
                   className="px-6 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-200 shadow-sm"

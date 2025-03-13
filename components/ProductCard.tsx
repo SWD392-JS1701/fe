@@ -5,8 +5,10 @@ import Link from "next/link";
 
 import { Product } from "../app/types/product";
 import { useDispatch, useSelector } from "react-redux";
-import { addToCart, updateQuantity } from "@/lib/redux/cartSlice";
 import { RootState } from "@/lib/redux/store";
+import { addToCart, updateQuantity } from "@/lib/redux/cartSlice";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 interface ProductCardProps {
   product: Product;
@@ -15,9 +17,19 @@ interface ProductCardProps {
 const ProductCard: FC<ProductCardProps> = ({ product }) => {
   const dispatch = useDispatch();
   const cart = useSelector((state: RootState) => state.cart.items);
+  const { data: session } = useSession();
+
   const handleAddToCart = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // Check if user is a doctor
+    if (session?.user?.role === "Doctor") {
+      toast.error("Not Allowed", {
+        description: "Doctors are not allowed to add items to cart"
+      });
+      return;
+    }
 
     const existingProduct = cart.find((item) => item.id === product._id);
     if (existingProduct) {
@@ -27,6 +39,9 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
           quantity: existingProduct.quantity + 1,
         })
       );
+      toast.success("Cart Updated", {
+        description: "Product quantity updated in cart"
+      });
     } else {
       dispatch(
         addToCart({
@@ -37,6 +52,9 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
           image_url: product.image_url,
         })
       );
+      toast.success("Added to Cart", {
+        description: "Product successfully added to cart"
+      });
     }
   };
 

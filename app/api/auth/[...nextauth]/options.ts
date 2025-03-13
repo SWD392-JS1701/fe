@@ -152,11 +152,8 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       if (token.error === "RefreshAccessTokenError") {
-        // Instead of returning null, return a session with an error flag
-        return {
-          ...session,
-          error: "RefreshAccessTokenError"
-        } as Session;
+        // Throw error to force immediate signout
+        throw new Error("RefreshAccessTokenError");
       }
 
       if (token && session.user) {

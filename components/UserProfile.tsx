@@ -1,11 +1,6 @@
 "use client";
 
-
 import React, { FC, useState } from "react";
-
-
-
-import { signOut } from "next-auth/react";
 
 import { updateUser } from "@/app/services/userService";
 import { toast, Toaster } from "react-hot-toast";
@@ -82,9 +77,6 @@ const UserProfile: FC<UserProfileProps> = ({ user, setUser }) => {
     }
     setLoading(false);
   };
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: "/sign-in" });
-  };
 
   return (
     <>
@@ -95,7 +87,6 @@ const UserProfile: FC<UserProfileProps> = ({ user, setUser }) => {
           <div className="flex items-center border border-black-200 rounded-lg p-4">
             <div className="mr-4">
               <FaDollarSign className="text-2xl text-black" />
-
             </div>
             <div>
               <h3 className="text-sm font-bold text-black">Total spent</h3>

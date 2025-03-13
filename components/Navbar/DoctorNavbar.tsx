@@ -38,8 +38,7 @@ const DoctorNavbar: FC = () => {
   }, [scrollCount]);
 
   const handleLogout = async () => {
-    await signOut({ redirect: false });
-    router.push("/");
+    await signOut({ callbackUrl: "/sign-in" });
   };
 
   return (
