@@ -8,6 +8,7 @@ declare module "next-auth" {
     email?: string;
     role?: string;
     access_token?: string;
+    refresh_token?: string;
   }
 
   interface Session extends DefaultSession {
@@ -17,6 +18,7 @@ declare module "next-auth" {
       email?: string;
       role?: string;
       access_token?: string;
+      refresh_token?: string;
     } & DefaultSession["user"];
   }
 }
@@ -25,5 +27,6 @@ declare module "next-auth/jwt" {
     interface JWT extends DefaultJWT{
         role?: string;
         access_token?: string;
+        expiration: number;
     }
 }

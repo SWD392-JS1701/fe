@@ -1,6 +1,5 @@
 "use client";
 
-
 import React from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
@@ -11,9 +10,7 @@ const AdminNavbar = () => {
   const router = useRouter();
 
   const handleLogout = async () => {
-    await signOut({ redirect: false });
-    router.push("/sign-in");
-
+    await signOut({ callbackUrl: "/sign-in" });
   };
 
   return (
@@ -52,7 +49,6 @@ const AdminNavbar = () => {
 
         {/* User Profile */}
         <div className="flex items-center space-x-4">
-
           <div className="relative group">
             <div className="flex items-center space-x-4 cursor-pointer">
               <div className="w-10 h-10 rounded-full overflow-hidden">
@@ -62,7 +58,7 @@ const AdminNavbar = () => {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <span className="text-gray-700">{session?.user?.name || "Admin"}</span>
+              <span className="text-gray-700">{"Admin"}</span>
             </div>
 
             {/* Dropdown Menu */}
@@ -83,7 +79,6 @@ const AdminNavbar = () => {
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </nav>

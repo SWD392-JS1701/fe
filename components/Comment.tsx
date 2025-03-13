@@ -6,7 +6,7 @@ const Comment = () => {
     {
       id: 1,
       username: "skl100n",
-      time: "5 years ago",
+      time: "5 seconds ago",
       content:
         "My boi Jojj hasn't been sleeping, so we shouldn't sleep on him too",
       replies: 2,
@@ -14,7 +14,7 @@ const Comment = () => {
     {
       id: 2,
       username: "marytherese9740",
-      time: "5 years ago (edited)",
+      time: "5 seconds ago (edited)",
       content:
         "What I think happened in the video is: The copilot took off his eye and proceeded to become the new villain to make joji happy",
       replies: 3,
@@ -22,7 +22,7 @@ const Comment = () => {
     {
       id: 3,
       username: "arifputra1687",
-      time: "5 years ago",
+      time: "5 seconds ago",
       content:
         'Director: "How many technological future space effects do u want?" Jojj : "No"',
       replies: 4,
@@ -30,7 +30,7 @@ const Comment = () => {
     {
       id: 4,
       username: "xinquiote9572",
-      time: "5 years ago",
+      time: "5 minutes ago",
       content:
         "This is quiet sad. He become the next villain to make his friend motivated again.",
       replies: 1,
@@ -39,7 +39,7 @@ const Comment = () => {
 
   return (
     <div style={{ padding: "20px 80px", fontFamily: "Arial, sans-serif" }}>
-      <h3>4 Comments</h3>
+      <h3>4 Reviews</h3>
       <div style={{ marginBottom: "20px" }}>
         <input
           type="text"

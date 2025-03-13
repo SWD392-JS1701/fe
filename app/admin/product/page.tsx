@@ -3,20 +3,25 @@
 import React, { FC, useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Trash2, Plus } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import Swal from "sweetalert2";
+
 import { Product } from "@/app/types/product";
 import { getAllProducts, deleteProduct } from "@/app/services/productService";
-import { AnimatePresence } from "framer-motion";
-import ProductDrawer from "@/components/ProductDrawer";
+import ProductDrawer from "@/components/ManageProduct/ProductDrawer";
+import EditProductModal from "@/components/ManageProduct/ProductEditModal";
 
 const ProductsPage: FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null);
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
   const itemsPerPage = 6;
 
-  // Fetch products on component mount
   useEffect(() => {
     const fetchProducts = async () => {
       const fetchedProducts = await getAllProducts();
@@ -25,54 +30,151 @@ const ProductsPage: FC = () => {
     fetchProducts();
   }, []);
 
-  // Filter and search products
+  // Filter products by name and date range
   const filteredProducts = useMemo(() => {
-    return products.filter((product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm, products]);
+    return products.filter((product) => {
+      const productDate = new Date(product.expired_date);
+      const start = startDate ? new Date(startDate) : null;
+      const end = endDate ? new Date(endDate) : null;
 
-  // Pagination logic
+      const matchesSearch = product.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesDate =
+        (!start || productDate >= start) && (!end || productDate <= end);
+
+      return matchesSearch && matchesDate;
+    });
+  }, [searchTerm, products, startDate, endDate]);
+
   const totalItems = filteredProducts.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentProducts = filteredProducts.slice(startIndex, endIndex);
 
-  // Handle pagination
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
   };
 
-  // Open off-canvas drawer
   const openDrawer = (product: Product) => {
     setSelectedProduct(product);
   };
 
-  // Close off-canvas drawer
   const closeDrawer = () => {
     setSelectedProduct(null);
   };
 
-  // Delete product
+  const openEditModal = (product: Product) => {
+    setProductToEdit(product);
+  };
+
+  const closeEditModal = () => {
+    setProductToEdit(null);
+  };
+
+  const handleUpdateProduct = (updatedProduct: Product) => {
+    setProducts((prevProducts) =>
+      prevProducts.map((product) =>
+        product._id === updatedProduct._id ? updatedProduct : product
+      )
+    );
+    if (selectedProduct && selectedProduct._id === updatedProduct._id) {
+      setSelectedProduct(updatedProduct);
+    }
+  };
+
   const handleDelete = async (productId: string) => {
-    if (confirm("Are you sure you want to delete this product?")) {
-      await deleteProduct(productId);
-      setProducts((prevProducts) =>
-        prevProducts.filter((product) => product._id !== productId)
-      );
-      if (selectedProduct && selectedProduct._id === productId) {
-        closeDrawer();
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteProduct(productId);
+        setProducts((prevProducts) =>
+          prevProducts.filter((product) => product._id !== productId)
+        );
+        if (selectedProduct && selectedProduct._id === productId) {
+          closeDrawer();
+        }
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          text: "The product has been deleted.",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Failed to delete the product. Please try again.",
+          showConfirmButton: true,
+        });
       }
     }
   };
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const handleAddProduct = () => {
+    console.log("Add new product clicked");
+  };
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen relative">
+      {/* Breadcrumb and Add Button */}
+      <div className="bg-gray-100 p-4 mb-4 flex justify-between items-center rounded-lg">
+        <nav className="text-gray-600 text-sm">
+          <Link href="/admin//overview" className="hover:text-gray-800">
+            <span>Dashboard</span>
+          </Link>
+          <span className="text-gray-400"> {" > "} </span>{" "}
+          <span className="text-gray-800">Products</span>
+        </nav>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="px-2 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <span>-</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="px-2 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+          <button
+            onClick={handleAddProduct}
+            className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+          >
+            <Plus size={16} className="mr-2" /> Add
+          </button>
+        </div>
+      </div>
+
+      {/* Header */}
       <div className="bg-white rounded-lg shadow-md p-6">
-        {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-xl font-semibold text-gray-800">
@@ -135,12 +237,11 @@ const ProductsPage: FC = () => {
                       className="rounded-lg"
                     />
                     <div>
-                      <Link href={`/admin/products/${product._id}`}>
-                        <p className="text-gray-800 font-medium hover:text-blue-600 hover:underline">
+                      <Link href={`/admin/product/${product._id}`}>
+                        <p className="text-gray-800 font-medium hover:text-blue-600">
                           {product.name}
                         </p>
                       </Link>
-                      <p className="text-gray-500 text-sm">ID: {product._id}</p>
                     </div>
                   </td>
                   <td className="p-3">
@@ -156,10 +257,14 @@ const ProductsPage: FC = () => {
                     </p>
                   </td>
                   <td className="p-3">
-                    <p className="text-gray-800">{product.Supplier}</p>
+                    <p className="text-gray-800">
+                      {product.Supplier || "Currently no supplier"}
+                    </p>
                   </td>
                   <td className="p-3">
-                    <p className="text-gray-800">{product.expired_date}</p>
+                    <p className="text-gray-800">
+                      {formatDate(product.expired_date)}
+                    </p>
                   </td>
                   <td className="p-3">
                     <p className="text-gray-800">{product.product_rating}/5</p>
@@ -173,14 +278,13 @@ const ProductsPage: FC = () => {
                       >
                         <Eye size={16} />
                       </button>
-                      <Link href={`/admin/products/edit/${product._id}`}>
-                        <button
-                          className="text-blue-600 hover:text-blue-800"
-                          aria-label="Edit product"
-                        >
-                          <Pencil size={16} />
-                        </button>
-                      </Link>
+                      <button
+                        onClick={() => openEditModal(product)}
+                        className="text-blue-600 hover:text-blue-800"
+                        aria-label="Edit product"
+                      >
+                        <Pencil size={16} />
+                      </button>
                       <button
                         onClick={() => handleDelete(product._id)}
                         className="text-red-600 hover:text-red-800"
@@ -252,6 +356,13 @@ const ProductsPage: FC = () => {
       <AnimatePresence>
         {selectedProduct && (
           <ProductDrawer product={selectedProduct} onClose={closeDrawer} />
+        )}
+        {productToEdit && (
+          <EditProductModal
+            product={productToEdit}
+            onClose={closeEditModal}
+            onUpdate={handleUpdateProduct}
+          />
         )}
       </AnimatePresence>
     </div>

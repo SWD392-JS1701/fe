@@ -5,8 +5,10 @@ import Link from "next/link";
 
 import { Product } from "../app/types/product";
 import { useDispatch, useSelector } from "react-redux";
-import { addToCart, updateQuantity } from "@/lib/redux/cartSlice";
 import { RootState } from "@/lib/redux/store";
+import { addToCart, updateQuantity } from "@/lib/redux/cartSlice";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 interface ProductCardProps {
   product: Product;
@@ -15,9 +17,19 @@ interface ProductCardProps {
 const ProductCard: FC<ProductCardProps> = ({ product }) => {
   const dispatch = useDispatch();
   const cart = useSelector((state: RootState) => state.cart.items);
+  const { data: session } = useSession();
+
   const handleAddToCart = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // Check if user is a doctor
+    if (session?.user?.role === "Doctor") {
+      toast.error("Not Allowed", {
+        description: "Doctors are not allowed to add items to cart"
+      });
+      return;
+    }
 
     const existingProduct = cart.find((item) => item.id === product._id);
     if (existingProduct) {
@@ -27,6 +39,9 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
           quantity: existingProduct.quantity + 1,
         })
       );
+      toast.success("Cart Updated", {
+        description: "Product quantity updated in cart"
+      });
     } else {
       dispatch(
         addToCart({
@@ -34,8 +49,12 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
           name: product.name,
           price: product.price,
           quantity: 1,
+          image_url: product.image_url,
         })
       );
+      toast.success("Added to Cart", {
+        description: "Product successfully added to cart"
+      });
     }
   };
 
@@ -75,7 +94,12 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
                 >
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
-                <span className="ml-1 text-gray-600">4.9 (120 reviews)</span>
+                <span className="text-yellow-500 text-2xl font-semibold">
+                ⭐ {product.product_rating.toFixed(1)}
+              </span>
+              <span className="text-gray-600 text-lg ml-3">
+                (Customer Reviews)
+              </span>
               </div>
             </div>
 

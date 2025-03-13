@@ -8,8 +8,6 @@ import React, {
   FormEvent,
 } from "react";
 
-
-
 import UserCard from "@/components/UserCard";
 import { FaPlus, FaEye, FaEyeSlash } from "react-icons/fa";
 
@@ -82,7 +80,7 @@ const EmployeePage = () => {
     fetchUsers();
   }, []);
 
-  const filteredUsers = users.filter((user) => user.role !== "admin");
+  const filteredUsers = users.filter((user) => user.role !== "Admin");
 
   const handleRecruit = async (user: User) => {
     if (loading) return;

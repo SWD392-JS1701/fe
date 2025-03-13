@@ -1,7 +1,7 @@
-
 import axiosInstance from "./axiosInstance";
 import { jwtDecode } from "jwt-decode";
 import { DecodedToken } from "../types/token";
+import axios from "axios";
 
 export const register = async (
   username: string,
@@ -42,8 +42,8 @@ export const login = async (email: string, password: string) => {
     });
 
     const data = response.data;
+    console.log(data);
     return data;
-
   } catch (error: any) {
     console.error("Login API Error:", error);
     throw new Error(
@@ -51,6 +51,7 @@ export const login = async (email: string, password: string) => {
     );
   }
 };
+
 
 export const resetPassword = async (token: string, newPassword: string) => {
   try {
@@ -105,8 +106,6 @@ const isTokenExpired = (token: string): boolean => {
     return true;
   }
 };
-
-
 
 export const getUserRole = (): string | null => {
   const token = getAccessToken();

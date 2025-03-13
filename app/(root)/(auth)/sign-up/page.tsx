@@ -1,11 +1,15 @@
 "use client";
 
-import React from "react";
-import Head from "next/head";
+import React, { FC } from "react";
 import Link from "next/link";
+import Head from "next/head";
+import { useAuthProtection } from "@/app/hooks/useAuthProtection";
 import SignUpForm from "@/components/SignUpForm";
 
-const SignUp = () => {
+const SignUp: FC = () => {
+  // This will automatically redirect logged-in users away from this page
+  useAuthProtection('public');
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-pink-50 to-purple-50 flex flex-col justify-center">
       <Head>

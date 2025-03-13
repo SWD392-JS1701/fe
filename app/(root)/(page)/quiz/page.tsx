@@ -1,7 +1,64 @@
+"use client";
+
 import Head from "next/head";
-import Link from "next/link";
+import { useState } from "react";
+import QuizQuestion from "@/components/QuizQuestion";
+import { questions } from "@/app/data/quizQuestions";
 
 const QuizQuestionsPage = () => {
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState<Record<number, string[]>>({});
+  const [skinType, setSkinType] = useState<string | null>(null);
+
+  const handleAnswer = (questionId: number, selectedAnswers: string[]) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [questionId]: selectedAnswers,
+    }));
+  };
+
+  const handleNext = () => {
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex((prev) => prev + 1);
+    } else {
+      // Calculate skin type when quiz is complete
+      const totals = {
+        Dry: 0,
+        Oily: 0,
+        Sensitive: 0,
+        Insensitive: 0,
+        Pigmented: 0,
+        NonPigmented: 0,
+        Wrinkled: 0,
+        Tight: 0,
+      };
+
+      // Sum points for each answer
+      Object.entries(answers).forEach(([qId, ans]) => {
+        const q = questions.find((q) => q.id === parseInt(qId));
+        ans.forEach((a) => {
+          const answer = q?.answers.find((aObj) => aObj.text === a);
+          if (answer) {
+            Object.entries(answer.points).forEach(([key, value]) => {
+              totals[key as keyof typeof totals] += value;
+            });
+          }
+        });
+      });
+
+      // Determine skin type based on highest scores
+      const skinTypeResult =
+        (totals.Dry > totals.Oily ? "D" : "O") +
+        (totals.Sensitive > totals.Insensitive ? "S" : "I") +
+        (totals.Pigmented > totals.NonPigmented ? "P" : "N") +
+        (totals.Wrinkled > totals.Tight ? "W" : "T");
+
+      setSkinType(skinTypeResult);
+    }
+  };
+
+  const currentQuestion = questions[currentQuestionIndex];
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-pink-50 to-purple-50 mt-[70px]">
       <Head>
@@ -13,85 +70,63 @@ const QuizQuestionsPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      {/* Quiz Questions Section */}
-      <section className="container mx-auto px-6 py-20">
-        <h1 className="text-3xl font-bold text-purple-800 mb-8 text-center">
+      {/* Quiz Container */}
+      <section className="container mx-auto px-6 py-12">
+        <h1 className="text-4xl font-bold text-purple-800 mb-6 text-center">
           Skin Type Quiz
         </h1>
-        <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl mx-auto">
-          {/* Question 1 */}
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-purple-800 mb-4">
-              1. How does your skin feel after washing?
-            </h2>
-            <div className="space-y-4">
-              <label className="flex items-center space-x-3">
-                <input
-                  type="radio"
-                  name="question1"
-                  className="form-radio text-purple-600"
-                />
-                <span className="text-gray-700">Tight and dry</span>
-              </label>
-              <label className="flex items-center space-x-3">
-                <input
-                  type="radio"
-                  name="question1"
-                  className="form-radio text-purple-600"
-                />
-                <span className="text-gray-700">Smooth and balanced</span>
-              </label>
-              <label className="flex items-center space-x-3">
-                <input
-                  type="radio"
-                  name="question1"
-                  className="form-radio text-purple-600"
-                />
-                <span className="text-gray-700">Oily and shiny</span>
-              </label>
-            </div>
-          </div>
+        <p className="text-center text-gray-600 mb-8">
+          Answer the following 16 questions to discover your Baumann Skin Type.
+          Some questions allow multiple answers—select all that apply!
+        </p>
 
-          {/* Question 2 */}
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-purple-800 mb-4">
-              2. How often do you experience breakouts?
-            </h2>
-            <div className="space-y-4">
-              <label className="flex items-center space-x-3">
-                <input
-                  type="radio"
-                  name="question2"
-                  className="form-radio text-purple-600"
-                />
-                <span className="text-gray-700">Rarely</span>
-              </label>
-              <label className="flex items-center space-x-3">
-                <input
-                  type="radio"
-                  name="question2"
-                  className="form-radio text-purple-600"
-                />
-                <span className="text-gray-700">Occasionally</span>
-              </label>
-              <label className="flex items-center space-x-3">
-                <input
-                  type="radio"
-                  name="question2"
-                  className="form-radio text-purple-600"
-                />
-                <span className="text-gray-700">Frequently</span>
-              </label>
-            </div>
-          </div>
+        {/* Progress Bar */}
+        <div className="w-full bg-gray-200 rounded-full h-2.5 mb-8">
+          <div
+            className="bg-purple-600 h-2.5 rounded-full transition-all duration-500"
+            style={{
+              width: `${
+                ((currentQuestionIndex + 1) / questions.length) * 100
+              }%`,
+            }}
+          ></div>
+        </div>
 
-          {/* Submit Button */}
-          <div className="text-center">
-            <button className="bg-purple-600 text-white px-8 py-3 rounded-full hover:bg-purple-700 transition duration-300">
-              Submit
+        {/* Display Result if Quiz is Complete */}
+        {skinType ? (
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-2xl mx-auto text-center">
+            <h2 className="text-2xl font-bold text-purple-800 mb-4">
+              Your Baumann Skin Type
+            </h2>
+            <p className="text-xl text-gray-700 mb-6">
+              Your skin type is <span className="font-bold">{skinType}</span>.
+            </p>
+            <button
+              className="bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition duration-300"
+              onClick={() => {
+                setCurrentQuestionIndex(0);
+                setAnswers({});
+                setSkinType(null);
+              }}
+            >
+              Retake Quiz
             </button>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Current Question */}
+            <QuizQuestion
+              question={currentQuestion}
+              onAnswer={handleAnswer}
+              onNext={handleNext}
+            />
+
+            {/* Navigation Info */}
+            <div className="text-center mt-4 text-gray-600">
+              Question {currentQuestionIndex + 1} of 16
+            </div>
+          </>
+        )}
       </section>
     </div>
   );

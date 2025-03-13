@@ -1,33 +1,16 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { API_URL } from "@/config";
 import { getSession, useSession } from "next-auth/react";
 import { jwtDecode } from "jwt-decode";
-
+import { User } from "../types/user";
+import axiosInstance from "./axiosInstance";
 interface JWTPayload {
   id: string;
   username: string;
   role: string;
   iat?: number;
   exp?: number;
-}
-
-export interface User {
-  _id: string;
-  username: string;
-  email: string;
-  role: string;
-  point: number;
-  skinType: string;
-  sensitivity: string;
-  first_name: string;
-  last_name: string;
-  phone_number: string;
-  address: string;
-  status: number;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export const useAuthRedirect = () => {
@@ -64,11 +47,7 @@ const authHeaders = async (session?: any) => {
 
 export const getAllUsers = async (session?: any): Promise<User[]> => {
   try {
-    const headers = await authHeaders(session);
-    const response = await axios.get<User[]>(`${API_URL}/users`, {
-      headers,
-
-    });
+    const response = await axiosInstance.get<User[]>("/users");
     return response.data;
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -78,16 +57,15 @@ export const getAllUsers = async (session?: any): Promise<User[]> => {
 
 export const getUserById = async (session?: any): Promise<User | null> => {
   try {
-    console.log("Session received in getUserById:", session);
+    // console.log("Session received in getUserById:", session);
 
     if (!session?.user?.access_token) {
       console.error("No access token found in session.");
       return null;
     }
 
-    
     const decoded: JWTPayload = jwtDecode(session.user.access_token);
-    console.log("Decoded token:", decoded);
+    // console.log("Decoded token:", decoded);
 
     if (!decoded.id) {
       console.error("No user ID found in decoded token.");
@@ -95,23 +73,26 @@ export const getUserById = async (session?: any): Promise<User | null> => {
     }
 
     const headers = await authHeaders(session);
-    console.log("Request headers:", headers);
-    console.log("Making request to:", `${API_URL}/users/${decoded.id}`);
+    // console.log("Request headers:", headers);
+    // console.log("Making request to:", `${API_URL}/users/${decoded.id}`);
 
-    const response = await axios.get<User>(`${API_URL}/users/${decoded.id}`, {
-      headers,
-    });
+    const response = await axiosInstance.get<User>(
+      `${API_URL}/users/${decoded.id}`,
+      {
+        headers,
+      }
+    );
 
-    console.log("API Response:", response.data);
+    // console.log("API Response:", response.data);
     return response.data;
   } catch (error: any) {
     console.error("Error fetching user details:", {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data,
-      stack: error.stack
+      stack: error.stack,
     });
-    
+
     if (error.response?.status === 400) {
       console.error("Invalid user ID format");
     } else if (error.response?.status === 401) {
@@ -119,7 +100,7 @@ export const getUserById = async (session?: any): Promise<User | null> => {
     } else if (error.response?.status === 404) {
       console.error("User not found");
     }
-    
+
     return null;
   }
 };
@@ -129,14 +110,12 @@ export const getUser = async (query: string): Promise<User | null> => {
     const headers = await authHeaders();
     let response;
     if (query.includes("@")) {
-
-      response = await axios.get<User>(`${API_URL}/user/${query}`, {
+      response = await axiosInstance.get<User>(`${API_URL}/user/${query}`, {
         headers,
       });
     } else {
-      response = await axios.get<User>(`${API_URL}/users/${query}`, {
+      response = await axiosInstance.get<User>(`${API_URL}/users/${query}`, {
         headers,
-
       });
     }
     return response.data;
@@ -148,11 +127,9 @@ export const getUser = async (query: string): Promise<User | null> => {
 
 export const createUser = async (user: User): Promise<User | null> => {
   try {
-
     const headers = await authHeaders();
-    const response = await axios.post<User>(`${API_URL}/users`, user, {
+    const response = await axiosInstance.post<User>(`${API_URL}/users`, user, {
       headers,
-
     });
     return response.data;
   } catch (error) {
@@ -166,9 +143,8 @@ export const updateUser = async (
   user: Partial<User>
 ): Promise<User | null> => {
   try {
-
     const headers = await authHeaders();
-    const response = await axios.patch<User>(
+    const response = await axiosInstance.patch<User>(
       `${API_URL}/users/${userId}`,
       user,
       { headers }
@@ -184,9 +160,8 @@ export const updateUser = async (
 export const deleteUser = async (userId: string): Promise<void> => {
   try {
     const headers = await authHeaders();
-    await axios.delete(`${API_URL}/users/${userId}`, {
+    await axiosInstance.delete(`${API_URL}/users/${userId}`, {
       headers,
-
     });
   } catch (error) {
     console.error("Error deleting user:", error);

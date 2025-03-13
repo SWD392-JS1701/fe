@@ -30,7 +30,6 @@ import { Button } from "@/components/ui/button";
 
 import { useSession } from "next-auth/react";
 
-
 import UserProfile from "@/components/UserProfile";
 import Membership from "@/components/Membership";
 import Error from "@/components/Error";
@@ -49,16 +48,15 @@ const ProfilePage: FC = () => {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const router = useRouter();
-  
 
   const { data: session, status } = useSession();
-  
+
   // This will handle the redirection if not authenticated
   useAuthRedirect();
 
   useEffect(() => {
-    console.log("Session Status:", status);
-    console.log("Session Data:", session);
+    // console.log("Session Status:", status);
+    // console.log("Session Data:", session);
 
     if (status === "loading") return;
 
@@ -69,22 +67,20 @@ const ProfilePage: FC = () => {
 
     const getUserProfile = async () => {
       try {
-        console.log("Calling getUserById with session:", {
-          id: session?.user?.id,
-          email: session?.user?.email,
-          role: session?.user?.role,
-          token: session?.user?.access_token ? "present" : "missing"
-        });
-        
+        // console.log("Calling getUserById with session:", {
+        //   id: session?.user?.id,
+        //   email: session?.user?.email,
+        //   role: session?.user?.role,
+        //   token: session?.user?.access_token ? "present" : "missing",
+        // });
+
         const userData = await getUserById(session);
-        
+
         if (!userData) {
           console.error("No user data returned from getUserById");
           setIsAuthorized(false);
           return;
         }
-
-        
 
         setIsAuthorized(true);
 
@@ -107,9 +103,9 @@ const ProfilePage: FC = () => {
         console.error("Error in getUserProfile:", {
           message: err.message,
           status: err.response?.status,
-          data: err.response?.data
+          data: err.response?.data,
         });
-        
+
         setIsAuthorized(false);
 
         if (err.response?.status === 401) {
@@ -135,17 +131,15 @@ const ProfilePage: FC = () => {
     getUserProfile();
 
     fetchMemberships();
-  
   }, [session, status, router]);
 
-  
   const handleNavClick = (section: string) => {
     setActiveSection(section);
   };
 
   const handleLogout = async () => {
-      await signOut({ callbackUrl: "/sign-in" });
-    };
+    await signOut({ callbackUrl: "/sign-in" });
+  };
 
   if (isAuthorized === null || loading) {
     return <Loading />;
@@ -159,7 +153,6 @@ const ProfilePage: FC = () => {
     Error("Error", "No user data available.");
     return null;
   }
-
 
   const renderContent = () => {
     switch (activeSection) {
@@ -331,7 +324,6 @@ const ProfilePage: FC = () => {
       </div>
     </>
   );
-
 };
 
 export default ProfilePage;
