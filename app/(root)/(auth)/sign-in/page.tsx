@@ -68,7 +68,7 @@ const SignIn: FC = () => {
         );
         if (session?.user?.access_token) {
           const decoded: JWTPayload = jwtDecode(session.user.access_token);
-          console.log("Decoded token:", decoded);
+          // console.log("Decoded token:", decoded);
 
           if (decoded.role === "Admin") {
             router.push("/admin/overview");
