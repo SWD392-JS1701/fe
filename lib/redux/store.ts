@@ -1,7 +1,8 @@
 import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { getUserFromToken } from "@/lib/redux/auth";
 import cartReducer from "./cartSlice";
 
-interface User {
+export interface User {
   id: string;
   username?: string;
   role?: string;
@@ -15,8 +16,7 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  isAuthenticated:
-    typeof window !== "undefined" && !!localStorage.getItem("access_token"),
+  isAuthenticated: false,
   user: null,
 };
 
@@ -27,17 +27,14 @@ const authSlice = createSlice({
     login(state, action: PayloadAction<User>) {
       state.isAuthenticated = true;
       state.user = action.payload;
-      if (action.payload.access_token) {
-        localStorage.setItem("access_token", action.payload.access_token);
-      }
     },
     logout(state) {
       state.isAuthenticated = false;
       state.user = null;
-      localStorage.removeItem("access_token");
     },
     setUser(state, action: PayloadAction<User | null>) {
       state.user = action.payload;
+      state.isAuthenticated = !!action.payload;
     },
   },
 });

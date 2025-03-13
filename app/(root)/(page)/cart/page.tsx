@@ -47,8 +47,7 @@ const CartPage = () => {
   };
 
   const handleCheckout = async () => {
-    console.log("Auth State:", { isAuthenticated, user });
-    if (!user) {
+    if (!isAuthenticated || !user) {
       Swal.fire({
         icon: "error",
         title: "Error!",
@@ -71,40 +70,34 @@ const CartPage = () => {
 
     setLoading(true);
     try {
-      // Step 1: Create the Order
-      const orderData = {
+      const paymentData = {
         user_Id: user.id,
         amount: totalCost,
       };
-      const newOrder = await createOrder(orderData);
-
-      // Step 2: Create the Order Detail
+      const paymentResponse = await createOrder(paymentData);
       const orderDetailData = {
-        order_Id: newOrder._id,
+        order_Id: paymentResponse._id,
         product_List: cartItems.map((item) => ({
           product_Id: item.id,
           quantity: item.quantity,
         })),
       };
-      await createOrderDetail(orderDetailData);
 
-      // Step 3: Clear the cart and notify the user
       dispatch(clearCart());
       Swal.fire({
         icon: "success",
         title: "Success!",
-        text: "Order placed successfully!",
+        text: "Order placed successfully! Payment processed.",
         showConfirmButton: false,
         timer: 1500,
       });
-
-      // Redirect to an order confirmation page
-      router.push(`/checkout`);
     } catch (error: any) {
       Swal.fire({
         icon: "error",
         title: "Error!",
-        text: error.message || "Failed to place order. Please try again.",
+        text:
+          error.message ||
+          "Failed to place order or process payment. Please try again.",
         showConfirmButton: true,
       });
     } finally {
