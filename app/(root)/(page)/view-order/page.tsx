@@ -15,8 +15,11 @@ import { toast } from "sonner";
 import Loading from "@/components/Loading";
 import OrderDetailModal from "@/components/UserProfile/OrderDetailModal";
 
-import { getOrdersByUserId } from "@/app/services/orderService";
-import { Order } from "@/app/types/order";
+import {
+  getOrdersByUserId,
+  getOrderDetailsByOrderId,
+} from "@/app/services/orderService";
+import { Order, OrderDetail } from "@/app/types/order";
 
 interface User {
   id: string;
@@ -24,6 +27,9 @@ interface User {
 
 const ViewOrderPage: FC<{ user: User }> = ({ user }) => {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [orderDetailsMap, setOrderDetailsMap] = useState<
+    Map<string, OrderDetail[]>
+  >(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -40,6 +46,16 @@ const ViewOrderPage: FC<{ user: User }> = ({ user }) => {
       try {
         const data = await getOrdersByUserId(user.id);
         setOrders(data);
+        const detailsPromises = data.map(async (order) => {
+          const details = await getOrderDetailsByOrderId(order._id);
+          return { orderId: order._id, details };
+        });
+        const detailsResults = await Promise.all(detailsPromises);
+        const newOrderDetailsMap = new Map<string, OrderDetail[]>();
+        detailsResults.forEach(({ orderId, details }) => {
+          newOrderDetailsMap.set(orderId, details);
+        });
+        setOrderDetailsMap(newOrderDetailsMap);
       } catch (err: any) {
         setError(err.message || "Failed to fetch orders.");
         console.error("Error fetching orders:", err);
@@ -176,11 +192,11 @@ const ViewOrderPage: FC<{ user: User }> = ({ user }) => {
         </CardContent>
       </Card>
 
-      {/* Order Detail Modal Component */}
       <OrderDetailModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         order={selectedOrder}
+        orderDetail={orderDetailsMap.get(selectedOrder?._id || "")?.[0] || null}
       />
     </div>
   );

@@ -17,6 +17,7 @@ export interface OrderDetail {
   _id: string;
   order_Id: string;
   product_List: {
+    name: string;
     product_Id: string;
     quantity: number;
     _id?: string;
@@ -27,6 +28,7 @@ export interface OrderDetail {
 export interface CreateOrderDetailRequest {
   order_Id: string;
   product_List: {
+    name: string;
     product_Id: string;
     quantity: number;
   }[];
