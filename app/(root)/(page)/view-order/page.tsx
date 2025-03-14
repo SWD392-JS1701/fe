@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import Loading from "@/components/Loading";
+import OrderDetailModal from "@/components/UserProfile/OrderDetailModal";
 
 import { getOrdersByUserId } from "@/app/services/orderService";
 import { Order } from "@/app/types/order";
@@ -25,6 +26,8 @@ const ViewOrderPage: FC<{ user: User }> = ({ user }) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -88,6 +91,15 @@ const ViewOrderPage: FC<{ user: User }> = ({ user }) => {
     }
   };
 
+  const handleOrderClick = (order: Order) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   if (loading) return <Loading />;
   if (error) {
     toast.error("Error", { description: error });
@@ -115,7 +127,6 @@ const ViewOrderPage: FC<{ user: User }> = ({ user }) => {
                 <TableHead className="font-semibold text-gray-700">
                   Status
                 </TableHead>
-
                 <TableHead className="text-right font-semibold text-gray-700">
                   Total
                 </TableHead>
@@ -134,7 +145,11 @@ const ViewOrderPage: FC<{ user: User }> = ({ user }) => {
               ) : (
                 orders.map((order, index) => {
                   return (
-                    <TableRow key={order._id} className="hover:bg-gray-50">
+                    <TableRow
+                      key={order._id}
+                      className="hover:bg-gray-50 cursor-pointer"
+                      onClick={() => handleOrderClick(order)}
+                    >
                       <TableCell className="font-medium text-gray-800">
                         {index + 1}
                       </TableCell>
@@ -160,6 +175,13 @@ const ViewOrderPage: FC<{ user: User }> = ({ user }) => {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Order Detail Modal Component */}
+      <OrderDetailModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        order={selectedOrder}
+      />
     </div>
   );
 };

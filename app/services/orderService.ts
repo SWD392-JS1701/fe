@@ -125,6 +125,37 @@ export const getOrderDetailById = async (id: string): Promise<OrderDetail> => {
   }
 };
 
+export const getOrderDetailsByOrderId = async (
+  orderId: string
+): Promise<OrderDetail[]> => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/order-details/order/${orderId}`,
+      {
+        headers: {
+          accept: "*/*",
+        },
+      }
+    );
+
+    if (response.data && Array.isArray(response.data.orderDetails)) {
+      return response.data.orderDetails as OrderDetail[];
+    } else {
+      console.warn("Unexpected response format:", response.data);
+      return [];
+    }
+  } catch (error: any) {
+    console.error(
+      "Error fetching order details by order ID:",
+      error.message || error
+    );
+    throw new Error(
+      error.response?.data?.message ||
+        "Failed to fetch order details by order ID"
+    );
+  }
+};
+
 export const createOrderDetail = async (
   orderDetailData: CreateOrderDetailRequest
 ): Promise<OrderDetail> => {

@@ -29,8 +29,8 @@ import { Button } from "@/components/ui/button";
 
 import { useSession } from "next-auth/react";
 
-import UserProfile from "@/components/UserProfile";
-import Membership from "@/components/Membership";
+import UserProfile from "@/components/UserProfile/UserProfile";
+import Membership from "@/components/UserProfile/Membership";
 import Error from "@/components/Error";
 import Loading from "@/components/Loading";
 import ChangePasswordPage from "../change-password/page";
