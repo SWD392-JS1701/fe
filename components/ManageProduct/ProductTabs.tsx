@@ -1,19 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-
-interface Product {
-  name: string;
-  product_rating: number;
-  price: number;
-  stock: number;
-  Supplier: string;
-  volume: number;
-  expired_date: string;
-  created_at: string;
-  updated_at: string;
-  description: string;
-}
+import { Product } from "../../app/types/product";
 
 interface ProductTabsProps {
   product: Product;

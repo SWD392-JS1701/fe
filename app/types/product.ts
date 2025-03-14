@@ -10,8 +10,8 @@ export interface Product {
   supplier_name?: string;
   expired_date: string;
   volume?: number;
-  created_at?: string;
-  updated_at?: string;
+  created_at: string;
+  updated_at: string;
   __v?: number;
   Supplier?: string;
 }
