@@ -26,9 +26,8 @@ const ViewBlog: FC = () => {
     fetchBlogs();
   }, []);
 
-  const truncateContent = (content: string, maxLength: number) => {
-    if (content.length <= maxLength) return content;
-    return content.substring(0, maxLength) + "...";
+  const truncateContent = (content: string) => {
+    return content.split(".")[0] + "."; // Chỉ lấy câu đầu tiên
   };
 
   if (loading) {
@@ -50,14 +49,8 @@ const ViewBlog: FC = () => {
   }
 
   return (
-    <div className="relative bg-gray-50 px-6 pt-16 pb-20 lg:px-8 lg:pt-24 lg:pb-28">
-      {/* Background Gradient */}
-      <div className="absolute inset-0">
-        <div className="h-1/3 bg-white sm:h-2/3"></div>
-      </div>
-
+    <div className="relative px-6 pt-16 pb-20 lg:px-8 lg:pt-24 lg:pb-28 mt-10">
       <div className="relative mx-auto max-w-7xl">
-        {/* Header */}
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Daily Posts
@@ -67,8 +60,7 @@ const ViewBlog: FC = () => {
           </p>
         </div>
 
-        {/* Blog Grid */}
-        <div className="mx-auto mt-12 grid max-w-lg gap-5 lg:max-w-none lg:grid-cols-3">
+        <div className="mx-auto mt-12 grid max-w-4xl gap-8 lg:max-w-none lg:grid-cols-3">
           {blogs.length === 0 ? (
             <div className="col-span-full text-center text-gray-500 text-lg">
               No blogs available.
@@ -77,59 +69,47 @@ const ViewBlog: FC = () => {
             blogs.map((blog) => (
               <div
                 key={blog._id}
-                className="flex flex-col overflow-hidden rounded-lg shadow-lg"
+                className="relative overflow-hidden rounded-xl shadow-lg group w-full h-[450px]"
               >
-                {/* Placeholder Image (since API data doesn't include images) */}
-                <div className="flex-shrink-0">
+                {/* Hình ảnh */}
+                <div className="relative h-72 w-full transition-transform duration-400 ease-in-out group-hover:-translate-y-10">
                   <img
-                    className="h-48 w-full object-cover"
+                    className="h-full w-full object-cover"
                     src="https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1679&q=80"
                     alt={blog.title}
                   />
                 </div>
-                <div className="flex flex-1 flex-col justify-between bg-white p-6">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-indigo-600">
-                      <Link href={`/view-blog/${blog._id}`}>Article</Link>
+
+                {/* Nội dung */}
+                <div className="absolute bottom-0 left-0 w-full bg-white p-6 transition-transform duration-400 ease-in-out group-hover:-translate-y-10">
+                  <Link href={`/view-blog/${blog._id}`} className="block">
+                    <p className="text-2xl font-extrabold text-black uppercase tracking-wide text-center">
+                      {blog.title}
                     </p>
-                    <Link
-                      href={`/view-blog/${blog._id}`}
-                      className="mt-2 block"
-                    >
-                      <p className="text-xl font-semibold text-gray-900">
-                        {blog.title}
-                      </p>
-                      <p className="mt-3 text-base text-gray-500">
-                        {truncateContent(blog.content, 100)}
-                      </p>
-                    </Link>
-                  </div>
-                  <div className="mt-6 flex items-center">
-                    <div className="flex-shrink-0">
-                      <Link href={`/doctors/${blog.doctor_id._id}`}>
-                        <span className="sr-only">
-                          {blog.author ||
-                            `${blog.doctor_id.first_name} ${blog.doctor_id.last_name}`}
-                        </span>
-                      </Link>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-gray-900">
-                        <Link
-                          href={`/doctors/${blog.doctor_id._id}`}
-                          className="hover:underline"
-                        >
-                          {blog.author ||
-                            `${blog.doctor_id.first_name} ${blog.doctor_id.last_name}`}
-                        </Link>
-                      </p>
-                      <div className="flex space-x-1 text-sm text-gray-500">
-                        <time dateTime={blog.created_at}>
-                          {new Date(blog.created_at).toLocaleDateString()}
-                        </time>
-                      </div>
-                    </div>
-                  </div>
+
+                    <p className="text-sm text-gray-500 opacity-0 transition-opacity duration-400 ease-in-out group-hover:opacity-100 line-clamp-1 text-center">
+                      {truncateContent(blog.content, 80)}
+                    </p>
+                  </Link>
+                  {/* Chữ "READ NOW" xuất hiện khi hover */}
+                  <Link
+                    href={`/view-blog/${blog._id}`}
+                    className="block text-center text-sm font-bold text-black uppercase tracking-wide opacity-0 transition-opacity duration-400 ease-in-out group-hover:opacity-100 mt-2"
+                  >
+                    Read Now →
+                  </Link>
+                </div>
+
+                {/* Thông tin tác giả & ngày đăng */}
+                <div className="absolute bottom-6 right-6 text-sm text-gray-600 opacity-0 transition-opacity duration-400 ease-in-out group-hover:opacity-100">
+                  <span>
+                    {blog.author ||
+                      `${blog.doctor_id.first_name} ${blog.doctor_id.last_name}`}
+                  </span>{" "}
+                  •{" "}
+                  <time dateTime={blog.created_at}>
+                    {new Date(blog.created_at).toLocaleDateString()}
+                  </time>
                 </div>
               </div>
             ))
