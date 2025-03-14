@@ -1,7 +1,6 @@
 import axiosInstance from "./axiosInstance";
 import { jwtDecode } from "jwt-decode";
 import { DecodedToken } from "../types/token";
-import axios from "axios";
 
 export const register = async (
   username: string,
@@ -51,7 +50,6 @@ export const login = async (email: string, password: string) => {
     );
   }
 };
-
 
 export const resetPassword = async (token: string, newPassword: string) => {
   try {
