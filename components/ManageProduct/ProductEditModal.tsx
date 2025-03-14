@@ -35,15 +35,24 @@ const EditProductModal: FC<EditProductModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<Product>({
     ...product,
-    expired_date: new Date(product.expired_date).toISOString().split("T")[0],
+    expired_date: new Date(product.expired_date).toISOString().split("T")[0], // Format date for input
   });
   const [productTypes, setProductTypes] = useState<ProductType[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   useEffect(() => {
     const fetchProductTypes = async () => {
-      const types = await getAllProductTypes();
-      setProductTypes(types);
+      try {
+        const types = await getAllProductTypes();
+        setProductTypes(types);
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "Failed to fetch product types.",
+          showConfirmButton: true,
+        });
+      }
     };
     fetchProductTypes();
   }, []);
@@ -56,7 +65,12 @@ const EditProductModal: FC<EditProductModalProps> = ({
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]:
+        name === "product_rating" || name === "price" || name === "volume"
+          ? parseFloat(value) || 0
+          : name === "stock"
+          ? parseInt(value, 10) || 0
+          : value,
     }));
   };
 
@@ -70,10 +84,12 @@ const EditProductModal: FC<EditProductModalProps> = ({
     e.preventDefault();
 
     // Validate numeric fields
-    const productRating = parseFloat(formData.product_rating.toString());
+    const productRating = parseFloat(
+      formData.product_rating?.toString() || "0"
+    );
     const price = parseFloat(formData.price.toString());
     const stock = parseInt(formData.stock.toString(), 10);
-    const volume = parseFloat(formData.volume.toString() || "0");
+    const volume = parseFloat(formData.volume?.toString() || "0");
 
     if (isNaN(productRating) || isNaN(price) || isNaN(stock) || isNaN(volume)) {
       Swal.fire({
@@ -102,9 +118,7 @@ const EditProductModal: FC<EditProductModalProps> = ({
     // Upload new image if selected
     if (imageFile) {
       const storageRef = ref(storage, `images/${product._id}`);
-
       try {
-        // Only try to delete the existing image if the URL is valid and exists
         if (
           formData.image_url &&
           formData.image_url.startsWith(
@@ -114,43 +128,40 @@ const EditProductModal: FC<EditProductModalProps> = ({
           const storagePath = decodeURIComponent(
             formData.image_url.split("/o/")[1].split("?")[0]
           );
-
           const oldImageRef = ref(storage, storagePath);
-
-          // Check if the image exists
           try {
-            await getDownloadURL(oldImageRef); // If this works, the image exists
-            await deleteObject(oldImageRef); // Only delete if it exists
+            await getDownloadURL(oldImageRef); // Check if image exists
+            await deleteObject(oldImageRef);
           } catch (error: any) {
             if (error.code !== "storage/object-not-found") {
-              throw error; // Rethrow if it's a different error
+              throw error;
             }
           }
         }
 
-        // Upload new image
-        await uploadBytes(storageRef, imageFile);
-        imageUrl = await getDownloadURL(storageRef);
+        const snapshot = await uploadBytes(storageRef, imageFile);
+        imageUrl = await getDownloadURL(snapshot.ref);
       } catch (error) {
         Swal.fire({
           icon: "error",
           title: "Upload Failed",
-          text: "Failed to upload image: " + error.message,
+          text: "Failed to upload image: " + (error as Error).message,
           showConfirmButton: true,
         });
         return;
       }
     }
 
-    // Prepare request body
     const requestBody: ProductUpdateRequest = {
-      ...formData,
-      product_rating: productRating,
+      name: formData.name,
       price,
+      product_rating: productRating,
       stock,
       volume,
       expired_date: expiredDate.toISOString(),
       image_url: imageUrl,
+      product_type_id: formData.product_type_id,
+      description: formData.description,
     };
 
     try {
@@ -190,7 +201,6 @@ const EditProductModal: FC<EditProductModalProps> = ({
         transition={{ duration: 0.3 }}
         className="bg-white rounded-lg shadow-xl p-8 w-full max-w-2xl relative"
       >
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors"
@@ -202,6 +212,7 @@ const EditProductModal: FC<EditProductModalProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Product Name */}
             <div>
               <label
                 htmlFor="name"
@@ -220,6 +231,7 @@ const EditProductModal: FC<EditProductModalProps> = ({
               />
             </div>
 
+            {/* Price */}
             <div>
               <label
                 htmlFor="price"
@@ -233,12 +245,136 @@ const EditProductModal: FC<EditProductModalProps> = ({
                 name="price"
                 value={formData.price}
                 onChange={handleChange}
+                step="0.01"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                 required
               />
             </div>
 
+            {/* Product Rating */}
             <div>
+              <label
+                htmlFor="product_rating"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Product Rating
+              </label>
+              <input
+                type="number"
+                id="product_rating"
+                name="product_rating"
+                value={formData.product_rating || ""}
+                onChange={handleChange}
+                step="0.1"
+                min="0"
+                max="5"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+
+            {/* Stock */}
+            <div>
+              <label
+                htmlFor="stock"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Stock
+              </label>
+              <input
+                type="number"
+                id="stock"
+                name="stock"
+                value={formData.stock}
+                onChange={handleChange}
+                min="0"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                required
+              />
+            </div>
+
+            {/* Volume */}
+            <div>
+              <label
+                htmlFor="volume"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Volume (ml)
+              </label>
+              <input
+                type="number"
+                id="volume"
+                name="volume"
+                value={formData.volume || ""}
+                onChange={handleChange}
+                step="0.1"
+                min="0"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+
+            {/* Expired Date */}
+            <div>
+              <label
+                htmlFor="expired_date"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Expiration Date
+              </label>
+              <input
+                type="date"
+                id="expired_date"
+                name="expired_date"
+                value={formData.expired_date}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                required
+              />
+            </div>
+
+            {/* Product Type */}
+            <div>
+              <label
+                htmlFor="product_type_id"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Product Type
+              </label>
+              <select
+                id="product_type_id"
+                name="product_type_id"
+                value={formData.product_type_id}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                required
+              >
+                <option value="">Select a type</option>
+                {productTypes.map((type) => (
+                  <option key={type._id} value={type._id}>
+                    {type.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Description */}
+            <div className="md:col-span-2">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Description
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description || ""}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg h-24 resize-none"
+              />
+            </div>
+
+            {/* Image */}
+            <div className="md:col-span-2">
               <label
                 htmlFor="image"
                 className="block text-sm font-medium text-gray-700"
@@ -255,7 +391,7 @@ const EditProductModal: FC<EditProductModalProps> = ({
               {formData.image_url && !imageFile && (
                 <img
                   src={formData.image_url}
-                  alt="Product"
+                  alt={formData.name}
                   className="mt-2 h-32 object-cover rounded-md"
                 />
               )}
