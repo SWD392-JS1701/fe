@@ -9,7 +9,7 @@ import {
   createBlog,
   updateBlog,
   deleteBlog,
-} from "@/app/controller/blogController";
+} from "@/app/services/blogService";
 import { useSession } from "next-auth/react";
 
 interface Blog {
@@ -175,6 +175,12 @@ const BlogPage = () => {
     }
   };
 
+  const handleDeleteDraft = () => {
+    localStorage.removeItem("blogDraft");
+    setFormData({ title: "", content: "" });
+    toast.success("Draft deleted successfully");
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case "edit":
@@ -247,6 +253,14 @@ const BlogPage = () => {
                 Create New Blog
               </h2>
               <div className="flex gap-3">
+                {formData.title.trim() || formData.content.trim() ? (
+                  <button
+                    onClick={handleDeleteDraft}
+                    className="px-6 py-2.5 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors duration-200 shadow-sm"
+                  >
+                    Delete Draft
+                  </button>
+                ) : null}
                 <button
                   onClick={() => handleTabChange("view")}
                   className="px-6 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors duration-200 shadow-sm"

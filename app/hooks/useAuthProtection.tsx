@@ -30,7 +30,7 @@ export const useAuthProtection = (mode: 'protected' | 'public') => {
       if (session.user?.role === 'Admin') {
         router.replace('/admin/overview');
         
-      } else if (session.user?.role === 'Doctor') {
+      } else if (session.user?.role === 'Doctor'||session.user?.role === 'Staff') {
         router.replace('/');
         
       } else {

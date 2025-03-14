@@ -5,6 +5,7 @@ import AdminNavbar from "./AdminNavbar";
 import DoctorNavbar from "./DoctorNavbar";
 import Navbar from "./Navbar";
 import Loading from "../Loading";
+import StaffNavbar from "./StaffNavbar";
 
 const NavbarWrapper = () => {
   const { data: session, status } = useSession();
@@ -28,6 +29,8 @@ const NavbarWrapper = () => {
       return <AdminNavbar />;
     case "Doctor":
       return <DoctorNavbar />;
+    case "Staff":
+      return <StaffNavbar />;
     default:
       return <Navbar />;
   }

@@ -192,7 +192,8 @@ const ProfilePage: FC = () => {
       </Head>
       <div className="bg-pink-50">
         <main className="container mx-auto py-30 px-4 bg-white">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8"> 
+            
             {/* Left Sidebar - User Info & Navigation */}
             <div className="md:col-span-1">
               <div className="border border-gray-200 rounded-md overflow-hidden">
@@ -216,17 +217,8 @@ const ProfilePage: FC = () => {
                     <FaUser className="mr-3" />
                     <span>My profile</span>
                   </button>
-                  <button
-                    onClick={() => handleNavClick("orders")}
-                    className={`flex items-center p-4 w-full text-left border-b border-gray-200 ${
-                      activeSection === "orders"
-                        ? "bg-black text-white"
-                        : "hover:bg-gray-50 text-black"
-                    }`}
-                  >
-                    <FaShoppingCart className="mr-3 text-gray-500" />
-                    <span>Orders</span>
-                  </button>
+
+                  {/* Change password button shown to all users */}
                   <button
                     onClick={() => handleNavClick("change-password")}
                     className={`flex items-center p-4 w-full text-left border-b border-gray-200 ${
@@ -238,39 +230,60 @@ const ProfilePage: FC = () => {
                     <FaLock className="mr-3 text-gray-500" />
                     <span>Change password</span>
                   </button>
-                  <button
-                    onClick={() => handleNavClick("recently-viewed")}
-                    className={`flex items-center p-4 w-full text-left border-b border-gray-200 ${
-                      activeSection === "recently-viewed"
-                        ? "bg-black text-white"
-                        : "hover:bg-gray-50 text-black"
-                    }`}
-                  >
-                    <FaEye className="mr-3 text-gray-500" />
-                    <span>Recently viewed</span>
-                  </button>
-                  <button
-                    onClick={() => handleNavClick("reorder")}
-                    className={`flex items-center p-4 w-full text-left border-b border-gray-200 ${
-                      activeSection === "reorder"
-                        ? "bg-black text-white"
-                        : "hover:bg-gray-50 text-black"
-                    }`}
-                  >
-                    <FaHistory className="mr-3 text-gray-500" />
-                    <span>Reorder products</span>
-                  </button>
-                  <button
-                    onClick={() => handleNavClick("subscriptions")}
-                    className={`flex items-center p-4 w-full text-left border-b border-gray-200 ${
-                      activeSection === "subscriptions"
-                        ? "bg-black text-white"
-                        : "hover:bg-gray-50 text-black"
-                    }`}
-                  >
-                    <FaFileAlt className="mr-3 text-gray-500" />
-                    <span>Subscriptions</span>
-                  </button>
+
+                  {/* Buttons only for normal users */}
+                  {session?.user?.role === "User" && (
+                    <>
+                      <button
+                        onClick={() => handleNavClick("orders")}
+                        className={`flex items-center p-4 w-full text-left border-b border-gray-200 ${
+                          activeSection === "orders"
+                            ? "bg-black text-white"
+                            : "hover:bg-gray-50 text-black"
+                        }`}
+                      >
+                        <FaShoppingCart className="mr-3 text-gray-500" />
+                        <span>Orders</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleNavClick("recently-viewed")}
+                        className={`flex items-center p-4 w-full text-left border-b border-gray-200 ${
+                          activeSection === "recently-viewed"
+                            ? "bg-black text-white"
+                            : "hover:bg-gray-50 text-black"
+                        }`}
+                      >
+                        <FaEye className="mr-3 text-gray-500" />
+                        <span>Recently viewed</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleNavClick("reorder")}
+                        className={`flex items-center p-4 w-full text-left border-b border-gray-200 ${
+                          activeSection === "reorder"
+                            ? "bg-black text-white"
+                            : "hover:bg-gray-50 text-black"
+                        }`}
+                      >
+                        <FaHistory className="mr-3 text-gray-500" />
+                        <span>Reorder products</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleNavClick("subscriptions")}
+                        className={`flex items-center p-4 w-full text-left border-b border-gray-200 ${
+                          activeSection === "subscriptions"
+                            ? "bg-black text-white"
+                            : "hover:bg-gray-50 text-black"
+                        }`}
+                      >
+                        <FaFileAlt className="mr-3 text-gray-500" />
+                        <span>Subscriptions</span>
+                      </button>
+                    </>
+                  )}
+
                   <Dialog
                     open={showLogoutDialog}
                     onOpenChange={setShowLogoutDialog}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { FC, useState } from "react";
-
+import { useSession } from "next-auth/react";
 import { updateUser } from "@/app/services/userService";
 import { toast, Toaster } from "react-hot-toast";
 import {
@@ -34,6 +34,7 @@ interface UserProfileProps {
 }
 
 const UserProfile: FC<UserProfileProps> = ({ user, setUser }) => {
+  const { data: session } = useSession();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -82,42 +83,44 @@ const UserProfile: FC<UserProfileProps> = ({ user, setUser }) => {
     <>
       <Toaster />
       <div className="border border-gray-200 rounded-lg p-6 bg-white">
-        {/* Dashboard Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 border-b border-gray-200 pb-8">
-          <div className="flex items-center border border-black-200 rounded-lg p-4">
-            <div className="mr-4">
-              <FaDollarSign className="text-2xl text-black" />
+        {/* Dashboard Stats - Only shown for normal users */}
+        {session?.user?.role === "User" && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 border-b border-gray-200 pb-8">
+            <div className="flex items-center border border-black-200 rounded-lg p-4">
+              <div className="mr-4">
+                <FaDollarSign className="text-2xl text-black" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-black">Total spent</h3>
+                <p className="text-lg font-bold text-black">
+                  ${user.totalSpent.toFixed(2)}
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-black">Total spent</h3>
-              <p className="text-lg font-bold text-black">
-                ${user.totalSpent.toFixed(2)}
-              </p>
-            </div>
-          </div>
 
-          <div className="flex items-center border border-black-200 rounded-lg p-4">
-            <div className="mr-4">
-              <FaShoppingCart className="text-2xl text-black" />
+            <div className="flex items-center border border-black-200 rounded-lg p-4">
+              <div className="mr-4">
+                <FaShoppingCart className="text-2xl text-black" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-black">All orders</h3>
+                <p className="text-lg font-bold text-black">{user.orderCount}</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-black">All orders</h3>
-              <p className="text-lg font-bold text-black">{user.orderCount}</p>
-            </div>
-          </div>
 
-          <div className="flex items-center border border-black-200 rounded-lg p-4">
-            <div className="mr-4">
-              <FaMapMarked className="text-2xl text-black" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-black">Addresses</h3>
-              <p className="text-lg font-bold text-black">
-                {user.addressCount || 1} {/* Default to 1 if undefined */}
-              </p>
+            <div className="flex items-center border border-black-200 rounded-lg p-4">
+              <div className="mr-4">
+                <FaMapMarked className="text-2xl text-black" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-black">Addresses</h3>
+                <p className="text-lg font-bold text-black">
+                  {user.addressCount || 1}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Profile Information */}
         <div className="flex justify-between items-center mb-8">
@@ -189,6 +192,45 @@ const UserProfile: FC<UserProfileProps> = ({ user, setUser }) => {
                 type="text"
                 name="address"
                 value={formData.address}
+                onChange={handleChange}
+                className="col-span-9 border p-2 rounded-md"
+              />
+            </div>
+
+            <div className="grid grid-cols-12 items-center">
+              <label className="col-span-3 text-sm font-bold text-gray-600">
+                Phone number
+              </label>
+              <input
+                type="text"
+                name="phone_number"
+                value={formData.phone_number}
+                onChange={handleChange}
+                className="col-span-9 border p-2 rounded-md"
+              />
+            </div>
+
+            <div className="grid grid-cols-12 items-center">
+              <label className="col-span-3 text-sm font-bold text-gray-600">
+                Skin Type
+              </label>
+              <input
+                type="text"
+                name="skinType"
+                value={formData.skinType}
+                onChange={handleChange}
+                className="col-span-9 border p-2 rounded-md"
+              />
+            </div>
+
+            <div className="grid grid-cols-12 items-center">
+              <label className="col-span-3 text-sm font-bold text-gray-600">
+                Sensitivity
+              </label>
+              <input
+                type="text"
+                name="sensitivity"
+                value={formData.sensitivity}
                 onChange={handleChange}
                 className="col-span-9 border p-2 rounded-md"
               />

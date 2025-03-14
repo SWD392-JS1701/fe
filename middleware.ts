@@ -19,12 +19,17 @@ export async function middleware(req: NextRequest) {
 
   // Doctor routes protection
   if (
-    path.startsWith("/doctor") ||
-    (path.startsWith("/blog") && role !== "Doctor")
+    path.startsWith("/doctor") && role !== "Doctor")
+   {
+    return unauthorized();
+  }
+  // Staff routes protection
+  if (
+    path.startsWith("/staff") ||
+    (path.startsWith("/blog") && role !== "Staff")
   ) {
     return unauthorized();
   }
-
   // Admin routes protection
   if (
     (path.startsWith("/admin") ||
