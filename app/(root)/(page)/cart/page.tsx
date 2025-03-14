@@ -1,4 +1,3 @@
-// app/cart/page.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -82,6 +81,8 @@ const CartPage = () => {
           quantity: item.quantity,
         })),
       };
+
+      await createOrderDetail(orderDetailData);
 
       dispatch(clearCart());
       Swal.fire({

@@ -3,7 +3,6 @@
 import React, { FC, useEffect, useState } from "react";
 
 import Head from "next/head";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { signOut } from "next-auth/react";
@@ -30,11 +29,12 @@ import { Button } from "@/components/ui/button";
 
 import { useSession } from "next-auth/react";
 
-import UserProfile from "@/components/UserProfile";
-import Membership from "@/components/Membership";
+import UserProfile from "@/components/UserProfile/UserProfile";
+import Membership from "@/components/UserProfile/Membership";
 import Error from "@/components/Error";
 import Loading from "@/components/Loading";
 import ChangePasswordPage from "../change-password/page";
+import ViewOrderPage from "../view-order/page";
 
 import { getUserById } from "@/app/services/userService";
 import { getMemberships } from "@/app/services/membershipSevice";
@@ -163,12 +163,7 @@ const ProfilePage: FC = () => {
           <Membership memberships={memberships} user={user} setUser={setUser} />
         );
       case "orders":
-        return (
-          <div className="p-6 bg-white rounded-lg border">
-            <h2 className="text-2xl font-bold">Orders</h2>
-            <p>Orders content coming soon...</p>
-          </div>
-        );
+        return <ViewOrderPage user={user} />;
       case "change-password":
         return <ChangePasswordPage />;
       case "recently-viewed":
