@@ -12,14 +12,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { createOrder, createOrderDetail } from "@/app/services/orderService";
-
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image_url: string;
-}
+import { useSession } from "next-auth/react";
 
 const CartPage = () => {
   const dispatch = useDispatch();
@@ -36,6 +29,7 @@ const CartPage = () => {
   const shippingCost = 10.0;
   const totalCost = totalPrice + shippingCost;
   const [loading, setLoading] = useState(false);
+  const { data: session, status } = useSession();
 
   const handleUpdateQuantity = (id: string, quantity: number) => {
     dispatch(updateQuantity({ id, quantity }));
@@ -46,7 +40,7 @@ const CartPage = () => {
   };
 
   const handleCheckout = async () => {
-    if (!isAuthenticated || !user) {
+    if (!session?.user) {
       Swal.fire({
         icon: "error",
         title: "Error!",
@@ -70,7 +64,7 @@ const CartPage = () => {
     setLoading(true);
     try {
       const paymentData = {
-        user_Id: user.id,
+        user_Id: session.user.id,
         amount: totalCost,
       };
       const paymentResponse = await createOrder(paymentData);
