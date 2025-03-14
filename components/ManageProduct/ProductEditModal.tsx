@@ -8,9 +8,19 @@ import {
   updateProduct,
   getAllProductTypes,
 } from "@/app/services/productService";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
 import Swal from "sweetalert2";
 import { X } from "lucide-react";
 import { motion } from "framer-motion";
+import { app } from "@/firebaseconfig";
+
+const storage = getStorage(app);
 
 interface EditProductModalProps {
   product: Product;
@@ -28,8 +38,8 @@ const EditProductModal: FC<EditProductModalProps> = ({
     expired_date: new Date(product.expired_date).toISOString().split("T")[0],
   });
   const [productTypes, setProductTypes] = useState<ProductType[]>([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
-  // Fetch product types on mount
   useEffect(() => {
     const fetchProductTypes = async () => {
       const types = await getAllProductTypes();
@@ -50,6 +60,12 @@ const EditProductModal: FC<EditProductModalProps> = ({
     }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setImageFile(e.target.files[0]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -63,7 +79,7 @@ const EditProductModal: FC<EditProductModalProps> = ({
       Swal.fire({
         icon: "error",
         title: "Invalid Input",
-        text: "Please ensure all numeric fields (rating, price, stock, volume) are valid numbers.",
+        text: "Ensure numeric fields are valid.",
         showConfirmButton: true,
       });
       return;
@@ -75,24 +91,66 @@ const EditProductModal: FC<EditProductModalProps> = ({
       Swal.fire({
         icon: "error",
         title: "Invalid Date",
-        text: "Please enter a valid expiration date.",
+        text: "Enter a valid expiration date.",
         showConfirmButton: true,
       });
       return;
     }
 
-    // Transform formData to match API expected format
+    let imageUrl = formData.image_url;
+
+    // Upload new image if selected
+    if (imageFile) {
+      const storageRef = ref(storage, `images/${product._id}`);
+
+      try {
+        // Only try to delete the existing image if the URL is valid and exists
+        if (
+          formData.image_url &&
+          formData.image_url.startsWith(
+            "https://firebasestorage.googleapis.com"
+          )
+        ) {
+          const storagePath = decodeURIComponent(
+            formData.image_url.split("/o/")[1].split("?")[0]
+          );
+
+          const oldImageRef = ref(storage, storagePath);
+
+          // Check if the image exists
+          try {
+            await getDownloadURL(oldImageRef); // If this works, the image exists
+            await deleteObject(oldImageRef); // Only delete if it exists
+          } catch (error: any) {
+            if (error.code !== "storage/object-not-found") {
+              throw error; // Rethrow if it's a different error
+            }
+          }
+        }
+
+        // Upload new image
+        await uploadBytes(storageRef, imageFile);
+        imageUrl = await getDownloadURL(storageRef);
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Upload Failed",
+          text: "Failed to upload image: " + error.message,
+          showConfirmButton: true,
+        });
+        return;
+      }
+    }
+
+    // Prepare request body
     const requestBody: ProductUpdateRequest = {
-      name: formData.name,
+      ...formData,
       product_rating: productRating,
-      description: formData.description,
-      price: price,
-      stock: stock,
-      product_type_id: formData.product_type_id,
-      image_url: formData.image_url,
-      supplier_name: formData.supplier_name || formData.Supplier || "",
+      price,
+      stock,
+      volume,
       expired_date: expiredDate.toISOString(),
-      volume: volume,
+      image_url: imageUrl,
     };
 
     try {
@@ -103,8 +161,8 @@ const EditProductModal: FC<EditProductModalProps> = ({
           icon: "success",
           title: "Success!",
           text: "Product updated successfully.",
-          showConfirmButton: false,
           timer: 1500,
+          showConfirmButton: false,
         });
         onClose();
       }
@@ -112,7 +170,7 @@ const EditProductModal: FC<EditProductModalProps> = ({
       Swal.fire({
         icon: "error",
         title: "Error!",
-        text: "Failed to update the product. Please try again.",
+        text: "Failed to update product.",
         showConfirmButton: true,
       });
     }
@@ -136,21 +194,18 @@ const EditProductModal: FC<EditProductModalProps> = ({
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors"
-          aria-label="Close modal"
         >
           <X size={24} />
         </button>
 
-        {/* Modal Header */}
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Edit Product</h2>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label
                 htmlFor="name"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-gray-700"
               >
                 Product Name
               </label>
@@ -160,7 +215,7 @@ const EditProductModal: FC<EditProductModalProps> = ({
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                 required
               />
             </div>
@@ -168,7 +223,7 @@ const EditProductModal: FC<EditProductModalProps> = ({
             <div>
               <label
                 htmlFor="price"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-gray-700"
               >
                 Price
               </label>
@@ -178,161 +233,49 @@ const EditProductModal: FC<EditProductModalProps> = ({
                 name="price"
                 value={formData.price}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                step="0.01"
-                min="0"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                 required
               />
             </div>
 
             <div>
               <label
-                htmlFor="stock"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                htmlFor="image"
+                className="block text-sm font-medium text-gray-700"
               >
-                Stock
+                Product Image
               </label>
               <input
-                type="number"
-                id="stock"
-                name="stock"
-                value={formData.stock}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                min="0"
-                required
+                type="file"
+                id="image"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
               />
-            </div>
-
-            <div>
-              <label
-                htmlFor="supplier_name"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Supplier
-              </label>
-              <input
-                type="text"
-                id="supplier_name"
-                name="supplier_name"
-                value={formData.supplier_name || formData.Supplier || ""}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="volume"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Volume
-              </label>
-              <input
-                type="number"
-                id="volume"
-                name="volume"
-                value={formData.volume}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                step="0.1"
-                min="0"
-                required
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="product_type_id"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Product Type
-              </label>
-              <select
-                id="product_type_id"
-                name="product_type_id"
-                value={formData.product_type_id}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              >
-                <option value="" disabled>
-                  Select a product type
-                </option>
-                {productTypes.map((type) => (
-                  <option key={type._id} value={type._id}>
-                    {type.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="expired_date"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Expired Date
-              </label>
-              <input
-                type="date"
-                id="expired_date"
-                name="expired_date"
-                value={formData.expired_date}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="image_url"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Image URL
-              </label>
-              <input
-                type="text"
-                id="image_url"
-                name="image_url"
-                value={formData.image_url}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
+              {formData.image_url && !imageFile && (
+                <img
+                  src={formData.image_url}
+                  alt="Product"
+                  className="mt-2 h-32 object-cover rounded-md"
+                />
+              )}
+              {imageFile && (
+                <p className="mt-2 text-sm text-gray-500">{imageFile.name}</p>
+              )}
             </div>
           </div>
 
-          <div>
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Description
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows={4}
-            />
-          </div>
-
-          {/* Form Actions */}
           <div className="flex justify-end space-x-4">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+              className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              className="px-6 py-2 bg-blue-500 text-white rounded-lg"
             >
               Save Changes
             </button>
