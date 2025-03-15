@@ -1,174 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-
-interface Appointment {
-  id: string;
-  date: string;
-  time: string;
-  location: string;
-  title: string;
-  attendees: { name: string; image: string }[];
-}
+import { Appointment } from "@/app/types/appointment";
+import { appointments } from "@/app/data/appoitmentsData";
 
 const ViewAppointment: React.FC = () => {
   const [activeTab, setActiveTab] = useState("upcoming");
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [expandedMonths, setExpandedMonths] = useState<string[]>(["April"]); // Default to current month expanded
-
-  // Sample appointment data (replace with API data in a real app)
-  const appointments: Appointment[] = [
-    {
-      id: "1",
-      date: "2025-04-28",
-      time: "09:00 - 09:30",
-      location: "Online",
-      title: "30min call meeting Peer <-> Leslie",
-      attendees: [
-        {
-          name: "Peer",
-          image:
-            "https://storage.googleapis.com/a1aa/image/CxizdzQSZcBTXDfxU0V1xNOktTXW5w6YlEcO37wg6rk.jpg",
-        },
-        {
-          name: "Leslie",
-          image:
-            "https://storage.googleapis.com/a1aa/image/9BtRVWstHBv08jvt1pkXcFSNrEKFKS0KzJ7mZjrvVXQ.jpg",
-        },
-      ],
-    },
-    {
-      id: "2",
-      date: "2025-04-30",
-      time: "15:20 - 16:20",
-      location: "Wework Paris",
-      title: "Livn Product Demo",
-      attendees: [
-        {
-          name: "Person 1",
-          image:
-            "https://storage.googleapis.com/a1aa/image/ufWBrbcIqje2MDo6M5enDKofNEYCS4r_yOPMbqPyX1E.jpg",
-        },
-        {
-          name: "Person 2",
-          image:
-            "https://storage.googleapis.com/a1aa/image/-kszovfdnD4Mf0gRe9Th5K0YHyh3NEPsbPzWEChoNzg.jpg",
-        },
-        {
-          name: "Person 3",
-          image:
-            "https://storage.googleapis.com/a1aa/image/x3itns_RlbacQpcfeq466cdzC_B94cWdptfAxNWUhOw.jpg",
-        },
-        {
-          name: "Person 4",
-          image:
-            "https://storage.googleapis.com/a1aa/image/qyf8xPfpsNZB4F42MTK0pHlkOS38jube3FkhCi6nato.jpg",
-        },
-      ],
-    },
-    {
-      id: "3",
-      date: "2025-04-29",
-      time: "11:15 - 11:45",
-      location: "Online",
-      title: "30min call meeting Olivia, Liam <-> Alban",
-      attendees: [
-        {
-          name: "Olivia",
-          image:
-            "https://storage.googleapis.com/a1aa/image/DT_npARZNF9e9gSfKFFvURNacYRVD40gLE0vO01PkOA.jpg",
-        },
-        {
-          name: "Liam",
-          image:
-            "https://storage.googleapis.com/a1aa/image/jow2qNSkpDJR25r7TW2MEZ_ZTl6_tLnx1ganUAXXjF8.jpg",
-        },
-        {
-          name: "Alban",
-          image:
-            "https://storage.googleapis.com/a1aa/image/V_sfLZwySZAiiJMyy-FS5PYw3J2XwwZbI3Af5NFPl_4.jpg",
-        },
-      ],
-    },
-    {
-      id: "4",
-      date: "2025-05-02",
-      time: "11:15 - 11:45",
-      location: "Online",
-      title: "30min call meeting Yulia, Alvin <-> Irina, Mae",
-      attendees: [
-        {
-          name: "Yulia",
-          image:
-            "https://storage.googleapis.com/a1aa/image/6NAnmRjYT1lYkJToraMeyIfO6mxqMSr1O653f1aIJ3k.jpg",
-        },
-        {
-          name: "Alvin",
-          image:
-            "https://storage.googleapis.com/a1aa/image/DfJAXLdujSk3fWsYoFEivsqzQlkjY6bL6u98OXgqh_c.jpg",
-        },
-        {
-          name: "Irina",
-          image:
-            "https://storage.googleapis.com/a1aa/image/W36orcZy-OPWwR0suSEPFD5XnKIx-Zf0I6N-otWyNro.jpg",
-        },
-        {
-          name: "Mae",
-          image:
-            "https://storage.googleapis.com/a1aa/image/sDn1fiuM6lVpbQRapb3t2o2J0ZfeQxe8P-Jl4Y73-mM.jpg",
-        },
-      ],
-    },
-    {
-      id: "5",
-      date: "2025-05-03",
-      time: "10:45 - 11:45",
-      location: "Online",
-      title: "Livn Product Demo",
-      attendees: [
-        {
-          name: "Person 1",
-          image:
-            "https://storage.googleapis.com/a1aa/image/ufWBrbcIqje2MDo6M5enDKofNEYCS4r_yOPMbqPyX1E.jpg",
-        },
-        {
-          name: "Person 2",
-          image:
-            "https://storage.googleapis.com/a1aa/image/-kszovfdnD4Mf0gRe9Th5K0YHyh3NEPsbPzWEChoNzg.jpg",
-        },
-        {
-          name: "Person 3",
-          image:
-            "https://storage.googleapis.com/a1aa/image/x3itns_RlbacQpcfeq466cdzC_B94cWdptfAxNWUhOw.jpg",
-        },
-      ],
-    },
-    {
-      id: "6",
-      date: "2025-05-04",
-      time: "17:30 - 18:00",
-      location: "Online",
-      title: "Product meeting review",
-      attendees: [
-        {
-          name: "Person 1",
-          image:
-            "https://storage.googleapis.com/a1aa/image/ufWBrbcIqje2MDo6M5enDKofNEYCS4r_yOPMbqPyX1E.jpg",
-        },
-        {
-          name: "Person 2",
-          image:
-            "https://storage.googleapis.com/a1aa/image/-kszovfdnD4Mf0gRe9Th5K0YHyh3NEPsbPzWEChoNzg.jpg",
-        },
-        {
-          name: "Person 3",
-          image:
-            "https://storage.googleapis.com/a1aa/image/x3itns_RlbacQpcfeq466cdzC_B94cWdptfAxNWUhOw.jpg",
-        },
-      ],
-    },
-  ];
-
   const tabs = ["upcoming", "pending", "cancelled"];
 
   const formatDate = (dateString: string) => {
@@ -199,10 +37,6 @@ const ViewAppointment: React.FC = () => {
     setExpandedMonths((prev) =>
       prev.includes(month) ? prev.filter((m) => m !== month) : [...prev, month]
     );
-  };
-
-  const toggleDropdown = (id: string) => {
-    setOpenDropdown(openDropdown === id ? null : id);
   };
 
   return (
@@ -296,20 +130,18 @@ const ViewAppointment: React.FC = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="relative w-full sm:w-auto">
-                          <button
-                            className="w-full sm:w-auto px-4 py-2 bg-gray-200 text-gray-800 rounded-lg flex items-center justify-between sm:justify-center gap-2 hover:bg-gray-300"
-                            onClick={() => toggleDropdown(appointment.id)}
-                          >
-                            Edit
-                            <i
-                              className={`fas fa-chevron-${
-                                openDropdown === appointment.id ? "up" : "down"
-                              }`}
-                            ></i>
-                          </button>
-                          {openDropdown === appointment.id && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                        <div className="relative w-full sm:w-auto group">
+                          <div className="pb-1">
+                            {" "}
+                            {/* Added padding to extend hover area */}
+                            <button className="w-full sm:w-auto px-4 py-2 bg-gray-200 text-gray-800 rounded-lg flex items-center justify-between sm:justify-center gap-2 hover:bg-gray-300">
+                              Edit
+                              <i className="fas fa-chevron-down"></i>
+                            </button>
+                            <div
+                              className="absolute right-0 top-full w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10 
+                              invisible group-hover:visible transition-all duration-200 ease-in-out"
+                            >
                               <a
                                 href="#"
                                 className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
@@ -341,7 +173,7 @@ const ViewAppointment: React.FC = () => {
                                 Cancel event
                               </a>
                             </div>
-                          )}
+                          </div>
                         </div>
                       </div>
                     );
