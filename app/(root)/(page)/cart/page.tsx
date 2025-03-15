@@ -71,6 +71,7 @@ const CartPage = () => {
       const orderDetailData = {
         order_Id: paymentResponse._id,
         product_List: cartItems.map((item) => ({
+          name: item.name,
           product_Id: item.id,
           quantity: item.quantity,
         })),

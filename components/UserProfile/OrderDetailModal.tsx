@@ -24,12 +24,14 @@ interface OrderDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   order: Order | null;
+  orderDetail: OrderDetail | null;
 }
 
 const OrderDetailModal: FC<OrderDetailModalProps> = ({
   isOpen,
   onClose,
   order,
+  orderDetail,
 }) => {
   const [orderDetails, setOrderDetails] = useState<OrderDetail[]>([]);
   const [loading, setLoading] = useState(false);
@@ -53,10 +55,12 @@ const OrderDetailModal: FC<OrderDetailModalProps> = ({
       }
     };
 
-    if (isOpen && order) {
+    if (isOpen && order && !orderDetail) {
       fetchOrderDetails();
+    } else if (orderDetail) {
+      setOrderDetails([orderDetail]); // Use the passed orderDetail if provided
     }
-  }, [isOpen, order]);
+  }, [isOpen, order, orderDetail]);
 
   if (!order) return null;
 
@@ -100,6 +104,8 @@ const OrderDetailModal: FC<OrderDetailModalProps> = ({
     }
   };
 
+  const currentOrderDetails = orderDetail ? [orderDetail] : orderDetails;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg">
@@ -107,7 +113,9 @@ const OrderDetailModal: FC<OrderDetailModalProps> = ({
           <DialogTitle className="text-xl font-semibold">
             Order Details
           </DialogTitle>
-          <DialogDescription>Order ID: {order._id}</DialogDescription>
+          <DialogDescription>
+            Order ID: {order._id} - Details of the products in this order.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -142,7 +150,7 @@ const OrderDetailModal: FC<OrderDetailModalProps> = ({
               </div>
             ) : error ? (
               <div className="text-center py-4 text-red-500">{error}</div>
-            ) : orderDetails.length === 0 ? (
+            ) : currentOrderDetails.length === 0 ? (
               <div className="text-center py-4 text-gray-500">
                 No product details found for this order.
               </div>
@@ -150,18 +158,18 @@ const OrderDetailModal: FC<OrderDetailModalProps> = ({
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gray-50">
-                    <TableHead className="font-medium">Product ID</TableHead>
+                    <TableHead className="font-medium">Product Name</TableHead>
                     <TableHead className="font-medium text-right">
                       Quantity
                     </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {orderDetails.map((detail) =>
+                  {currentOrderDetails.flatMap((detail) =>
                     detail.product_List.map((product, index) => (
                       <TableRow key={`${detail._id}-${index}`}>
                         <TableCell className="font-medium">
-                          {product.product_Id}
+                          {product.name || "Unnamed Product"}
                         </TableCell>
                         <TableCell className="text-right">
                           {product.quantity}

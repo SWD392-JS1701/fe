@@ -142,6 +142,9 @@ const SchedulePage: FC = () => {
   const [loading, setLoading] = useState(true);
   const [activeDoctorId, setActiveDoctorId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [changes, setChanges] = useState<
+    { day: string; slotId: string; doctorId: string | null }[]
+  >([]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -246,7 +249,6 @@ const SchedulePage: FC = () => {
     const day = parts[1];
     const slotId = parts.slice(2).join("-");
 
-    const previousSchedule = [...schedule]; // Backup for rollback
     const updatedSchedule = schedule.map((daySchedule) => {
       if (daySchedule.day.toLowerCase() === day) {
         const updatedSlots = daySchedule.slots.map((slot) => {
@@ -270,41 +272,10 @@ const SchedulePage: FC = () => {
     });
 
     setSchedule(updatedSchedule);
-
-    const daySchedule = updatedSchedule.find(
-      (d) => d.day.toLowerCase() === day
-    );
-    const updatedSlot = daySchedule?.slots.find((s) => s.id === slotId);
-
-    if (updatedSlot && daySchedule?._id) {
-      try {
-        await updateSlot(daySchedule._id, slotId, {
-          doctorId: updatedSlot.doctorId,
-          doctorName: updatedSlot.doctorName,
-          status: updatedSlot.status,
-        });
-        Swal.fire({
-          icon: "success",
-          title: "Slot updated successfully",
-          showConfirmButton: false,
-          timer: 1500,
-        });
-      } catch (error: any) {
-        setSchedule(previousSchedule); // Rollback on failure
-        console.error("Error updating slot:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Failed to update slot",
-          text: error.message,
-          showConfirmButton: false,
-          timer: 1500,
-        });
-      }
-    }
+    setChanges([...changes, { day, slotId, doctorId }]);
   };
 
   const handleClearSlot = async (day: string, slotId: string) => {
-    const previousSchedule = [...schedule]; // Backup for rollback
     const updatedSchedule = schedule.map((daySchedule) => {
       if (daySchedule.day.toLowerCase() === day.toLowerCase()) {
         const updatedSlots = daySchedule.slots.map((slot) => {
@@ -325,36 +296,45 @@ const SchedulePage: FC = () => {
     });
 
     setSchedule(updatedSchedule);
+    setChanges([...changes, { day, slotId, doctorId: null }]);
+  };
 
-    const daySchedule = updatedSchedule.find(
-      (d) => d.day.toLowerCase() === day.toLowerCase()
-    );
-    const updatedSlot = daySchedule?.slots.find((s) => s.id === slotId);
+  const handleSaveChanges = async () => {
+    try {
+      for (const change of changes) {
+        const daySchedule = schedule.find(
+          (d) => d.day.toLowerCase() === change.day.toLowerCase()
+        );
+        const updatedSlot = daySchedule?.slots.find(
+          (s) => s.id === change.slotId
+        );
 
-    if (updatedSlot && daySchedule?._id) {
-      try {
-        await updateSlot(daySchedule._id, slotId, {
-          doctorId: updatedSlot.doctorId,
-          doctorName: updatedSlot.doctorName,
-          status: updatedSlot.status,
-        });
-        Swal.fire({
-          icon: "success",
-          title: "Slot cleared successfully",
-          showConfirmButton: false,
-          timer: 1500,
-        });
-      } catch (error: any) {
-        setSchedule(previousSchedule); // Rollback on failure
-        console.error("Error clearing slot:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Failed to clear slot",
-          text: error.message,
-          showConfirmButton: false,
-          timer: 1500,
-        });
+        if (updatedSlot && daySchedule?._id) {
+          await updateSlot(daySchedule._id, change.slotId, {
+            doctorId: updatedSlot.doctorId,
+            doctorName: updatedSlot.doctorName,
+            status: updatedSlot.status,
+          });
+        }
       }
+
+      Swal.fire({
+        icon: "success",
+        title: "Changes saved successfully",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+
+      setChanges([]); // Clear changes after saving
+    } catch (error: any) {
+      console.error("Error saving changes:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed to save changes",
+        text: error.message,
+        showConfirmButton: false,
+        timer: 1500,
+      });
     }
   };
 
@@ -493,6 +473,16 @@ const SchedulePage: FC = () => {
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      {/* Save Button */}
+      <div className="fixed bottom-4 right-4">
+        <button
+          onClick={handleSaveChanges}
+          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors"
+        >
+          Save Changes
+        </button>
+      </div>
     </div>
   );
 };

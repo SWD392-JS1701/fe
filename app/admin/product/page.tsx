@@ -11,6 +11,7 @@ import { Product } from "@/app/types/product";
 import { getAllProducts, deleteProduct } from "@/app/services/productService";
 import ProductDrawer from "@/components/ManageProduct/ProductDrawer";
 import EditProductModal from "@/components/ManageProduct/ProductEditModal";
+import ProductAddModal from "@/components/ManageProduct/ProductAddModal"; // Import the new modal
 
 const ProductsPage: FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -18,6 +19,7 @@ const ProductsPage: FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false); // New state for add modal
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const itemsPerPage = 6;
@@ -75,6 +77,14 @@ const ProductsPage: FC = () => {
     setProductToEdit(null);
   };
 
+  const openAddModal = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const closeAddModal = () => {
+    setIsAddModalOpen(false);
+  };
+
   const handleUpdateProduct = (updatedProduct: Product) => {
     setProducts((prevProducts) =>
       prevProducts.map((product) =>
@@ -84,6 +94,11 @@ const ProductsPage: FC = () => {
     if (selectedProduct && selectedProduct._id === updatedProduct._id) {
       setSelectedProduct(updatedProduct);
     }
+  };
+
+  const handleAddProduct = (newProduct: Product) => {
+    setProducts((prevProducts) => [...prevProducts, newProduct]);
+    closeAddModal();
   };
 
   const handleDelete = async (productId: string) => {
@@ -133,16 +148,12 @@ const ProductsPage: FC = () => {
     });
   };
 
-  const handleAddProduct = () => {
-    console.log("Add new product clicked");
-  };
-
   return (
     <div className="p-6 bg-gray-100 min-h-screen relative">
       {/* Breadcrumb and Add Button */}
       <div className="bg-gray-100 p-4 mb-4 flex justify-between items-center rounded-lg">
         <nav className="text-gray-600 text-sm">
-          <Link href="/admin//overview" className="hover:text-gray-800">
+          <Link href="/admin/overview" className="hover:text-gray-800">
             <span>Dashboard</span>
           </Link>
           <span className="text-gray-400"> {" > "} </span>{" "}
@@ -165,7 +176,7 @@ const ProductsPage: FC = () => {
             />
           </div>
           <button
-            onClick={handleAddProduct}
+            onClick={openAddModal} // Updated to open the modal
             className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
           >
             <Plus size={16} className="mr-2" /> Add
@@ -258,7 +269,9 @@ const ProductsPage: FC = () => {
                   </td>
                   <td className="p-3">
                     <p className="text-gray-800">
-                      {product.Supplier || "Currently no supplier"}
+                      {product.supplier_name ||
+                        product.Supplier ||
+                        "Currently no supplier"}
                     </p>
                   </td>
                   <td className="p-3">
@@ -267,7 +280,9 @@ const ProductsPage: FC = () => {
                     </p>
                   </td>
                   <td className="p-3">
-                    <p className="text-gray-800">{product.product_rating}/5</p>
+                    <p className="text-gray-800">
+                      {product.product_rating || 0}/5
+                    </p>
                   </td>
                   <td className="p-3">
                     <div className="flex justify-center items-center space-x-2 h-full">
@@ -352,7 +367,7 @@ const ProductsPage: FC = () => {
         </div>
       </div>
 
-      {/* Render Product Drawer */}
+      {/* Render Modals and Drawer */}
       <AnimatePresence>
         {selectedProduct && (
           <ProductDrawer product={selectedProduct} onClose={closeDrawer} />
@@ -362,6 +377,12 @@ const ProductsPage: FC = () => {
             product={productToEdit}
             onClose={closeEditModal}
             onUpdate={handleUpdateProduct}
+          />
+        )}
+        {isAddModalOpen && (
+          <ProductAddModal
+            onClose={closeAddModal}
+            onCreate={handleAddProduct}
           />
         )}
       </AnimatePresence>

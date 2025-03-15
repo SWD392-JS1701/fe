@@ -4,7 +4,7 @@ export interface ScheduleSlot {
   doctorId: string | null;
   doctorName?: string | null;
   specialization?: string | null;
-  status?: string; // Add status
+  status?: string;
 }
 
 export interface Schedule {

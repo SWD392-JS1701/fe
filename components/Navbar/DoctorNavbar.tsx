@@ -15,7 +15,7 @@ const DoctorNavbar: FC = () => {
   const maxBorderWidth = 250;
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
-  
+
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -51,10 +51,7 @@ const DoctorNavbar: FC = () => {
     >
       {/* Top navbar */}
       <div className="container mx-auto flex justify-between items-center px-6">
-        
-        <div className="relative w-full max-w-lg">
-          
-        </div>
+        <div className="relative w-full max-w-lg"></div>
 
         {/* Logo */}
         <div className="flex-1 flex justify-center">
@@ -137,7 +134,7 @@ const DoctorNavbar: FC = () => {
       {/* Shortcuts */}
       <div className="flex justify-center items-center py-2 space-x-20 relative">
         <Link href="/doctor/dashboard">DASHBOARD</Link>
-        <Link href="/doctor/appointments">APPOINTMENTS</Link>
+        <Link href="/view-appointment">APPOINTMENTS</Link>
         <Link href="/doctor/patients">PATIENTS</Link>
         <Link href="/doctor/schedule">SCHEDULE</Link>
         <Link href="/blog">BLOG</Link>
