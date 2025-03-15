@@ -3,20 +3,13 @@
 import Link from "next/link";
 import React, { FC, useEffect, useState } from "react";
 import Image from "next/image";
-import { Search, X } from "lucide-react";
 import Logo from "@/assets/logo.png";
-import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
 const DoctorNavbar: FC = () => {
   const [scrollCount, setScrollCount] = useState(0);
   const maxScrollCount = 3;
   const maxBorderWidth = 250;
-  const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter();
-
-  const { data: session } = useSession();
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -102,13 +95,13 @@ const DoctorNavbar: FC = () => {
             <div className="absolute right-0 hidden group-hover:block w-48 bg-white rounded-md shadow-lg z-50">
               <div className="px-4 py-3 border-b border-gray-200">
                 <Link
-                  href="/doctor/appointments"
+                  href="/doctor/view-appointment"
                   className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
                 >
                   My Appointments
                 </Link>
                 <Link
-                  href="/doctor/patients"
+                  href="/doctor/patient"
                   className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
                 >
                   My Patients
@@ -134,10 +127,10 @@ const DoctorNavbar: FC = () => {
       {/* Shortcuts */}
       <div className="flex justify-center items-center py-2 space-x-20 relative">
         <Link href="/doctor/dashboard">DASHBOARD</Link>
-        <Link href="/view-appointment">APPOINTMENTS</Link>
-        <Link href="/doctor/patients">PATIENTS</Link>
+        <Link href="/doctor/view-appointment">APPOINTMENTS</Link>
+        <Link href="/doctor/patient">PATIENTS</Link>
         <Link href="/doctor/schedule">SCHEDULE</Link>
-        <Link href="/blog">BLOG</Link>
+        <Link href="/view-blog">VIEW BLOG</Link>
 
         {/* Border Animation */}
         <div

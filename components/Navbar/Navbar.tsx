@@ -223,7 +223,7 @@ const Navbar: FC = () => {
 
         {/* Icons */}
         <div className="flex-1 flex justify-end items-center space-x-3">
-        <div className="relative group">
+          <div className="relative group">
             <Link href={session ? "/profile" : "/sign-in"}>
               <svg
                 className={`w-6 h-6 transition-all duration-500 ${
@@ -277,9 +277,7 @@ const Navbar: FC = () => {
                     </Link>
                   </div>
                   <button
-
                     onClick={handleLogout}
-
                     className="block w-full text-center py-3 text-sm bg-black text-white hover:bg-gray-900"
                   >
                     LOGOUT
@@ -332,7 +330,7 @@ const Navbar: FC = () => {
       {/* Shortcuts */}
       <div className="flex justify-center items-center py-2 space-x-20 relative">
         <Link href="/shop">SHOP</Link>
-        <Link href="/brands">BRANDS</Link>
+        <Link href="/booking">BOOKINGS</Link>
         <Link href="/view-blog">VIEW BLOG</Link>
         <Link href="/library">SKIN TYPE LIBRARY</Link>
         <Link href="/skin-type-quiz">TAKE THE QUIZ</Link>
