@@ -3,20 +3,13 @@
 import Link from "next/link";
 import React, { FC, useEffect, useState } from "react";
 import Image from "next/image";
-import { Search, X } from "lucide-react";
 import Logo from "@/assets/logo.png";
-import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
 const DoctorNavbar: FC = () => {
   const [scrollCount, setScrollCount] = useState(0);
   const maxScrollCount = 3;
   const maxBorderWidth = 250;
-  const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter();
-
-  const { data: session } = useSession();
 
   useEffect(() => {
     let lastScrollY = window.scrollY;

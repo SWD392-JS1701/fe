@@ -31,10 +31,10 @@ import { useSession } from "next-auth/react";
 
 import UserProfile from "@/components/UserProfile/UserProfile";
 import Membership from "@/components/UserProfile/Membership";
-import Error from "@/components/Error";
-import Loading from "@/components/Loading";
 import ChangePasswordPage from "../change-password/page";
 import ViewOrderPage from "../view-order/page";
+import Error from "@/components/Error";
+import Loading from "@/components/Loading";
 
 import { getUserById } from "@/app/services/userService";
 import { getMemberships } from "@/app/services/membershipSevice";
@@ -173,11 +173,11 @@ const ProfilePage: FC = () => {
             <p>Recently viewed content coming soon...</p>
           </div>
         );
-      case "reorder":
+      case "my-bookings":
         return (
           <div className="p-6 bg-white rounded-lg border">
-            <h2 className="text-2xl font-bold">Reorder Products</h2>
-            <p>Reorder content coming soon...</p>
+            <h2 className="text-2xl font-bold">My Bookings</h2>
+            <p>Booking content coming soon...</p>
           </div>
         );
       default:
@@ -192,8 +192,7 @@ const ProfilePage: FC = () => {
       </Head>
       <div className="bg-pink-50">
         <main className="container mx-auto py-30 px-4 bg-white">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8"> 
-            
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Left Sidebar - User Info & Navigation */}
             <div className="md:col-span-1">
               <div className="border border-gray-200 rounded-md overflow-hidden">
@@ -259,15 +258,15 @@ const ProfilePage: FC = () => {
                       </button>
 
                       <button
-                        onClick={() => handleNavClick("reorder")}
+                        onClick={() => handleNavClick("my-bookings")}
                         className={`flex items-center p-4 w-full text-left border-b border-gray-200 ${
-                          activeSection === "reorder"
+                          activeSection === "my-bookings"
                             ? "bg-black text-white"
                             : "hover:bg-gray-50 text-black"
                         }`}
                       >
                         <FaHistory className="mr-3 text-gray-500" />
-                        <span>Reorder products</span>
+                        <span>My Bookings</span>
                       </button>
 
                       <button
