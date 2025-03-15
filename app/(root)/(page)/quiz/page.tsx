@@ -3,7 +3,7 @@
 import Head from "next/head";
 import { useState } from "react";
 import QuizQuestion from "@/components/QuizQuestion";
-import { questions } from "@/app/data/quizQuestions";
+import { questions, skinTypeDescriptions } from "@/app/data/quizQuestions";
 
 const QuizQuestionsPage = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -98,8 +98,12 @@ const QuizQuestionsPage = () => {
             <h2 className="text-2xl font-bold text-purple-800 mb-4">
               Your Baumann Skin Type
             </h2>
-            <p className="text-xl text-gray-700 mb-6">
+            <p className="text-xl text-gray-700 mb-2">
               Your skin type is <span className="font-bold">{skinType}</span>.
+            </p>
+            <p className="text-gray-600 mb-6">
+              {skinTypeDescriptions[skinType] ||
+                "No description available for this skin type."}
             </p>
             <button
               className="bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition duration-300"
