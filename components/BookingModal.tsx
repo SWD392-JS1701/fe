@@ -52,12 +52,11 @@ const BookingModal: FC<BookingModalProps> = ({
 
   const [selectedDate, setSelectedDate] = useState<string>("Tomorrow");
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [selectedCombo, setSelectedCombo] = useState<string | null>(null); // Store combo _id
-  const [combos, setCombos] = useState<Combo[]>([]); // Store fetched combos
+  const [selectedCombo, setSelectedCombo] = useState<string | null>(null);
+  const [combos, setCombos] = useState<Combo[]>([]);
   const [showInstructions, setShowInstructions] = useState(false);
   const [loadingCombos, setLoadingCombos] = useState(false);
 
-  // Fetch combos when the modal opens
   useEffect(() => {
     if (isOpen) {
       const fetchCombos = async () => {
@@ -66,7 +65,7 @@ const BookingModal: FC<BookingModalProps> = ({
           const fetchedCombos = await getAllCombosController();
           setCombos(fetchedCombos);
           if (fetchedCombos.length > 0) {
-            setSelectedCombo(fetchedCombos[0]._id!); // Default to first combo
+            setSelectedCombo(fetchedCombos[0]._id!);
           }
         } catch (error) {
           console.error("Failed to fetch combos:", error);
@@ -100,6 +99,7 @@ const BookingModal: FC<BookingModalProps> = ({
       toast.error("Please select a combo to continue");
       return;
     }
+    onClose();
     setShowInstructions(true);
   };
 
@@ -108,7 +108,7 @@ const BookingModal: FC<BookingModalProps> = ({
     onConfirm({
       date: selectedDate,
       time: selectedTime!,
-      comboId: selectedCombo!, // Pass the selected combo _id
+      comboId: selectedCombo!,
     });
     onClose();
   };
