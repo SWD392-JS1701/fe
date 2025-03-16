@@ -76,7 +76,6 @@ const BookingPage: React.FC = () => {
 
   const handleModalConfirm = (selectedSlot: { date: string; time: string }) => {
     console.log("Appointment booked for", selectedDoctor?.name, selectedSlot);
-    // Add API call to book the appointment here
     setIsModalOpen(false);
   };
 
