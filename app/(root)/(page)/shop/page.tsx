@@ -1,7 +1,10 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import { getAllProducts, searchProductsByName } from "@/app/services/productService";
+import {
+  getAllProducts,
+  searchProductsByName,
+} from "@/app/services/productService";
 import ProductCard from "@/components/ProductCard";
 import { Product } from "@/app/types/product";
 import { motion } from "framer-motion";
@@ -14,27 +17,29 @@ const ShopPage = () => {
   const [showFilter, setShowFilter] = useState(false);
   const [selectedSort, setSelectedSort] = useState("Just Dropped");
   const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
-  const [currentPriceRange, setCurrentPriceRange] = useState({ min: 0, max: 1000 });
+  const [currentPriceRange, setCurrentPriceRange] = useState({
+    min: 0,
+    max: 1000,
+  });
   const searchParams = useSearchParams();
 
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const searchTerm = searchParams.get('search');
+        const searchTerm = searchParams.get("search");
         let data: Product[];
-        
+
         if (searchTerm) {
           data = await searchProductsByName(searchTerm);
         } else {
           data = await getAllProducts();
         }
-        
+
         setProducts(data);
         // Set initial price range based on products
         if (data.length > 0) {
-          
-          const prices = data.map(p => p.price);
+          const prices = data.map((p) => p.price);
           const minPrice = Math.floor(Math.min(...prices));
           const maxPrice = Math.ceil(Math.max(...prices));
           setPriceRange({ min: minPrice, max: maxPrice });
@@ -47,33 +52,36 @@ const ShopPage = () => {
         setLoading(false);
       }
     };
-    
+
     fetchProducts();
   }, [searchParams]);
 
   // Sort and filter products
   const filteredAndSortedProducts = useMemo(() => {
-    let productsToSort = [...products].filter(
-      product => 
-        product.price >= currentPriceRange.min && 
+    const productsToSort = [...products].filter(
+      (product) =>
+        product.price >= currentPriceRange.min &&
         product.price <= currentPriceRange.max
     );
-    
+
     switch (selectedSort) {
       case "Just Dropped":
-        return productsToSort.sort((a, b) => 
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        return productsToSort.sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
-      
+
       case "Price: Low - High":
         return productsToSort.sort((a, b) => a.price - b.price);
-      
+
       case "Price: High - Low":
         return productsToSort.sort((a, b) => b.price - a.price);
-      
+
       case "Customer Rating":
-        return productsToSort.sort((a, b) => b.product_rating - a.product_rating);
-      
+        return productsToSort.sort(
+          (a, b) => b.product_rating - a.product_rating
+        );
+
       default:
         return productsToSort;
     }
@@ -84,10 +92,10 @@ const ShopPage = () => {
     setShowSort(false);
   };
 
-  const handlePriceRangeChange = (type: 'min' | 'max', value: number) => {
-    setCurrentPriceRange(prev => ({
+  const handlePriceRangeChange = (type: "min" | "max", value: number) => {
+    setCurrentPriceRange((prev) => ({
       ...prev,
-      [type]: value
+      [type]: value,
     }));
   };
 
@@ -109,15 +117,15 @@ const ShopPage = () => {
             <span className="font-extrabold italic">
               {filteredAndSortedProducts.length === 1 ? "Item" : "Items"}
             </span>
-            {searchParams.get('search') && (
+            {searchParams.get("search") && (
               <span className="text-lg font-normal ml-2">
-                for "{searchParams.get('search')}"
+                for "{searchParams.get("search")}"
               </span>
             )}
           </h1>
           <p className="text-gray-600">
-            {searchParams.get('search')
-              ? `Search results for "${searchParams.get('search')}"`
+            {searchParams.get("search")
+              ? `Search results for "${searchParams.get("search")}"`
               : "Browse our collection of products"}
           </p>
         </div>
@@ -247,7 +255,9 @@ const ShopPage = () => {
                   min={priceRange.min}
                   max={currentPriceRange.max}
                   value={currentPriceRange.min}
-                  onChange={(e) => handlePriceRangeChange('min', Number(e.target.value))}
+                  onChange={(e) =>
+                    handlePriceRangeChange("min", Number(e.target.value))
+                  }
                   className="w-full border rounded-md p-2 mt-1"
                 />
               </div>
@@ -258,7 +268,9 @@ const ShopPage = () => {
                   min={currentPriceRange.min}
                   max={priceRange.max}
                   value={currentPriceRange.max}
-                  onChange={(e) => handlePriceRangeChange('max', Number(e.target.value))}
+                  onChange={(e) =>
+                    handlePriceRangeChange("max", Number(e.target.value))
+                  }
                   className="w-full border rounded-md p-2 mt-1"
                 />
               </div>
@@ -268,7 +280,9 @@ const ShopPage = () => {
               min={priceRange.min}
               max={priceRange.max}
               value={currentPriceRange.max}
-              onChange={(e) => handlePriceRangeChange('max', Number(e.target.value))}
+              onChange={(e) =>
+                handlePriceRangeChange("max", Number(e.target.value))
+              }
               className="w-full"
             />
           </div>

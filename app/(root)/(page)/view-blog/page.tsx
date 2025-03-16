@@ -52,12 +52,9 @@ const ViewBlog: FC = () => {
     <div className="relative px-6 pt-16 pb-20 lg:px-8 lg:pt-24 lg:pb-28 mt-10">
       <div className="relative mx-auto max-w-7xl">
         <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+          <h2 className="text-3xl font-extrabold italic text-black uppercase text-center ">
             Daily Posts
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-xl text-gray-500 sm:mt-4">
-            Explore the latest insights and updates from our doctors.
-          </p>
         </div>
 
         <div className="mx-auto mt-12 grid max-w-4xl gap-8 lg:max-w-none lg:grid-cols-3">
@@ -91,7 +88,6 @@ const ViewBlog: FC = () => {
                       {truncateContent(blog.content)}
                     </p>
                   </Link>
-                  {/* Chữ "READ NOW" xuất hiện khi hover */}
                   <Link
                     href={`/view-blog/${blog._id}`}
                     className="block text-center text-sm font-bold text-black uppercase tracking-wide opacity-0 transition-opacity duration-400 ease-in-out group-hover:opacity-100 mt-2"
