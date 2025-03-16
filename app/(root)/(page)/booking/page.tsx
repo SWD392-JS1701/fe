@@ -201,49 +201,62 @@ const BookingPage: React.FC = () => {
           <h2 className="text-lg font-semibold mb-4">
             {filteredDoctors.length} Doctors Available
           </h2>
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredDoctors.map((doctor) => (
               <div
                 key={doctor._id}
-                className="bg-blue-50 p-6 rounded-lg shadow-md flex flex-col md:flex-row items-start md:items-center justify-between"
+                className="relative overflow-hidden rounded-xl shadow-lg group w-full h-[450px] bg-white"
               >
-                <div className="flex items-start space-x-4">
+                {/* Hình ảnh bác sĩ */}
+                <div className="relative h-72 w-full transition-transform duration-400 ease-in-out group-hover:-translate-y-12">
                   <Image
-                    src={doctor.profilePicture || "/images/default-doctor.jpg"}
+                    src={
+                      "https://th.bing.com/th/id/R.c01bfe8e1f11dfe3a1af580cfa3bbc89?rik=4XJslhCYu9u8CA&riu=http%3a%2f%2fhakomed.net%2fwp-content%2fuploads%2f2018%2f11%2f03.jpg&ehk=hVGis2mazsfZKbGSNt2KebgoX7%2b9lh%2bIUJTdYnIiXic%3d&risl=&pid=ImgRaw&r=0"
+                    }
                     alt={doctor.name}
-                    width={80}
-                    height={80}
-                    className="w-20 h-20 rounded-full"
+                    width={300}
+                    height={300}
+                    className="h-full w-full object-cover"
                   />
-                  <div>
-                    <h3 className="text-xl font-semibold">{doctor.name}</h3>
-                    <p className="text-gray-600">{doctor.certification}</p>
-                    <p className="text-sm text-gray-500">
-                      Specialties: {doctor.specialties.join(", ")}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      ${doctor.consultationFee} Consultation Fee at clinic
-                    </p>
-                    <div className="flex items-center space-x-2 mt-2">
-                      <span className="text-yellow-500">★</span>
-                      <span>
-                        {doctor.rating} ({doctor.reviews} Reviews)
-                      </span>
-                      <span>•</span>
-                      <span>{doctor.yearsOfExperience}+ Years</span>
-                      <span>•</span>
-                      <span>{doctor.location}</span>
-                    </div>
+                </div>
+
+                {/* Nội dung chính */}
+                <div className="absolute bottom-0 left-0 w-full bg-white p-6 transition-transform duration-400 ease-in-out transform group-hover:-translate-y-16">
+                  <p className="text-2xl font-extrabold text-black uppercase tracking-wide text-center">
+                    {doctor.name}
+                  </p>
+                  <p className="text-sm text-gray-600 text-center group-hover:opacity-0">
+                    {doctor.certification}
+                  </p>
+                  <p className="text-sm text-gray-500 text-center group-hover:opacity-0">
+                    Specialties: {doctor.specialties.join(", ")}
+                  </p>
+                  <p className="text-sm text-gray-500 text-center transition-all duration-300 group-hover:text-xl group-hover:font-bold group-hover:text-orange-500">
+                    ${doctor.consultationFee} Consultation Fee
+                  </p>
+
+                  {/* Đánh giá & Kinh nghiệm */}
+                  <div className="flex items-center justify-center space-x-2 mt-2 text-gray-600 text-sm group-hover:opacity-0">
+                    <span className="text-yellow-500">★</span>
+                    <span>
+                      {doctor.rating} ({doctor.reviews} Reviews)
+                    </span>
+                    <span>•</span>
+                    <span>{doctor.yearsOfExperience}+ Years</span>
+                    <span>•</span>
+                    <span>{doctor.location}</span>
                   </div>
                 </div>
-                <div className="flex flex-col space-y-2 mt-4 md:mt-0">
-                  <div className="flex items-center justify-start">
-                    <FaPhone className="text-gray-500 mr-2" />
+
+                {/* Số điện thoại & Nút đặt lịch */}
+                <div className="absolute bottom-0 left-0 w-full bg-white py-4 opacity-0 transition-all duration-400 ease-in-out transform translate-y-12 group-hover:translate-y-0 group-hover:opacity-100 flex flex-col items-center space-y-3 shadow-md">
+                  <div className="flex items-center text-gray-600 text-lg">
+                    <FaPhone className="mr-2" />
                     {doctor.contactNumber}
                   </div>
                   <button
                     onClick={() => handleBookAppointment(doctor)}
-                    className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600"
+                    className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-full transition"
                   >
                     Book Appointment
                   </button>

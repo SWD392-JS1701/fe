@@ -187,5 +187,5 @@ const BookingModal: React.FC<BookingModalProps> = ({
     </>
   );
 };
-
+// doctor.profilePicture ||
 export default BookingModal;
