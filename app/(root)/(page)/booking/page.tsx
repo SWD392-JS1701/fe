@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { FaPhone, FaFilter } from "react-icons/fa";
+import { FaPhone } from "react-icons/fa";
 import { Doctor } from "../../../types/doctor";
 import { initialDoctors } from "../../../data/initialDoctors";
 import BookingModal from "@/components/BookingModal";
@@ -15,7 +15,7 @@ const BookingPage: React.FC = () => {
   const [filters, setFilters] = useState({
     gender: "All",
     experience: 5,
-    minFee: 50,
+    minFee: 40,
     maxFee: 200,
     availability: "Morning",
     consultType: "On-site",
@@ -84,15 +84,23 @@ const BookingPage: React.FC = () => {
 
   return (
     <div className="relative pt-32 pb-10 p-8 min-h-screen bg-gray-50">
-      {/* Nút Filter */}
-      <button
-        onClick={() => setIsFilterVisible(!isFilterVisible)}
-        className="fixed top-32 right-6 z-50 bg-black text-white px-4 py-2 rounded-md text-lg cursor-pointer flex items-center"
-      >
-        <FaFilter className="mr-2" />
-        Filter
-      </button>
+      <div className=" flex justify-between items-center mt-">
+        <div>
+          <h2 className="text-2xl font-extrabold italic text-black tracking-tight">
+            {filteredDoctors.length} Doctors Available
+          </h2>
+        </div>
 
+        <div className="flex gap-4">
+          {/* Nút Filter */}
+          <button
+            onClick={() => setIsFilterVisible(!isFilterVisible)}
+            className="bg-black text-white px-4 py-2 rounded-md text-lg cursor-pointer"
+          >
+            Filter
+          </button>
+        </div>
+      </div>
       {/* Sidebar Filter */}
       <div
         className={`fixed top-0 right-0 h-full bg-white shadow-lg p-6 
@@ -231,10 +239,7 @@ const BookingPage: React.FC = () => {
       </div>
 
       {/* Doctors List Section */}
-      <div className="w-full md:w-3/4">
-        <h2 className="text-2xl mb-4 font-extrabold italic text-black tracking-tight">
-          {filteredDoctors.length} Doctors Available
-        </h2>
+      <div className="w-full md:w-3/4 mt-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredDoctors.map((doctor) => (
             <div
