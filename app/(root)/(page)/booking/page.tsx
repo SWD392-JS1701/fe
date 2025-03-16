@@ -84,7 +84,7 @@ const BookingPage: React.FC = () => {
 
   return (
     <div className="relative pt-32 pb-10 p-8 min-h-screen bg-gray-50">
-      <div className=" flex justify-between items-center mt-">
+      <div className=" flex justify-between items-center mt-6">
         <div>
           <h2 className="text-2xl font-extrabold italic text-black tracking-tight">
             {filteredDoctors.length} Doctors Available
@@ -270,7 +270,7 @@ const BookingPage: React.FC = () => {
                 <p className="text-sm text-gray-500 text-center group-hover:opacity-0">
                   Specialties: {doctor.specialties.join(", ")}
                 </p>
-                <p className="text-sm text-gray-500 text-center transition-all duration-300 group-hover:text-xl group-hover:font-bold group-hover:text-orange-500">
+                <p className="text-sm text-gray-500 text-center transition-all duration-300 group-hover:text-xl group-hover:font-bold group-hover:text-green-700">
                   ${doctor.consultationFee} Consultation Fee
                 </p>
 
@@ -295,7 +295,7 @@ const BookingPage: React.FC = () => {
                 </div>
                 <button
                   onClick={() => handleBookAppointment(doctor)}
-                  className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-full transition"
+                  className="bg-black  text-white font-bold py-2 px-4 rounded-full transition cursor-pointer"
                 >
                   Book Appointment
                 </button>

@@ -88,7 +88,6 @@ const ViewBlog: FC = () => {
                       {truncateContent(blog.content, 80)}
                     </p>
                   </Link>
-                  {/* Chữ "READ NOW" xuất hiện khi hover */}
                   <Link
                     href={`/view-blog/${blog._id}`}
                     className="block text-center text-sm font-bold text-black uppercase tracking-wide opacity-0 transition-opacity duration-400 ease-in-out group-hover:opacity-100 mt-2"
