@@ -24,7 +24,10 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
     e.stopPropagation();
 
     // Check if user is a doctor
-    if (session?.user?.role === "Doctor"||session?.user?.role === "Staff") {
+    if (session?.user?.role === "Doctor"
+      ||session?.user?.role === "Staff"
+      ||session?.user?.role === "Admin"
+    ) {
       toast.error("Not Allowed", {
         description: "Cant add items to cart"
       });

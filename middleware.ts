@@ -25,8 +25,10 @@ export async function middleware(req: NextRequest) {
   }
   // Staff routes protection
   if (
-    path.startsWith("/staff") ||
-    (path.startsWith("/blog") && role !== "Staff")
+    (path.startsWith("/staff") ||
+    path.startsWith("/orders") ||
+    path.startsWith("/blog")
+    ) && role !== "Staff"
   ) {
     return unauthorized();
   }
@@ -35,8 +37,8 @@ export async function middleware(req: NextRequest) {
     (path.startsWith("/admin") ||
       path.startsWith("/employee") ||
       path.startsWith("/overview") ||
-      path.startsWith("/schedule")) &&
-    role !== "Admin"
+      path.startsWith("/schedule")
+    ) && role !== "Admin"
   ) {
     return unauthorized();
   }
@@ -48,6 +50,7 @@ export const config = {
   matcher: [
     "/doctor/:path*",
     "/admin/:path*",
+    "/staff/:path*",
     "/profile/:path*",
     "/blog/:path*",
     "/employee/:path*",

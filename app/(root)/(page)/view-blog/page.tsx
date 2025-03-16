@@ -88,7 +88,7 @@ const ViewBlog: FC = () => {
                     </p>
 
                     <p className="text-sm text-gray-500 opacity-0 transition-opacity duration-400 ease-in-out group-hover:opacity-100 line-clamp-1 text-center">
-                      {truncateContent(blog.content, 80)}
+                      {truncateContent(blog.content)}
                     </p>
                   </Link>
                   {/* Chữ "READ NOW" xuất hiện khi hover */}
