@@ -232,7 +232,7 @@ const BookingPage: React.FC = () => {
 
       {/* Doctors List Section */}
       <div className="w-full md:w-3/4">
-        <h2 className="text-lg font-semibold mb-4">
+        <h2 className="text-2xl mb-4 font-extrabold italic text-black tracking-tight">
           {filteredDoctors.length} Doctors Available
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
