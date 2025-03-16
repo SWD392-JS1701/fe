@@ -255,5 +255,5 @@ const BookingModal: FC<BookingModalProps> = ({
     </>
   );
 };
-
+// doctor.profilePicture ||
 export default BookingModal;

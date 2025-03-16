@@ -30,7 +30,7 @@ const getTypeColor = (typeNumber: number): string => {
 
 const QuizPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-r from-pink-50 to-purple-50 mt-[70px]">
+    <div className="min-h-screen bg-white mt-[70px]">
       <Head>
         <title>Skin Type Quiz - GlowUp Skincare</title>
         <meta
@@ -42,7 +42,7 @@ const QuizPage = () => {
 
       {/* Quiz Hero Section */}
       <section className="container mx-auto px-6 py-20 text-center">
-        <h1 className="text-5xl font-bold text-purple-800 mb-6">
+        <h1 className="text-5xl font-bold text-black mb-6">
           Which of the 16 Baumann Skin Types® Are You?
         </h1>
         <p className="text-gray-600 mb-8">
@@ -68,7 +68,7 @@ const QuizPage = () => {
         {/* Button styled to match the image */}
         <Link
           href="/quiz"
-          className="bg-purple-600 text-white px-8 py-3 rounded-full hover:bg-purple-700 transition duration-300"
+          className="bg-black text-white px-8 py-3 rounded-full transition duration-300"
         >
           Find my Skin Type
         </Link>

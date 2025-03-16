@@ -5,7 +5,7 @@ import StaffNavbar from "@/components/Navbar/StaffNavbar";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-
+import Footer from "@/components/Footer";
 interface StaffLayoutProps {
   children: ReactNode;
 }
@@ -40,6 +40,7 @@ const StaffLayout: FC<StaffLayoutProps> = ({ children }) => {
     <div>
       <StaffNavbar />
       <main className="pt-28">{children}</main>
+      <Footer />
     </div>
   );
 };

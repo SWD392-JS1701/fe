@@ -60,7 +60,7 @@ const QuizQuestionsPage = () => {
   const currentQuestion = questions[currentQuestionIndex];
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-pink-50 to-purple-50 mt-[70px]">
+    <div className="min-h-screen bg-white mt-[70px]">
       <Head>
         <title>Quiz Questions - GlowUp Skincare</title>
         <meta
@@ -71,10 +71,7 @@ const QuizQuestionsPage = () => {
       </Head>
 
       {/* Quiz Container */}
-      <section className="container mx-auto px-6 py-12">
-        <h1 className="text-4xl font-bold text-purple-800 mb-6 text-center">
-          Skin Type Quiz
-        </h1>
+      <section className="container mx-auto px-6 py-12 mt-30">
         <p className="text-center text-gray-600 mb-8">
           Answer the following 16 questions to discover your Baumann Skin Type.
           Some questions allow multiple answers—select all that apply!
@@ -83,7 +80,7 @@ const QuizQuestionsPage = () => {
         {/* Progress Bar */}
         <div className="w-full bg-gray-200 rounded-full h-2.5 mb-8">
           <div
-            className="bg-purple-600 h-2.5 rounded-full transition-all duration-500"
+            className="bg-white h-2.5 rounded-full transition-all duration-500"
             style={{
               width: `${
                 ((currentQuestionIndex + 1) / questions.length) * 100
@@ -95,7 +92,7 @@ const QuizQuestionsPage = () => {
         {/* Display Result if Quiz is Complete */}
         {skinType ? (
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-2xl mx-auto text-center">
-            <h2 className="text-2xl font-bold text-purple-800 mb-4">
+            <h2 className="text-2xl font-bold text-black mb-4">
               Your Baumann Skin Type
             </h2>
             <p className="text-xl text-gray-700 mb-2">
@@ -106,7 +103,7 @@ const QuizQuestionsPage = () => {
                 "No description available for this skin type."}
             </p>
             <button
-              className="bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition duration-300"
+              className="bg-black text-white px-6 py-2 rounded-full transition duration-300"
               onClick={() => {
                 setCurrentQuestionIndex(0);
                 setAnswers({});
