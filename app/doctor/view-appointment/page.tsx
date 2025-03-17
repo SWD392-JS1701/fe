@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, FC } from "react";
 import { Appointment } from "@/app/types/appointment";
 import { appointments } from "@/app/data/appoitmentsData";
 
-const ViewAppointment: React.FC = () => {
+const ViewAppointment: FC = () => {
   const [activeTab, setActiveTab] = useState("upcoming");
-  const [expandedMonths, setExpandedMonths] = useState<string[]>(["April"]); // Default to current month expanded
+  const [expandedMonths, setExpandedMonths] = useState<string[]>(["April"]);
   const tabs = ["upcoming", "pending", "cancelled"];
 
   const formatDate = (dateString: string) => {
@@ -127,51 +127,6 @@ const ViewAppointment: React.FC = () => {
                                   style={{ marginLeft: idx > 0 ? "-8px" : "0" }}
                                 />
                               ))}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="relative w-full sm:w-auto group">
-                          <div className="pb-1">
-                            {" "}
-                            {/* Added padding to extend hover area */}
-                            <button className="w-full sm:w-auto px-4 py-2 bg-gray-200 text-gray-800 rounded-lg flex items-center justify-between sm:justify-center gap-2 hover:bg-gray-300">
-                              Edit
-                              <i className="fas fa-chevron-down"></i>
-                            </button>
-                            <div
-                              className="absolute right-0 top-full w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10 
-                              invisible group-hover:visible transition-all duration-200 ease-in-out"
-                            >
-                              <a
-                                href="#"
-                                className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                              >
-                                Reschedule booking
-                              </a>
-                              <a
-                                href="#"
-                                className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                              >
-                                Request reschedule
-                              </a>
-                              <a
-                                href="#"
-                                className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                              >
-                                Edit location
-                              </a>
-                              <a
-                                href="#"
-                                className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                              >
-                                Invite people
-                              </a>
-                              <a
-                                href="#"
-                                className="block px-4 py-2 text-gray-800 hover:bg-gray-100"
-                              >
-                                Cancel event
-                              </a>
                             </div>
                           </div>
                         </div>

@@ -14,14 +14,19 @@ import Swal from "sweetalert2";
 import { createOrder, createOrderDetail } from "@/app/services/orderService";
 import { getUserById } from "@/app/services/userService";
 import { useSession } from "next-auth/react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button"; // Import shadcn Button component
 
 const CartPage = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const cartItems = useSelector((state: RootState) => state.cart.items);
-  const { user, isAuthenticated } = useSelector(
-    (state: RootState) => state.auth
-  );
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -30,7 +35,7 @@ const CartPage = () => {
   const shippingCost = 10.0;
   const totalCost = totalPrice + shippingCost;
   const [loading, setLoading] = useState(false);
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   // Initialize userInfo with empty strings
   const [userInfo, setUserInfo] = useState({
@@ -47,7 +52,9 @@ const CartPage = () => {
           const userData = await getUserById(session);
           if (userData) {
             setUserInfo({
-              fullname: `${userData.first_name || ''} ${userData.last_name || ''}`.trim(),
+              fullname: `${userData.first_name || ""} ${
+                userData.last_name || ""
+              }`.trim(),
               telephone: userData.phone_number || "",
               address: userData.address || "",
             });
@@ -62,7 +69,7 @@ const CartPage = () => {
   }, [session]);
 
   // Add state for active tab
-  const [activeTab, setActiveTab] = useState<'summary' | 'delivery'>('summary');
+  const [activeTab, setActiveTab] = useState<"summary" | "delivery">("summary");
 
   // Add state for promo code
   const [promoCode, setPromoCode] = useState("");
@@ -77,10 +84,10 @@ const CartPage = () => {
   };
 
   const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, ''); // Remove any non-digit characters
-    setUserInfo(prev => ({
+    const value = e.target.value.replace(/\D/g, ""); // Remove any non-digit characters
+    setUserInfo((prev) => ({
       ...prev,
-      telephone: value
+      telephone: value,
     }));
   };
 
@@ -133,7 +140,6 @@ const CartPage = () => {
         user_telephone: userInfo.telephone,
         user_address: userInfo.address,
         amount: totalCost,
-        
       };
       const paymentResponse = await createOrder(paymentData);
       const orderDetailData = {
@@ -170,15 +176,15 @@ const CartPage = () => {
   };
 
   const handleNextStep = () => {
-    if (activeTab === 'summary') {
-      setActiveTab('delivery');
+    if (activeTab === "summary") {
+      setActiveTab("delivery");
     } else {
       handleCheckout();
     }
   };
 
   const renderTabContent = () => {
-    if (activeTab === 'summary') {
+    if (activeTab === "summary") {
       return (
         <div className="min-h-[300px]">
           <div className="flex justify-between mt-6 mb-5">
@@ -193,12 +199,22 @@ const CartPage = () => {
             <label className="font-medium inline-block mb-3 text-sm uppercase">
               Shipping
             </label>
-            <select className="block p-2 text-gray-600 w-full text-sm">
-              <option>Standard shipping - $10.00</option>
-            </select>
+            <Select defaultValue="standard">
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select shipping method" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="standard">
+                  Standard shipping - $10.00
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="py-10">
-            <label htmlFor="promo" className="font-semibold inline-block mb-3 text-sm uppercase">
+            <label
+              htmlFor="promo"
+              className="font-semibold inline-block mb-3 text-sm uppercase"
+            >
               Promo Code
             </label>
             <input
@@ -210,15 +226,15 @@ const CartPage = () => {
               className="p-2 text-sm w-full"
             />
           </div>
-          <button 
+          <Button
             onClick={() => {
               // Handle promo code application here
               console.log("Applying promo code:", promoCode);
             }}
-            className="bg-red-500 border rounded-md hover:bg-red-600 px-5 py-2 text-sm text-white uppercase"
+            className="bg-red-500 border rounded-md hover:bg-red-600 px-5 py-2 text-sm text-white uppercase mt-4"
           >
             Apply
-          </button>
+          </Button>
         </div>
       );
     }
@@ -274,21 +290,19 @@ const CartPage = () => {
   return (
     <div className="container mx-auto mt-10 pt-18 bg-pink-50">
       <Link
-            href="/"
-            className="flex font-semibold text-indigo-600 text-sm mt-10"
-          >
-            <svg
-              className="fill-current mr-2 text-indigo-600 w-4"
-              viewBox="0 0 448 512"
-            >
-              <path d="M134.059 296H436c6.627 0 12-5.373 12-12v-56c0-6.627-5.373-12-12-12H134.059v-46.059c0-21.382-25.851-32.09-40.971-16.971L7.029 239.029c-9.373 9.373-9.373 24.569 0 33.941l86.059 86.059c15.119 15.119 40.971 4.411 40.971-16.971V296z" />
-            </svg>
-            Continue Shopping
-          </Link>
+        href="/"
+        className="flex font-semibold text-indigo-600 text-sm mt-10"
+      >
+        <svg
+          className="fill-current mr-2 text-indigo-600 w-4"
+          viewBox="0 0 448 512"
+        >
+          <path d="M134.059 296H436c6.627 0 12-5.373 12-12v-56c0-6.627-5.373-12-12-12H134.059v-46.059c0-21.382-25.851-32.09-40.971-16.971L7.029 239.029c-9.373 9.373-9.373 24.569 0 33.941l86.059 86.059c15.119 15.119 40.971 4.411 40.971-16.971V296z" />
+        </svg>
+        Continue Shopping
+      </Link>
       <div className="sm:flex shadow-md my-10">
-        
         <div className="w-full sm:w-3/4 bg-pink-50 px-10 ">
-        
           <div className="flex justify-between border-b pb-8">
             <h1 className="font-semibold text-2xl">Shopping Cart</h1>
             <h2 className="font-semibold text-2xl">{totalItems} Items</h2>
@@ -321,37 +335,47 @@ const CartPage = () => {
                     <p className="text-base font-black leading-none text-gray-800">
                       {item.name}
                     </p>
-                    <select
-                      aria-label="Select quantity"
-                      className="py-2 px-1 border border-gray-200 mr-6 focus:outline-none"
-                      value={item.quantity}
-                      onChange={(e) => {
-                        handleUpdateQuantity(item.id, +e.target.value);
-                      }}
+                    <Select
+                      value={item.quantity.toString()}
+                      onValueChange={(value) =>
+                        handleUpdateQuantity(item.id, +value)
+                      }
                     >
-                      {[...Array(10).keys()].map((num) => (
-                        <option key={num + 1} value={num + 1}>
-                          {num + 1}
-                        </option>
-                      ))}
-                    </select>
+                      <SelectTrigger className="w-[70px]">
+                        <SelectValue placeholder={item.quantity.toString()} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[...Array(10).keys()].map((num) => (
+                          <SelectItem
+                            key={num + 1}
+                            value={(num + 1).toString()}
+                          >
+                            {num + 1}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <p className="text-xs leading-3 text-gray-600 pt-2">
+                  <p className="text-sm leading-3 text-gray-600 pt-2">
                     Price: ${item.price}
                   </p>
                   <div className="flex items-center justify-between pt-5">
                     <div className="flex items-center">
-                      <button className="bg-blue-500 border rounded-md hover:bg-blue-600 px-5 py-2 text-sm text-white uppercase mr-4">
+                      <Button
+                        variant="default"
+                        className="bg-blue-500 border rounded-md hover:bg-blue-600 px-5 py-2 text-sm text-white uppercase mr-4"
+                      >
                         Add to favorites
-                      </button>
-                      <button
-                        className="bg-red-500 border rounded-md hover:bg-red-600 px-5 py-2 text-sm text-white uppercase"
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        className="border rounded-md px-5 py-2 text-sm text-white uppercase"
                         onClick={() => {
                           handleRemoveItem(item.id);
                         }}
                       >
                         Remove
-                      </button>
+                      </Button>
                     </div>
                     <p className="text-base font-black leading-none text-gray-800">
                       ${(item.price * item.quantity).toFixed(2)}
@@ -361,29 +385,27 @@ const CartPage = () => {
               </div>
             ))
           )}
-
-          
         </div>
         <div id="summary" className="w-full sm:w-1/4 md:w-1/2 px-8">
           {/* Tab Navigation */}
           <div className="flex border-b border-gray-200">
             <button
               className={`flex-1 py-4 px-6 text-center border-b-2 font-medium text-sm ${
-                activeTab === 'summary'
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                activeTab === "summary"
+                  ? "border-indigo-500 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
-              onClick={() => setActiveTab('summary')}
+              onClick={() => setActiveTab("summary")}
             >
               Order Summary
             </button>
             <button
               className={`flex-1 py-4 px-6 text-center border-b-2 font-medium text-sm ${
-                activeTab === 'delivery'
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                activeTab === "delivery"
+                  ? "border-indigo-500 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
-              onClick={() => setActiveTab('delivery')}
+              onClick={() => setActiveTab("delivery")}
             >
               Delivery Info
             </button>
@@ -398,16 +420,23 @@ const CartPage = () => {
               <span>Total cost</span>
               <span>${totalCost.toFixed(2)}</span>
             </div>
-            <button
-              onClick={activeTab === 'summary' ? handleNextStep : handleCheckout}
+            <Button
+              onClick={
+                activeTab === "summary" ? handleNextStep : handleCheckout
+              }
               disabled={loading}
               className={`bg-indigo-500 rounded-md font-semibold py-4 my-4 text-sm text-white uppercase w-full ${
-                loading ? "opacity-50 cursor-not-allowed" : "hover:bg-indigo-600"
+                loading
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-indigo-600"
               }`}
             >
-              {loading ? "Processing..." : activeTab === 'summary' ? "Next" : "Checkout"}
-            </button>
-            
+              {loading
+                ? "Processing..."
+                : activeTab === "summary"
+                ? "Next"
+                : "Checkout"}
+            </Button>
           </div>
         </div>
       </div>
