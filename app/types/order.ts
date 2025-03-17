@@ -17,7 +17,7 @@ export interface CreateOrderRequest {
   user_telephone: string;
   user_address: string;
   amount: number;
-  status: number;
+  
 }
 
 export interface OrderDetail {

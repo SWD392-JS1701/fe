@@ -133,7 +133,7 @@ const CartPage = () => {
         user_telephone: userInfo.telephone,
         user_address: userInfo.address,
         amount: totalCost,
-        status: 0  // Set default status to 0 (Pending)
+        
       };
       const paymentResponse = await createOrder(paymentData);
       const orderDetailData = {
