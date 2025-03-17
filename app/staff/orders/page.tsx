@@ -26,6 +26,8 @@ const StaffOrdersPage = () => {
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ordersPerPage = 5;
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -92,6 +94,18 @@ const StaffOrdersPage = () => {
     if (filterStatus === "all") return true;
     return order.status.toString() === filterStatus;
   });
+
+  // Get current orders
+  const indexOfLastOrder = currentPage * ordersPerPage;
+  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
+  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+
+  // Change page
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    setExpandedOrderId(null); // Close any expanded order when changing pages
+  };
 
   const handleExpandOrder = async (orderId: string) => {
     if (expandedOrderId === orderId) {
@@ -195,7 +209,10 @@ const StaffOrdersPage = () => {
         <div className="flex gap-4">
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
+            onChange={(e) => {
+              setFilterStatus(e.target.value);
+              setCurrentPage(1); // Reset to first page when filtering
+            }}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           >
             <option value="all">All Orders</option>
@@ -231,14 +248,14 @@ const StaffOrdersPage = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredOrders.length === 0 ? (
+            {currentOrders.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
                   No orders found
                 </td>
               </tr>
             ) : (
-              filteredOrders.map((order) => (
+              currentOrders.map((order) => (
                 <React.Fragment key={order._id}>
                   <tr className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -303,7 +320,53 @@ const StaffOrdersPage = () => {
           </tbody>
         </table>
       </div>
+      <div >
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center space-x-2 mt-6">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded-md ${
+              currentPage === 1
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-indigo-500 text-white hover:bg-indigo-600"
+            }`}
+          >
+            Previous
+          </button>
+          
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={index + 1}
+              onClick={() => handlePageChange(index + 1)}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === index + 1
+                  ? "bg-indigo-600 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              {index + 1}
+            </button>
+          ))}
+
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded-md ${
+              currentPage === totalPages
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-indigo-500 text-white hover:bg-indigo-600"
+            }`}
+          >
+            Next
+          </button>
+        </div>
+      )}
+      </div>      
+      
     </div>
+    
   );
 };
 
