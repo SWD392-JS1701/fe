@@ -288,7 +288,7 @@ const CartPage = () => {
   };
 
   return (
-    <div className="container mx-auto mt-10 pt-18 bg-pink-50">
+    <div className="container mx-auto mt-10 pt-18">
       <Link
         href="/"
         className="flex font-semibold text-indigo-600 text-sm mt-10"
@@ -302,10 +302,10 @@ const CartPage = () => {
         Continue Shopping
       </Link>
       <div className="sm:flex shadow-md my-10">
-        <div className="w-full sm:w-3/4 bg-pink-50 px-10 ">
-          <div className="flex justify-between border-b pb-8">
-            <h1 className="font-semibold text-2xl">Shopping Cart</h1>
-            <h2 className="font-semibold text-2xl">{totalItems} Items</h2>
+        <div className="w-full sm:w-3/4 bg-white px-6 py-6">
+          <div className="flex justify-between border-b pb-4">
+            <h1 className="font-semibold text-2xl italic">YOUR BAG</h1>
+            <h2 className="font-semibold text-2xl">{totalItems} ITEMS</h2>
           </div>
 
           {cartItems.length === 0 ? (
@@ -316,76 +316,67 @@ const CartPage = () => {
             cartItems.map((item) => (
               <div
                 key={item.id}
-                className="md:flex items-strech py-8 md:py-10 lg:py-8 border-t border-gray-50"
+                className="flex items-start py-6 border-b border-gray-200"
               >
-                <div className="md:w-4/12 2xl:w-1/4 w-full">
+                {/* Hình ảnh sản phẩm */}
+                <div className="w-1/4">
                   <img
                     src={item.image_url}
                     alt={item.name}
-                    className="h-full object-center object-cover md:block hidden"
-                  />
-                  <img
-                    src="https://i.ibb.co/TTnzMTf/Rectangle-21.png"
-                    alt={item.name}
-                    className="md:hidden w-full h-full object-center object-cover"
+                    className="w-full h-auto object-cover"
                   />
                 </div>
-                <div className="md:pl-3 md:w-8/12 2xl:w-3/4 flex flex-col justify-center">
-                  <div className="flex items-center justify-between w-full">
-                    <p className="text-base font-black leading-none text-gray-800">
-                      {item.name}
-                    </p>
-                    <Select
-                      value={item.quantity.toString()}
-                      onValueChange={(value) =>
-                        handleUpdateQuantity(item.id, +value)
-                      }
-                    >
-                      <SelectTrigger className="w-[70px]">
-                        <SelectValue placeholder={item.quantity.toString()} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[...Array(10).keys()].map((num) => (
-                          <SelectItem
-                            key={num + 1}
-                            value={(num + 1).toString()}
-                          >
-                            {num + 1}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <p className="text-sm leading-3 text-gray-600 pt-2">
-                    Price: ${item.price}
-                  </p>
-                  <div className="flex items-center justify-between pt-5">
-                    <div className="flex items-center">
-                      <Button
-                        variant="default"
-                        className="bg-blue-500 border rounded-md hover:bg-blue-600 px-5 py-2 text-sm text-white uppercase mr-4"
-                      >
-                        Add to favorites
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        className="border rounded-md px-5 py-2 text-sm text-white uppercase"
-                        onClick={() => {
-                          handleRemoveItem(item.id);
-                        }}
-                      >
-                        Remove
-                      </Button>
+
+                {/* Thông tin sản phẩm */}
+                <div className="w-3/4 pl-4 flex flex-col justify-between">
+                  <div className="flex justify-between">
+                    <div>
+                      <p className="text-lg font-semibold">{item.name}</p>
                     </div>
-                    <p className="text-base font-black leading-none text-gray-800">
-                      ${(item.price * item.quantity).toFixed(2)}
+                    <p className="text-lg font-semibold">
+                      £{item.price.toFixed(2)}
                     </p>
+                  </div>
+
+                  {/* Số lượng & nút xóa */}
+                  <div className="flex items-center justify-between pt-4">
+                    {/* Bộ đếm số lượng giống ảnh */}
+                    <div className="flex items-center border border-gray-300 rounded-md">
+                      <button
+                        className="px-3 py-1 text-gray-700 hover:bg-gray-200"
+                        onClick={() =>
+                          handleUpdateQuantity(item.id, item.quantity - 1)
+                        }
+                        disabled={item.quantity <= 1}
+                      >
+                        -
+                      </button>
+                      <span className="px-4 text-lg font-semibold">
+                        {item.quantity}
+                      </span>
+                      <button
+                        className="px-3 py-1 text-gray-700 hover:bg-gray-200"
+                        onClick={() =>
+                          handleUpdateQuantity(item.id, item.quantity + 1)
+                        }
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    <button
+                      className="text-red-500 text-sm font-semibold hover:underline"
+                      onClick={() => handleRemoveItem(item.id)}
+                    >
+                      Remove
+                    </button>
                   </div>
                 </div>
               </div>
             ))
           )}
         </div>
+
         <div id="summary" className="w-full sm:w-1/4 md:w-1/2 px-8">
           {/* Tab Navigation */}
           <div className="flex border-b border-gray-200">

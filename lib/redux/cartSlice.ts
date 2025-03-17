@@ -57,13 +57,6 @@ const cartSlice = createSlice({
       const item = state.items.find((item) => item.id === action.payload.id);
       if (item) {
         item.quantity = action.payload.quantity;
-        Swal.fire({
-          icon: "success",
-          title: "Quantity updated",
-          text: `Quantity for ${item.name} has been updated to ${item.quantity}.`,
-          showConfirmButton: false,
-          timer: 1500,
-        });
       }
     },
 
