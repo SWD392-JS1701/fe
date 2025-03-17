@@ -40,14 +40,14 @@ const BookingModal: FC<BookingModalProps> = ({
   onConfirm,
 }) => {
   const slots = [
-    { date: "Tomorrow", time: "10:00 AM", status: "Available" },
-    { date: "Tomorrow", time: "10:15 AM", status: "Available" },
-    { date: "Tomorrow", time: "10:30 AM", status: "Booked" },
-    { date: "Tomorrow", time: "10:45 AM", status: "Available" },
-    { date: "Tomorrow", time: "11:00 AM", status: "Available" },
-    { date: "Tomorrow", time: "11:15 AM", status: "Available" },
-    { date: "Tomorrow", time: "11:30 AM", status: "Available" },
-    { date: "Tomorrow", time: "11:45 AM", status: "Available" },
+    { date: "Tuesday", time: "10:00 AM", status: "Available" },
+    { date: "Tuesday", time: "10:15 AM", status: "Available" },
+    { date: "Tuesday", time: "10:30 AM", status: "Booked" },
+    { date: "Tuesday", time: "10:45 AM", status: "Available" },
+    { date: "Tuesday", time: "11:00 AM", status: "Available" },
+    { date: "Tuesday", time: "11:15 AM", status: "Available" },
+    { date: "Tuesday", time: "11:30 AM", status: "Available" },
+    { date: "Tuesday", time: "11:45 AM", status: "Available" },
   ];
 
   const [selectedDate, setSelectedDate] = useState<string>("Tomorrow");
@@ -178,12 +178,13 @@ const BookingModal: FC<BookingModalProps> = ({
             </label>
             <div className="flex space-x-2 mb-2 overflow-x-auto">
               {[
-                "Today",
-                "Tomorrow",
-                "Fri, 22 Mar",
-                "Sat, 23 Mar",
-                "Sun, 24 Mar",
-                "Tue, 26 Mar",
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
               ].map((date) => (
                 <button
                   key={date}
@@ -220,7 +221,7 @@ const BookingModal: FC<BookingModalProps> = ({
                 ))}
             </div>
             <p className="text-xs text-gray-500 mt-2 flex justify-center gap-2">
-              <span className="bg-green-200 text-green-800 px-2 py-1 rounded">
+              <span className="bg-green-500 text-white px-2 py-1 rounded">
                 Selected
               </span>
               <span className="bg-gray-300 text-gray-500 px-2 py-1 rounded">
