@@ -188,15 +188,15 @@ const CartPage = () => {
       return (
         <div className="min-h-[300px]">
           <div className="flex justify-between mt-6 mb-5">
-            <span className="font-semibold text-sm uppercase">
+            <span className="font-bold text-lg uppercase">
               Items {totalItems}
             </span>
-            <span className="font-semibold text-sm">
+            <span className="font-semibold text-lg">
               ${totalPrice.toFixed(2)}
             </span>
           </div>
           <div>
-            <label className="font-medium inline-block mb-3 text-sm uppercase">
+            <label className="font-bold inline-block mb-3 text-lg uppercase">
               Shipping
             </label>
             <Select defaultValue="standard">
@@ -213,7 +213,7 @@ const CartPage = () => {
           <div className="py-10">
             <label
               htmlFor="promo"
-              className="font-semibold inline-block mb-3 text-sm uppercase"
+              className="font-bold inline-block mb-3 text-lg uppercase"
             >
               Promo Code
             </label>
@@ -231,7 +231,7 @@ const CartPage = () => {
               // Handle promo code application here
               console.log("Applying promo code:", promoCode);
             }}
-            className="bg-red-500 border rounded-md hover:bg-red-600 px-5 py-2 text-sm text-white uppercase mt-4"
+            className="bg-red-500 border rounded-md hover:bg-red-600 px-5 py-2 text-sm text-white uppercase"
           >
             Apply
           </Button>
@@ -242,7 +242,7 @@ const CartPage = () => {
     return (
       <div className="min-h-[300px] space-y-4 mt-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-lg font-bold text-gray-700 mb-1">
             Full Name
           </label>
           <input
@@ -250,12 +250,13 @@ const CartPage = () => {
             name="fullname"
             value={userInfo.fullname}
             onChange={handleUserInfoChange}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-lg"
             placeholder="Enter full name"
           />
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-lg font-bold text-gray-700 mb-1">
             Phone Number
           </label>
           <input
@@ -265,13 +266,14 @@ const CartPage = () => {
             onChange={handlePhoneNumberChange}
             pattern="[0-9]*"
             inputMode="numeric"
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-lg"
             placeholder="Enter phone number (numbers only)"
             maxLength={15}
           />
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-lg font-bold text-gray-700 mb-1">
             Delivery Address
           </label>
           <input
@@ -279,7 +281,7 @@ const CartPage = () => {
             name="address"
             value={userInfo.address}
             onChange={handleUserInfoChange}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-lg"
             placeholder="Enter delivery address"
           />
         </div>
@@ -301,15 +303,16 @@ const CartPage = () => {
         </svg>
         Continue Shopping
       </Link>
-      <div className="sm:flex shadow-md my-10">
-        <div className="w-full sm:w-3/4 bg-white px-6 py-6">
+      <div className="my-10 w-full max-w-2xl mx-auto relative">
+        {/* Giỏ hàng */}
+        <div className="w-full max-w-3xl mx-auto bg-white px-6 py-6">
           <div className="flex justify-between border-b pb-4">
-            <h1 className="font-semibold text-2xl italic">YOUR BAG</h1>
-            <h2 className="font-semibold text-2xl">{totalItems} ITEMS</h2>
+            <h1 className="font-bold text-3xl italic">YOUR CART</h1>
+            <h2 className="font-bold text-3xl">{totalItems} ITEMS</h2>
           </div>
 
           {cartItems.length === 0 ? (
-            <p className="text-center text-gray-600 py-10">
+            <p className="text-center text-gray-600 py-10 text-xl font-bold">
               Your cart is empty.
             </p>
           ) : (
@@ -330,20 +333,17 @@ const CartPage = () => {
                 {/* Thông tin sản phẩm */}
                 <div className="w-3/4 pl-4 flex flex-col justify-between">
                   <div className="flex justify-between">
-                    <div>
-                      <p className="text-lg font-semibold">{item.name}</p>
-                    </div>
-                    <p className="text-lg font-semibold">
-                      £{item.price.toFixed(2)}
+                    <p className="text-xl font-bold">{item.name}</p>
+                    <p className="text-xl font-bold">
+                      ${item.price.toFixed(2)}
                     </p>
                   </div>
 
                   {/* Số lượng & nút xóa */}
                   <div className="flex items-center justify-between pt-4">
-                    {/* Bộ đếm số lượng giống ảnh */}
                     <div className="flex items-center border border-gray-300 rounded-md">
                       <button
-                        className="px-3 py-1 text-gray-700 hover:bg-gray-200"
+                        className="px-4 py-2 text-xl text-gray-700 font-bold hover:bg-gray-200"
                         onClick={() =>
                           handleUpdateQuantity(item.id, item.quantity - 1)
                         }
@@ -351,11 +351,11 @@ const CartPage = () => {
                       >
                         -
                       </button>
-                      <span className="px-4 text-lg font-semibold">
+                      <span className="px-6 text-xl font-bold">
                         {item.quantity}
                       </span>
                       <button
-                        className="px-3 py-1 text-gray-700 hover:bg-gray-200"
+                        className="px-4 py-2 text-xl text-gray-700 font-bold hover:bg-gray-200"
                         onClick={() =>
                           handleUpdateQuantity(item.id, item.quantity + 1)
                         }
@@ -365,7 +365,7 @@ const CartPage = () => {
                     </div>
 
                     <button
-                      className="text-red-500 text-sm font-semibold hover:underline"
+                      className="text-red-500 text-base font-bold hover:underline"
                       onClick={() => handleRemoveItem(item.id)}
                     >
                       Remove
@@ -377,28 +377,28 @@ const CartPage = () => {
           )}
         </div>
 
-        <div id="summary" className="w-full sm:w-1/4 md:w-1/2 px-8">
-          {/* Tab Navigation */}
+        {/* Order Summary */}
+        <div id="summary" className="w-full max-w-2xl mx-auto px-8 mt-8">
           <div className="flex border-b border-gray-200">
             <button
-              className={`flex-1 py-4 px-6 text-center border-b-2 font-medium text-sm ${
+              className={`flex-1 py-5 px-6 text-center border-b-2 text-2xl font-bold italic ${
                 activeTab === "summary"
                   ? "border-indigo-500 text-indigo-600"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
               onClick={() => setActiveTab("summary")}
             >
-              Order Summary
+              ORDER SUMMARY
             </button>
             <button
-              className={`flex-1 py-4 px-6 text-center border-b-2 font-medium text-sm ${
+              className={`flex-1 py-5 px-6 text-center border-b-2 text-2xl font-bold italic ${
                 activeTab === "delivery"
                   ? "border-indigo-500 text-indigo-600"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
               onClick={() => setActiveTab("delivery")}
             >
-              Delivery Info
+              DELIVERY INFO
             </button>
           </div>
 
@@ -407,7 +407,7 @@ const CartPage = () => {
 
           {/* Total and Next/Checkout Button */}
           <div className="border-t mt-8">
-            <div className="flex font-semibold justify-between py-6 text-sm uppercase">
+            <div className="flex font-bold justify-between py-6 text-lg uppercase">
               <span>Total cost</span>
               <span>${totalCost.toFixed(2)}</span>
             </div>
@@ -416,17 +416,15 @@ const CartPage = () => {
                 activeTab === "summary" ? handleNextStep : handleCheckout
               }
               disabled={loading}
-              className={`bg-indigo-500 rounded-md font-semibold py-4 my-4 text-sm text-white uppercase w-full ${
-                loading
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-indigo-600"
+              className={`bg-[#66FF80] rounded-md font-bold py-10 my-4 text-3xl text-black w-full border-2 border-[#66FF80] transition-all ${
+                loading ? "opacity-50 cursor-not-allowed" : "hover:border-black"
               }`}
             >
               {loading
                 ? "Processing..."
                 : activeTab === "summary"
                 ? "Next"
-                : "Checkout"}
+                : "Checkout securely"}
             </Button>
           </div>
         </div>
