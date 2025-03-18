@@ -16,7 +16,6 @@ import InstructionNotification from "./InstructionNotification";
 import { Doctor } from "../app/types/doctor";
 import { ScheduleSlot } from "@/app/types/schedule";
 import { fetchScheduleByDoctorId } from "@/app/controller/scheduleController";
-import { initialSchedule } from "@/app/data/initialSchedule";
 
 interface BookingModalProps {
   doctor: Doctor;
@@ -54,6 +53,13 @@ const BookingModal: FC<BookingModalProps> = ({
       fetchData();
     }
   }, [isOpen, doctor?._id]);
+
+  const getDaySlots = (dayOfWeek: string) => {
+    return slots.filter(
+      (slot) =>
+        slot.doctorId === doctor?.user_Id && slot.dayOfWeek === dayOfWeek
+    );
+  };
 
   const handleDateSelect = (date: string) => {
     setSelectedDate(date);
@@ -111,43 +117,46 @@ const BookingModal: FC<BookingModalProps> = ({
               Select Date & Time Slot
             </label>
             <div className="flex space-x-2 mb-2 overflow-x-auto">
-              {initialSchedule.map((schedule) => (
-                <button
-                  key={schedule.day}
-                  className={`px-3 py-1 rounded-md text-sm ${
-                    selectedDate === schedule.day
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  } whitespace-nowrap`}
-                  onClick={() => handleDateSelect(schedule.day)}
-                >
-                  {schedule.day}
-                </button>
-              ))}
+              {Array.from(new Set(slots.map((slot) => slot.dayOfWeek))).map(
+                (day) => (
+                  <button
+                    key={day}
+                    className={`px-3 py-1 rounded-md text-sm ${
+                      selectedDate === day
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    } whitespace-nowrap`}
+                    onClick={() => handleDateSelect(day)}
+                  >
+                    {day}
+                  </button>
+                )
+              )}
             </div>
             <div className="grid grid-cols-4 gap-2">
-              {slots
-                .filter((slot) => {
-                  return slot.doctorId === doctor?.user_Id;
-                })
-                .map((slot, index) => (
+              {loadingSlots ? (
+                <p>Loading slots...</p>
+              ) : (
+                getDaySlots(selectedDate).map((slot) => (
                   <button
-                    key={`${slot.id}-${index}`}
+                    key={slot._id}
                     className={`px-3 py-1 rounded-md text-sm ${
                       selectedTime === slot.startTime
                         ? "bg-green-500 text-white"
-                        : slot.status === "Booked"
+                        : slot.status === "booked"
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                         : "bg-green-200 text-green-800 hover:bg-green-300"
                     }`}
-                    disabled={slot.status === "Booked"}
+                    disabled={slot.status === "booked"}
                     onClick={() => handleTimeSelect(slot.startTime)}
                   >
-                    {slot.startTime}
-                    {slot.status === "Booked" && " (Booked)"}
+                    {`${slot.startTime} - ${slot.endTime}`}
+                    {slot.status === "booked" ? " (Booked)" : " (Available)"}
                   </button>
-                ))}
+                ))
+              )}
             </div>
+
             <p className="text-xs text-gray-500 mt-2 flex justify-center gap-2">
               <span className="bg-green-500 text-white px-2 py-1 rounded">
                 Selected

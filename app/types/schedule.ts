@@ -1,5 +1,5 @@
 export interface ScheduleSlot {
-  id: string;
+  _id: string;
   startTime: string;
   endTime: string;
   doctorId: string | null;

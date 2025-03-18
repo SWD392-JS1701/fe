@@ -27,7 +27,7 @@ interface ScheduleSlot {
   doctorId: string | null;
   doctorName?: string | null;
   specialization?: string | null;
-  status?: string; // Add status
+  status?: string;
 }
 
 interface DaySchedule {
@@ -95,7 +95,7 @@ interface ScheduleSlotProps {
   day: string;
 }
 
-const ScheduleSlot: FC<ScheduleSlotProps> = ({ slot, doctors, day = "" }) => {
+const ScheduleSlot: FC<ScheduleSlotProps> = ({ slot, day = "" }) => {
   const { setNodeRef, isOver, active } = useDroppable({
     id: `slot-${day.toLowerCase() || "unknown"}-${slot.id}`,
     data: {
@@ -145,6 +145,7 @@ const SchedulePage: FC = () => {
   const [changes, setChanges] = useState<
     { day: string; slotId: string; doctorId: string | null }[]
   >([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -170,7 +171,7 @@ const SchedulePage: FC = () => {
         }
 
         const transformedSchedule = apiSchedules.map((daySchedule: any) => ({
-          _id: daySchedule._id, // Include schedule _id
+          _id: daySchedule._id,
           day: daySchedule.dayOfWeek,
           slots: daySchedule.slots.map((slot: any) => ({
             id: slot.slotId,
@@ -178,7 +179,7 @@ const SchedulePage: FC = () => {
             doctorId: slot.doctorId || null,
             doctorName: slot.doctorName || null,
             specialization: slot.specialization || null,
-            status: slot.status || "available", // Include status
+            status: slot.status || "available",
           })),
         }));
 
@@ -261,7 +262,7 @@ const SchedulePage: FC = () => {
                 ? `${assignedDoctor.first_name} ${assignedDoctor.last_name}`
                 : null,
               specialization: assignedDoctor?.specialization || null,
-              status: "booked",
+              status: "available",
             };
           }
           return slot;
@@ -300,6 +301,8 @@ const SchedulePage: FC = () => {
   };
 
   const handleSaveChanges = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
     try {
       for (const change of changes) {
         const daySchedule = schedule.find(
@@ -335,6 +338,8 @@ const SchedulePage: FC = () => {
         showConfirmButton: false,
         timer: 1500,
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -478,9 +483,14 @@ const SchedulePage: FC = () => {
       <div className="fixed bottom-4 right-4">
         <button
           onClick={handleSaveChanges}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors"
+          disabled={isSaving}
+          className={`${
+            isSaving
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-500 hover:bg-blue-600"
+          } text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors`}
         >
-          Save Changes
+          {isSaving ? "Saving..." : "Save Changes"}
         </button>
       </div>
     </div>
