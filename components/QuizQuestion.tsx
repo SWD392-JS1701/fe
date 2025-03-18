@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { FC, useState } from "react";
 
 interface QuizQuestionProps {
   question: {
@@ -13,12 +13,12 @@ interface QuizQuestionProps {
   onNext: () => void;
 }
 
-const QuizQuestion: React.FC<QuizQuestionProps> = ({
+const QuizQuestion: FC<QuizQuestionProps> = ({
   question,
   onAnswer,
   onNext,
 }) => {
-  const [selectedAnswers, setSelectedAnswers] = React.useState<string[]>([]);
+  const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
 
   const handleAnswerChange = (answer: string) => {
     if (question.type === "single") {

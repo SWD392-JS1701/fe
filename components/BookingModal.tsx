@@ -3,9 +3,7 @@
 import React, { FC, useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
-import { Doctor } from "../app/types/doctor";
-import { Combo } from "../app/types/combo";
-import { getAllCombosController } from "@/app/controller/comboController";
+
 import {
   Dialog,
   DialogContent,
@@ -14,23 +12,16 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import InstructionNotification from "./InstructionNotification";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
+import { Doctor } from "../app/types/doctor";
+import { ScheduleSlot } from "@/app/types/schedule";
+import { fetchScheduleByDoctorId } from "@/app/controller/scheduleController";
 
 interface BookingModalProps {
   doctor: Doctor;
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (selectedSlot: {
-    date: string;
-    time: string;
-    comboId: string;
-  }) => void;
+  onConfirm: (selectedSlot: { date: string; time: string }) => void;
 }
 
 const BookingModal: FC<BookingModalProps> = ({
@@ -39,43 +30,36 @@ const BookingModal: FC<BookingModalProps> = ({
   onClose,
   onConfirm,
 }) => {
-  const slots = [
-    { date: "Tuesday", time: "10:00 AM", status: "Available" },
-    { date: "Tuesday", time: "10:15 AM", status: "Available" },
-    { date: "Tuesday", time: "10:30 AM", status: "Booked" },
-    { date: "Tuesday", time: "10:45 AM", status: "Available" },
-    { date: "Tuesday", time: "11:00 AM", status: "Available" },
-    { date: "Tuesday", time: "11:15 AM", status: "Available" },
-    { date: "Tuesday", time: "11:30 AM", status: "Available" },
-    { date: "Tuesday", time: "11:45 AM", status: "Available" },
-  ];
-
+  const [slots, setSlots] = useState<ScheduleSlot[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>("Tomorrow");
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [selectedCombo, setSelectedCombo] = useState<string | null>(null);
-  const [combos, setCombos] = useState<Combo[]>([]);
   const [showInstructions, setShowInstructions] = useState(false);
-  const [loadingCombos, setLoadingCombos] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      const fetchCombos = async () => {
-        setLoadingCombos(true);
+    if (isOpen && doctor?.user_Id) {
+      const fetchData = async () => {
+        setLoadingSlots(true);
         try {
-          const fetchedCombos = await getAllCombosController();
-          setCombos(fetchedCombos);
-          if (fetchedCombos.length > 0) {
-            setSelectedCombo(fetchedCombos[0]._id!);
-          }
+          const scheduleData = await fetchScheduleByDoctorId(doctor.user_Id);
+          setSlots(scheduleData);
         } catch (error) {
-          console.error("Failed to fetch combos:", error);
+          console.error("Failed to fetch data:", error);
+          toast.error("Failed to load schedule");
         } finally {
-          setLoadingCombos(false);
+          setLoadingSlots(false);
         }
       };
-      fetchCombos();
+      fetchData();
     }
-  }, [isOpen]);
+  }, [isOpen, doctor?._id]);
+
+  const getDaySlots = (dayOfWeek: string) => {
+    return slots.filter(
+      (slot) =>
+        slot.doctorId === doctor?.user_Id && slot.dayOfWeek === dayOfWeek
+    );
+  };
 
   const handleDateSelect = (date: string) => {
     setSelectedDate(date);
@@ -86,17 +70,9 @@ const BookingModal: FC<BookingModalProps> = ({
     setSelectedTime(time);
   };
 
-  const handleComboSelect = (comboId: string) => {
-    setSelectedCombo(comboId);
-  };
-
   const handleConfirm = () => {
     if (!selectedTime) {
       toast.error("Please select a time slot to continue");
-      return;
-    }
-    if (!selectedCombo) {
-      toast.error("Please select a combo to continue");
       return;
     }
     onClose();
@@ -108,7 +84,6 @@ const BookingModal: FC<BookingModalProps> = ({
     onConfirm({
       date: selectedDate,
       time: selectedTime!,
-      comboId: selectedCombo!,
     });
     onClose();
   };
@@ -132,43 +107,8 @@ const BookingModal: FC<BookingModalProps> = ({
               <div>
                 <h3 className="font-semibold">{doctor?.name}</h3>
                 <p className="text-sm text-gray-600">{doctor?.certification}</p>
-                <p className="text-sm text-gray-500">
-                  {doctor?.location}, United States
-                </p>
               </div>
             </div>
-            <p className="text-sm mt-2">
-              ${doctor?.consultationFee} Consultation Fee at clinic
-            </p>
-          </div>
-
-          {/* Combo Selection */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Combo
-            </label>
-            {loadingCombos ? (
-              <p>Loading combos...</p>
-            ) : combos.length === 0 ? (
-              <p>No combos available.</p>
-            ) : (
-              <Select
-                value={selectedCombo || ""}
-                onValueChange={handleComboSelect}
-                disabled={loadingCombos}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a combo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {combos.map((combo) => (
-                    <SelectItem key={combo._id} value={combo._id!}>
-                      {`${combo.name} - ${combo.type} ($${combo.price})`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
           </div>
 
           {/* Date and Time Selection */}
@@ -177,49 +117,46 @@ const BookingModal: FC<BookingModalProps> = ({
               Select Date & Time Slot
             </label>
             <div className="flex space-x-2 mb-2 overflow-x-auto">
-              {[
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday",
-                "Sunday",
-              ].map((date) => (
-                <button
-                  key={date}
-                  className={`px-3 py-1 rounded-md text-sm ${
-                    selectedDate === date
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  } whitespace-nowrap`}
-                  onClick={() => handleDateSelect(date)}
-                >
-                  {date}
-                </button>
-              ))}
+              {Array.from(new Set(slots.map((slot) => slot.dayOfWeek))).map(
+                (day) => (
+                  <button
+                    key={day}
+                    className={`px-3 py-1 rounded-md text-sm ${
+                      selectedDate === day
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    } whitespace-nowrap`}
+                    onClick={() => handleDateSelect(day)}
+                  >
+                    {day}
+                  </button>
+                )
+              )}
             </div>
             <div className="grid grid-cols-4 gap-2">
-              {slots
-                .filter((slot) => slot.date === selectedDate)
-                .map((slot, index) => (
+              {loadingSlots ? (
+                <p>Loading slots...</p>
+              ) : (
+                getDaySlots(selectedDate).map((slot) => (
                   <button
-                    key={index}
+                    key={slot._id}
                     className={`px-3 py-1 rounded-md text-sm ${
-                      selectedTime === slot.time
+                      selectedTime === slot.startTime
                         ? "bg-green-500 text-white"
-                        : slot.status === "Booked"
+                        : slot.status === "booked"
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                         : "bg-green-200 text-green-800 hover:bg-green-300"
                     }`}
-                    disabled={slot.status === "Booked"}
-                    onClick={() => handleTimeSelect(slot.time)}
+                    disabled={slot.status === "booked"}
+                    onClick={() => handleTimeSelect(slot.startTime)}
                   >
-                    {slot.time}
-                    {slot.status === "Booked" && " (Booked)"}
+                    {`${slot.startTime} - ${slot.endTime}`}
+                    {slot.status === "booked" ? " (Booked)" : " (Available)"}
                   </button>
-                ))}
+                ))
+              )}
             </div>
+
             <p className="text-xs text-gray-500 mt-2 flex justify-center gap-2">
               <span className="bg-green-500 text-white px-2 py-1 rounded">
                 Selected
@@ -243,7 +180,7 @@ const BookingModal: FC<BookingModalProps> = ({
             <button
               onClick={handleConfirm}
               className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-              disabled={!selectedTime || !selectedCombo}
+              disabled={!selectedTime}
             >
               Continue
             </button>
@@ -256,5 +193,5 @@ const BookingModal: FC<BookingModalProps> = ({
     </>
   );
 };
-// doctor.profilePicture ||
+
 export default BookingModal;

@@ -1,6 +1,13 @@
 "use client";
 
-import React, { FC, useState } from "react";
+import React, {
+  FC,
+  useState,
+  Dispatch,
+  SetStateAction,
+  ChangeEvent,
+  FormEvent,
+} from "react";
 import { useSession } from "next-auth/react";
 import { updateUser } from "@/app/services/userService";
 import { toast, Toaster } from "react-hot-toast";
@@ -30,7 +37,7 @@ interface User {
 
 interface UserProfileProps {
   user: User;
-  setUser: React.Dispatch<React.SetStateAction<User>>;
+  setUser: Dispatch<SetStateAction<User>>;
 }
 
 const UserProfile: FC<UserProfileProps> = ({ user, setUser }) => {
@@ -50,11 +57,11 @@ const UserProfile: FC<UserProfileProps> = ({ user, setUser }) => {
     sensitivity: user?.sensitivity || "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     setLoading(true);
@@ -104,7 +111,9 @@ const UserProfile: FC<UserProfileProps> = ({ user, setUser }) => {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-black">All orders</h3>
-                <p className="text-lg font-bold text-black">{user.orderCount}</p>
+                <p className="text-lg font-bold text-black">
+                  {user.orderCount}
+                </p>
               </div>
             </div>
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { FC } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getBlogById } from "@/app/services/blogService";
@@ -8,7 +8,7 @@ interface BlogDetailProps {
   params: { id: string };
 }
 
-const BlogDetail: React.FC<BlogDetailProps> = async ({ params }) => {
+const BlogDetail: FC<BlogDetailProps> = async ({ params }) => {
   const { id } = params;
   let blog: Blog | null = null;
 

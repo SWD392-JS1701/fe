@@ -1,9 +1,13 @@
-import axiosInstance from "./axiosInstance"; // Import axiosInstance
+import axiosInstance from "./axiosInstance";
 import { Doctor } from "../types/doctor";
 
 export const getAllDoctors = async (): Promise<Doctor[]> => {
   try {
-    const response = await axiosInstance.get("/doctors");
+    const response = await axiosInstance.get("/doctors", {
+      headers: {
+        accept: "application/json",
+      },
+    });
     return response.data;
   } catch (error: any) {
     console.error("Error fetching doctors:", error);
@@ -18,7 +22,11 @@ export const getDoctorById = async (
   doctorId: string
 ): Promise<Doctor | null> => {
   try {
-    const response = await axiosInstance.get(`/doctors/${doctorId}`);
+    const response = await axiosInstance.get(`/doctors/${doctorId}`, {
+      headers: {
+        accept: "application/json",
+      },
+    });
     return response.data;
   } catch (error: any) {
     console.error("Error fetching doctor details:", error);
@@ -29,7 +37,9 @@ export const getDoctorById = async (
   }
 };
 
-export const createDoctor = async (doctor: Doctor): Promise<Doctor | null> => {
+export const createDoctor = async (
+  doctor: Omit<Doctor, "_id" | "__v">
+): Promise<Doctor | null> => {
   try {
     const response = await axiosInstance.post("/doctors", doctor, {
       headers: {
@@ -48,7 +58,7 @@ export const createDoctor = async (doctor: Doctor): Promise<Doctor | null> => {
 
 export const updateDoctor = async (
   doctorId: string,
-  doctor: Doctor
+  doctor: Partial<Doctor>
 ): Promise<Doctor | null> => {
   try {
     const response = await axiosInstance.patch(`/doctors/${doctorId}`, doctor, {
@@ -68,7 +78,11 @@ export const updateDoctor = async (
 
 export const deleteDoctor = async (doctorId: string): Promise<void> => {
   try {
-    await axiosInstance.delete(`/doctors/${doctorId}`);
+    await axiosInstance.delete(`/doctors/${doctorId}`, {
+      headers: {
+        accept: "application/json",
+      },
+    });
   } catch (error: any) {
     console.error("Error deleting doctor:", error);
     throw new Error(

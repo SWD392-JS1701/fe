@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ChangeEvent } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/lib/redux/store";
 import {
@@ -75,7 +75,7 @@ const CartPage = () => {
   const [promoCode, setPromoCode] = useState("");
 
   // Handle user info changes
-  const handleUserInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUserInfoChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUserInfo((prev) => ({
       ...prev,
@@ -83,7 +83,7 @@ const CartPage = () => {
     }));
   };
 
-  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhoneNumberChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, ""); // Remove any non-digit characters
     setUserInfo((prev) => ({
       ...prev,
