@@ -1,5 +1,5 @@
 import axiosInstance from "./axiosInstance";
-import { Schedule } from "../types/schedule";
+import { Schedule, ScheduleSlot } from "../types/schedule";
 
 export const getSchedule = async () => {
   try {
@@ -80,6 +80,21 @@ export const getSlotOfWeek = async (dateOfWeek: string, slotId: string) => {
     console.error("Slot API Error:", error);
     throw new Error(
       error.response?.data?.message || "Failed to fetch slot. Please try again."
+    );
+  }
+};
+
+export const getScheduleByDoctorId = async (
+  id: string
+): Promise<ScheduleSlot[]> => {
+  try {
+    const response = await axiosInstance.get(`/schedules/slots/doctor/${id}`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Schedule API Error:", error);
+    throw new Error(
+      error.response?.data?.message ||
+        "Failed to fetch schedule. Please try again."
     );
   }
 };

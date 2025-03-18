@@ -1,10 +1,12 @@
 export interface ScheduleSlot {
   id: string;
-  time: string;
+  startTime: string;
+  endTime: string;
   doctorId: string | null;
   doctorName?: string | null;
   specialization?: string | null;
   status?: string;
+  dayOfWeek: string;
 }
 
 export interface Schedule {

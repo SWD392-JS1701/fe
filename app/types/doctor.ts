@@ -1,19 +1,18 @@
 export interface Doctor {
   _id?: string;
   user_Id: string;
-  name: string;
   certification: string;
   schedule: string;
   description: string;
-  specialties: string[];
+  __v?: number;
+  name: string;
+  yearsOfExperience: number;
   consultationFee: number;
+  availability: string;
   sessionFee: number;
-  location: string;
+  specialties: string[];
   rating: number;
   reviews: number;
-  yearsOfExperience: number;
+  location: string;
   contactNumber: string;
-  availability: string;
-  gender: "Male" | "Female";
-  profilePicture?: string;
 }

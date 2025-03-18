@@ -1,3 +1,5 @@
+import { toast } from "react-hot-toast";
+import { Doctor } from "../types/doctor";
 import {
   getAllDoctors,
   getDoctorById,
@@ -5,8 +7,6 @@ import {
   updateDoctor,
   deleteDoctor,
 } from "@/app/services/doctorService";
-import { toast } from "react-hot-toast";
-import { Doctor } from "../types/doctor";
 
 export const fetchAllDoctors = async (): Promise<Doctor[]> => {
   try {
@@ -31,7 +31,7 @@ export const fetchDoctorById = async (
 };
 
 export const createNewDoctor = async (
-  doctor: Doctor
+  doctor: Omit<Doctor, "_id" | "__v">
 ): Promise<Doctor | null> => {
   try {
     const newDoctor = await createDoctor(doctor);
@@ -45,7 +45,7 @@ export const createNewDoctor = async (
 
 export const updateExistingDoctor = async (
   doctorId: string,
-  doctor: Doctor
+  doctor: Partial<Doctor>
 ): Promise<Doctor | null> => {
   try {
     const updatedDoctor = await updateDoctor(doctorId, doctor);
