@@ -1,12 +1,12 @@
 "use client";
 
 import Providers from "@/app/provider";
-import React from "react";
+import React, { ReactNode } from "react";
 
 import Footer from "@/components/Footer";
 import NavbarWrapper from "@/components/Navbar/NavbarWrapper";
 
-const MainLayout = ({ children }: { children: React.ReactNode }) => {
+const MainLayout = ({ children }: { children: ReactNode }) => {
   return (
     <Providers>
       <NavbarWrapper />

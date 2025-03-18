@@ -7,12 +7,9 @@ export interface Doctor {
   __v?: number;
   name: string;
   yearsOfExperience: number;
-  consultationFee: number;
   availability: string;
-  sessionFee: number;
   specialties: string[];
   rating: number;
   reviews: number;
-  location: string;
   contactNumber: string;
 }

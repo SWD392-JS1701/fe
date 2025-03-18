@@ -1,13 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { FC, useState, useEffect } from "react";
 import Image from "next/image";
 import { FaPhone } from "react-icons/fa";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import { Doctor } from "../../../types/doctor";
 import { fetchAllDoctors } from "@/app/controller/doctorController";
 import BookingModal from "@/components/BookingModal";
 
-const BookingPage: React.FC = () => {
+const BookingPage: FC = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
@@ -44,13 +52,10 @@ const BookingPage: React.FC = () => {
       __v: doctor.__v,
       name: doctor.name || `Dr. ${doctor.user_Id}`,
       yearsOfExperience: doctor.yearsOfExperience || 10,
-      consultationFee: doctor.consultationFee || 50,
       availability: doctor.availability || availability,
-      sessionFee: doctor.sessionFee || 100,
       specialties: doctor.specialties || ["General Practice"],
       rating: doctor.rating || 4.0,
       reviews: doctor.reviews || 0,
-      location: doctor.location || "Unknown Location",
       contactNumber: doctor.contactNumber || "+1-555-000-0000",
     };
   };
@@ -79,23 +84,12 @@ const BookingPage: React.FC = () => {
   useEffect(() => {
     const filtered = doctors.filter((doctor) => {
       const matchesExperience = doctor.yearsOfExperience >= filters.experience;
-      const matchesFee =
-        doctor.consultationFee >= filters.minFee &&
-        doctor.consultationFee <= filters.maxFee;
       const matchesAvailability =
         filters.availability === "All" ||
         doctor.availability === filters.availability;
-      const matchesConsultType =
-        filters.consultType === "All" ||
-        (filters.consultType === "On-site" && doctor.consultationFee > 0) ||
-        (filters.consultType === "Home Visit" && doctor.sessionFee > 0);
+      const matchesConsultType = filters.consultType === "All";
 
-      return (
-        matchesExperience &&
-        matchesFee &&
-        matchesAvailability &&
-        matchesConsultType
-      );
+      return matchesExperience && matchesAvailability && matchesConsultType;
     });
     setFilteredDoctors(filtered);
   }, [filters, doctors]);
@@ -174,19 +168,23 @@ const BookingPage: React.FC = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Experience
           </label>
-          <select
-            value={tempFilters.experience}
-            onChange={(e) =>
-              handleFilterChange("experience", Number(e.target.value))
+          <Select
+            value={tempFilters.experience.toString()}
+            onValueChange={(value) =>
+              handleFilterChange("experience", Number(value))
             }
-            className="w-full p-2 border rounded-md"
           >
-            {[0, 1, 5, 10, 15].map((exp) => (
-              <option key={exp} value={exp}>
-                {exp}+ Years
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select experience" />
+            </SelectTrigger>
+            <SelectContent>
+              {[0, 1, 5, 10, 15].map((exp) => (
+                <SelectItem key={exp} value={exp.toString()}>
+                  {exp}+ Years
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Visiting Fees Filter */}
@@ -219,17 +217,21 @@ const BookingPage: React.FC = () => {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Availability
           </label>
-          <select
+          <Select
             value={tempFilters.availability}
-            onChange={(e) => handleFilterChange("availability", e.target.value)}
-            className="w-full p-2 border rounded-md"
+            onValueChange={(value) => handleFilterChange("availability", value)}
           >
-            {["All", "Morning", "Afternoon", "Evening"].map((time) => (
-              <option key={time} value={time}>
-                {time}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select availability" />
+            </SelectTrigger>
+            <SelectContent>
+              {["All", "Morning", "Afternoon", "Evening"].map((time) => (
+                <SelectItem key={time} value={time}>
+                  {time}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Consult Type Filter */}
@@ -300,9 +302,6 @@ const BookingPage: React.FC = () => {
                 <p className="text-sm text-gray-500 text-center group-hover:opacity-0">
                   Specialties: {doctor.specialties.join(", ")}
                 </p>
-                <p className="text-sm text-gray-500 text-center transition-all duration-300 group-hover:text-xl group-hover:font-bold group-hover:text-green-700">
-                  ${doctor.consultationFee} Consultation Fee
-                </p>
 
                 {/* Rating & Experience */}
                 <div className="flex items-center justify-center space-x-2 mt-2 text-gray-600 text-sm group-hover:opacity-0">
@@ -312,8 +311,6 @@ const BookingPage: React.FC = () => {
                   </span>
                   <span>•</span>
                   <span>{doctor.yearsOfExperience}+ Years</span>
-                  <span>•</span>
-                  <span>{doctor.location}</span>
                 </div>
               </div>
 

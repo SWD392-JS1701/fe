@@ -12,18 +12,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import InstructionNotification from "./InstructionNotification";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
-import { Combo } from "../app/types/combo";
 import { Doctor } from "../app/types/doctor";
 import { ScheduleSlot } from "@/app/types/schedule";
-import { getAllCombosController } from "@/app/controller/comboController";
 import { fetchScheduleByDoctorId } from "@/app/controller/scheduleController";
 import { initialSchedule } from "@/app/data/initialSchedule";
 
@@ -31,11 +22,7 @@ interface BookingModalProps {
   doctor: Doctor;
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (selectedSlot: {
-    date: string;
-    time: string;
-    comboId: string;
-  }) => void;
+  onConfirm: (selectedSlot: { date: string; time: string }) => void;
 }
 
 const BookingModal: FC<BookingModalProps> = ({
@@ -48,33 +35,20 @@ const BookingModal: FC<BookingModalProps> = ({
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>("Tomorrow");
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [selectedCombo, setSelectedCombo] = useState<string | null>(null);
-  const [combos, setCombos] = useState<Combo[]>([]);
   const [showInstructions, setShowInstructions] = useState(false);
-  const [loadingCombos, setLoadingCombos] = useState(false);
 
   useEffect(() => {
     if (isOpen && doctor?.user_Id) {
       const fetchData = async () => {
         setLoadingSlots(true);
-        setLoadingCombos(true);
         try {
-          const [scheduleData, fetchedCombos] = await Promise.all([
-            fetchScheduleByDoctorId(doctor.user_Id),
-            getAllCombosController(),
-          ]);
-
+          const scheduleData = await fetchScheduleByDoctorId(doctor.user_Id);
           setSlots(scheduleData);
-          setCombos(fetchedCombos);
-          if (fetchedCombos.length > 0) {
-            setSelectedCombo(fetchedCombos[0]._id!);
-          }
         } catch (error) {
           console.error("Failed to fetch data:", error);
-          toast.error("Failed to load schedule or combos");
+          toast.error("Failed to load schedule");
         } finally {
           setLoadingSlots(false);
-          setLoadingCombos(false);
         }
       };
       fetchData();
@@ -90,17 +64,9 @@ const BookingModal: FC<BookingModalProps> = ({
     setSelectedTime(time);
   };
 
-  const handleComboSelect = (comboId: string) => {
-    setSelectedCombo(comboId);
-  };
-
   const handleConfirm = () => {
     if (!selectedTime) {
       toast.error("Please select a time slot to continue");
-      return;
-    }
-    if (!selectedCombo) {
-      toast.error("Please select a combo to continue");
       return;
     }
     onClose();
@@ -112,7 +78,6 @@ const BookingModal: FC<BookingModalProps> = ({
     onConfirm({
       date: selectedDate,
       time: selectedTime!,
-      comboId: selectedCombo!,
     });
     onClose();
   };
@@ -136,43 +101,8 @@ const BookingModal: FC<BookingModalProps> = ({
               <div>
                 <h3 className="font-semibold">{doctor?.name}</h3>
                 <p className="text-sm text-gray-600">{doctor?.certification}</p>
-                <p className="text-sm text-gray-500">
-                  {doctor?.location}, United States
-                </p>
               </div>
             </div>
-            <p className="text-sm mt-2">
-              ${doctor?.consultationFee} Consultation Fee at clinic
-            </p>
-          </div>
-
-          {/* Combo Selection */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Combo
-            </label>
-            {loadingCombos ? (
-              <p>Loading combos...</p>
-            ) : combos.length === 0 ? (
-              <p>No combos available.</p>
-            ) : (
-              <Select
-                value={selectedCombo || ""}
-                onValueChange={handleComboSelect}
-                disabled={loadingCombos}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a combo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {combos.map((combo) => (
-                    <SelectItem key={combo._id} value={combo._id!}>
-                      {`${combo.name} - ${combo.type} ($${combo.price})`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
           </div>
 
           {/* Date and Time Selection */}
@@ -241,7 +171,7 @@ const BookingModal: FC<BookingModalProps> = ({
             <button
               onClick={handleConfirm}
               className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-              disabled={!selectedTime || !selectedCombo}
+              disabled={!selectedTime}
             >
               Continue
             </button>

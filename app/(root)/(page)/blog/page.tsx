@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
+import { useEffect, useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import {
@@ -124,7 +123,7 @@ const BlogPage = () => {
     setActiveTab(tab);
   };
 
-  const handleCreateBlog = async (e: React.FormEvent) => {
+  const handleCreateBlog = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -148,7 +147,7 @@ const BlogPage = () => {
     }
   };
 
-  const handleUpdateBlog = async (e: React.FormEvent) => {
+  const handleUpdateBlog = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 

@@ -1,9 +1,9 @@
 import { getUserRole } from "@/app/services/authService";
-import { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { useAuthRedirect } from "@/app/services/userService";
 import { useRouter } from "next/navigation";
 
-export function withAuth(Component: React.FC, allowedRoles: string[]) {
+export function withAuth(Component: FC, allowedRoles: string[]) {
   return function AuthenticatedComponent() {
     const { isChecking } = useAuthRedirect();
     const [role, setRole] = useState<string | null>(null);
