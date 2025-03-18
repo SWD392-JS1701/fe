@@ -80,7 +80,7 @@ const QuizQuestionsPage = () => {
         {/* Progress Bar */}
         <div className="w-full bg-gray-200 rounded-full h-2.5 mb-8">
           <div
-            className="bg-white h-2.5 rounded-full transition-all duration-500"
+            className="bg-black h-2.5 rounded-full transition-all duration-500"
             style={{
               width: `${
                 ((currentQuestionIndex + 1) / questions.length) * 100

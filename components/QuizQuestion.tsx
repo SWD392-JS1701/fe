@@ -40,10 +40,10 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg max-w-2xl mx-auto">
-      <h2 className="text-lg font-semibold text-purple-800 mb-4">
+      <h2 className="text-lg font-semibold text-black mb-4">
         Question {question.id} of 16
       </h2>
-      <p className="text-xl font-bold text-purple-800 mb-6">{question.text}</p>
+      <p className="text-xl font-bold text-black mb-6">{question.text}</p>
       <div className="space-y-4">
         {question.answers.map((answer, index) => (
           <label key={index} className="flex items-center space-x-3">
@@ -51,14 +51,14 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
               <input
                 type="radio"
                 name={`question-${question.id}`}
-                className="form-radio text-purple-600"
+                className="form-radio text-black"
                 checked={selectedAnswers.includes(answer.text)}
                 onChange={() => handleAnswerChange(answer.text)}
               />
             ) : (
               <input
                 type="checkbox"
-                className="form-checkbox text-purple-600"
+                className="form-checkbox text-black"
                 checked={selectedAnswers.includes(answer.text)}
                 onChange={() => handleAnswerChange(answer.text)}
               />
@@ -69,7 +69,7 @@ const QuizQuestion: React.FC<QuizQuestionProps> = ({
       </div>
       <div className="mt-8 text-center">
         <button
-          className="bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition duration-300 disabled:opacity-50"
+          className="bg-black text-white px-6 py-2 rounded-full transition duration-300 disabled:opacity-50"
           onClick={handleNext}
           disabled={question.type === "single" && selectedAnswers.length === 0}
         >
