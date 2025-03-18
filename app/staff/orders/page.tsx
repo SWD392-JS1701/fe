@@ -1,9 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Fragment } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { getOrders, updateOrder, getOrderDetailsByOrderId } from "@/app/services/orderService";
+import {
+  getOrders,
+  updateOrder,
+  getOrderDetailsByOrderId,
+} from "@/app/services/orderService";
 import { Order } from "@/app/types/order";
 import { toast } from "react-hot-toast";
 import Loading from "@/components/Loading";
@@ -98,7 +102,10 @@ const StaffOrdersPage = () => {
   // Get current orders
   const indexOfLastOrder = currentPage * ordersPerPage;
   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
+  const currentOrders = filteredOrders.slice(
+    indexOfFirstOrder,
+    indexOfLastOrder
+  );
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
   // Change page
@@ -117,14 +124,22 @@ const StaffOrdersPage = () => {
       console.log("Fetching order details for order:", orderId);
       const orderDetails = await getOrderDetailsByOrderId(orderId);
       console.log("Received order details:", orderDetails);
-      
+
       if (orderDetails && orderDetails.length > 0) {
-        console.log("Setting orders with details:", orderDetails[0].product_List);
-        setOrders(orders.map(order => 
-          order._id === orderId 
-            ? { ...order, orderDetails: { product_List: orderDetails[0].product_List } }
-            : order
-        ));
+        console.log(
+          "Setting orders with details:",
+          orderDetails[0].product_List
+        );
+        setOrders(
+          orders.map((order) =>
+            order._id === orderId
+              ? {
+                  ...order,
+                  orderDetails: { product_List: orderDetails[0].product_List },
+                }
+              : order
+          )
+        );
         setExpandedOrderId(orderId);
       } else {
         console.log("No order details found");
@@ -140,61 +155,84 @@ const StaffOrdersPage = () => {
     console.log("Rendering products for order:", order._id);
     console.log("Order details:", order.orderDetails);
 
-    return expandedOrderId === order._id && (
-      <tr className="bg-gray-50">
-        <td colSpan={7} className="p-4">
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white p-4 rounded-lg shadow-sm">
-                <h4 className="font-semibold mb-2">Delivery Information</h4>
-                <div className="space-y-2">
-                  <p><span className="font-medium">Full Name:</span> {order.user_fullname}</p>
-                  <p><span className="font-medium">Phone:</span> {order.user_telephone}</p>
-                  <p><span className="font-medium">Address:</span> {order.user_address}</p>
+    return (
+      expandedOrderId === order._id && (
+        <tr className="bg-gray-50">
+          <td colSpan={7} className="p-4">
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white p-4 rounded-lg shadow-sm">
+                  <h4 className="font-semibold mb-2">Delivery Information</h4>
+                  <div className="space-y-2">
+                    <p>
+                      <span className="font-medium">Full Name:</span>{" "}
+                      {order.user_fullname}
+                    </p>
+                    <p>
+                      <span className="font-medium">Phone:</span>{" "}
+                      {order.user_telephone}
+                    </p>
+                    <p>
+                      <span className="font-medium">Address:</span>{" "}
+                      {order.user_address}
+                    </p>
+                  </div>
+                </div>
+                <div className="bg-white p-4 rounded-lg shadow-sm">
+                  <h4 className="font-semibold mb-2">Order Details</h4>
+                  <div className="space-y-2">
+                    <p>
+                      <span className="font-medium">Order ID:</span> {order._id}
+                    </p>
+                    <p>
+                      <span className="font-medium">Date:</span>{" "}
+                      {new Date(order.createdAt).toLocaleString()}
+                    </p>
+                    <p>
+                      <span className="font-medium">Total Amount:</span> $
+                      {order.amount.toFixed(2)}
+                    </p>
+                  </div>
                 </div>
               </div>
               <div className="bg-white p-4 rounded-lg shadow-sm">
-                <h4 className="font-semibold mb-2">Order Details</h4>
-                <div className="space-y-2">
-                  <p><span className="font-medium">Order ID:</span> {order._id}</p>
-                  <p><span className="font-medium">Date:</span> {new Date(order.createdAt).toLocaleString()}</p>
-                  <p><span className="font-medium">Total Amount:</span> ${order.amount.toFixed(2)}</p>
-                </div>
+                <h4 className="font-semibold mb-2">Products</h4>
+                {!order.orderDetails ? (
+                  <p className="text-gray-500">Loading products...</p>
+                ) : !order.orderDetails.product_List?.length ? (
+                  <p className="text-gray-500">
+                    No products found for this order.
+                  </p>
+                ) : (
+                  <table className="min-w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2">Product Name</th>
+                        <th className="text-left py-2">Product ID</th>
+                        <th className="text-right py-2">Quantity</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {order.orderDetails.product_List.map((product, index) => {
+                        console.log("Rendering product:", product);
+                        return (
+                          <tr key={index} className="border-b last:border-b-0">
+                            <td className="py-2">{product.name}</td>
+                            <td className="py-2">{product.product_Id}</td>
+                            <td className="py-2 text-right">
+                              {product.quantity}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <h4 className="font-semibold mb-2">Products</h4>
-              {!order.orderDetails ? (
-                <p className="text-gray-500">Loading products...</p>
-              ) : !order.orderDetails.product_List?.length ? (
-                <p className="text-gray-500">No products found for this order.</p>
-              ) : (
-                <table className="min-w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-2">Product Name</th>
-                      <th className="text-left py-2">Product ID</th>
-                      <th className="text-right py-2">Quantity</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {order.orderDetails.product_List.map((product, index) => {
-                      console.log("Rendering product:", product);
-                      return (
-                        <tr key={index} className="border-b last:border-b-0">
-                          <td className="py-2">{product.name}</td>
-                          <td className="py-2">{product.product_Id}</td>
-                          <td className="py-2 text-right">{product.quantity}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </div>
-        </td>
-      </tr>
+          </td>
+        </tr>
+      )
     );
   };
 
@@ -256,7 +294,7 @@ const StaffOrdersPage = () => {
               </tr>
             ) : (
               currentOrders.map((order) => (
-                <React.Fragment key={order._id}>
+                <Fragment key={order._id}>
                   <tr className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       <button
@@ -265,7 +303,7 @@ const StaffOrdersPage = () => {
                       >
                         <svg
                           className={`w-4 h-4 transform transition-transform ${
-                            expandedOrderId === order._id ? 'rotate-90' : ''
+                            expandedOrderId === order._id ? "rotate-90" : ""
                           }`}
                           fill="none"
                           stroke="currentColor"
@@ -303,7 +341,10 @@ const StaffOrdersPage = () => {
                       <select
                         value={order.status}
                         onChange={(e) =>
-                          handleStatusChange(order._id, parseInt(e.target.value))
+                          handleStatusChange(
+                            order._id,
+                            parseInt(e.target.value)
+                          )
                         }
                         className="px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       >
@@ -314,60 +355,58 @@ const StaffOrdersPage = () => {
                     </td>
                   </tr>
                   {renderOrderDetails(order)}
-                </React.Fragment>
+                </Fragment>
               ))
             )}
           </tbody>
         </table>
       </div>
-      <div >
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center space-x-2 mt-6">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className={`px-3 py-1 rounded-md ${
-              currentPage === 1
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-indigo-500 text-white hover:bg-indigo-600"
-            }`}
-          >
-            Previous
-          </button>
-          
-          {[...Array(totalPages)].map((_, index) => (
+      <div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center space-x-2 mt-6">
             <button
-              key={index + 1}
-              onClick={() => handlePageChange(index + 1)}
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
               className={`px-3 py-1 rounded-md ${
-                currentPage === index + 1
-                  ? "bg-indigo-600 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                currentPage === 1
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-indigo-500 text-white hover:bg-indigo-600"
               }`}
             >
-              {index + 1}
+              Previous
             </button>
-          ))}
 
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className={`px-3 py-1 rounded-md ${
-              currentPage === totalPages
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-indigo-500 text-white hover:bg-indigo-600"
-            }`}
-          >
-            Next
-          </button>
-        </div>
-      )}
-      </div>      
-      
+            {[...Array(totalPages)].map((_, index) => (
+              <button
+                key={index + 1}
+                onClick={() => handlePageChange(index + 1)}
+                className={`px-3 py-1 rounded-md ${
+                  currentPage === index + 1
+                    ? "bg-indigo-600 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {index + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === totalPages
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-indigo-500 text-white hover:bg-indigo-600"
+              }`}
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </div>
     </div>
-    
   );
 };
 
-export default StaffOrdersPage; 
+export default StaffOrdersPage;

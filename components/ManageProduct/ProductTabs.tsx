@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { FC, useState } from "react";
 import { Product } from "../../app/types/product";
 
 interface ProductTabsProps {
   product: Product;
 }
 
-const ProductTabs: React.FC<ProductTabsProps> = ({ product }) => {
+const ProductTabs: FC<ProductTabsProps> = ({ product }) => {
   const [activeTab, setActiveTab] = useState("overview");
 
   const formatDate = (dateString: string) => {
