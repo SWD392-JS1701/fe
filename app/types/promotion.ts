@@ -7,3 +7,10 @@ export interface Promotion {
   end_date: string;
   __v: number;
 }
+
+export interface PromotedProduct {
+  _id: string;
+  promotion_id: string;
+  product_id: string;
+  __v?: number;
+}
