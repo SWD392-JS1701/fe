@@ -45,7 +45,7 @@ export const updatePromotion = async (
   promotionData: Partial<Promotion>
 ): Promise<Promotion> => {
   try {
-    const response = await axios.put(
+    const response = await axios.patch(
       `${API_URL}/promotions/${id}`,
       promotionData
     );

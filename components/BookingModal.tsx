@@ -98,7 +98,9 @@ const BookingModal: FC<BookingModalProps> = ({
           <div className="bg-blue-50 p-4 rounded-md mb-4">
             <div className="flex items-center space-x-4">
               <Image
-                src={doctor?.profilePicture || "/images/default-doctor.jpg"}
+                src={
+                  "https://th.bing.com/th/id/R.c01bfe8e1f11dfe3a1af580cfa3bbc89?rik=4XJslhCYu9u8CA&riu=http%3a%2f%2fhakomed.net%2fwp-content%2fuploads%2f2018%2f11%2f03.jpg&ehk=hVGis2mazsfZKbGSNt2KebgoX7%2b9lh%2bIUJTdYnIiXic%3d&risl=&pid=ImgRaw&r=0"
+                }
                 alt={doctor?.name}
                 width={50}
                 height={50}

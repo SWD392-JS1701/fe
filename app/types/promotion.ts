@@ -7,5 +7,3 @@ export interface Promotion {
   end_date: string;
   __v: number;
 }
-
-// export const Pr

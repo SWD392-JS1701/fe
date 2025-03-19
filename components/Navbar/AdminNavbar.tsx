@@ -34,6 +34,12 @@ const AdminNavbar = () => {
             Product
           </Link>
           <Link
+            href="/admin/promotion"
+            className="text-gray-700 hover:text-blue-600"
+          >
+            Promotion
+          </Link>
+          <Link
             href="/admin/schedule"
             className="text-gray-700 hover:text-blue-600"
           >
