@@ -12,6 +12,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import Swal from "sweetalert2";
 
@@ -20,29 +28,59 @@ import { Promotion, PromotedProduct } from "@/app/types/promotion";
 import {
   getPromotionByIdController,
   createPromotedProductController,
+  updatePromotedProductController,
+  deletePromotedProductController,
+  getAllPromotedProductByPromotionIdController,
 } from "@/app/controller/promotionController";
-import { fetchAllProducts } from "@/app/controller/productController";
+import {
+  fetchAllProducts,
+  fetchProductById,
+} from "@/app/controller/productController";
 
 const PromotionDetailPage = () => {
   const params = useParams();
   const [promotion, setPromotion] = useState<Promotion | null>(null);
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
+  const [promotedProducts, setPromotedProducts] = useState<
+    Array<{ product: Product; promotedProduct: PromotedProduct }>
+  >([]);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(
     null
   );
 
+  const fetchPromotedProducts = async () => {
+    try {
+      const promotedProductsData =
+        await getAllPromotedProductByPromotionIdController(params.id as string);
+      const productsWithDetails = await Promise.all(
+        promotedProductsData.map(async (promotedProduct) => {
+          const product = await fetchProductById(promotedProduct.product_id);
+          return {
+            product: product!,
+            promotedProduct,
+          };
+        })
+      );
+      setPromotedProducts(productsWithDetails);
+    } catch (error) {
+      console.error("Error fetching promoted products:", error);
+      toast.error("Failed to load promoted products");
+    }
+  };
+
   useEffect(() => {
-    const fetchPromotionAndProducts = async () => {
+    const fetchData = async () => {
       try {
-        const promotionData = await getPromotionByIdController(
-          params.id as string
-        );
+        const [promotionData, allProducts] = await Promise.all([
+          getPromotionByIdController(params.id as string),
+          fetchAllProducts(),
+        ]);
         setPromotion(promotionData);
-        const allProducts = await fetchAllProducts();
         setProducts(allProducts);
+        await fetchPromotedProducts();
       } catch (error) {
-        toast.error("Failed to load promotion details or products");
+        toast.error("Failed to load data");
         console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
@@ -50,7 +88,7 @@ const PromotionDetailPage = () => {
     };
 
     if (params.id) {
-      fetchPromotionAndProducts();
+      fetchData();
     }
   }, [params.id]);
 
@@ -61,11 +99,10 @@ const PromotionDetailPage = () => {
     }
 
     try {
-      const promotedProductData: Omit<PromotedProduct, "_id" | "__v"> = {
+      await createPromotedProductController({
         promotion_id: params.id as string,
         product_id: selectedProductId,
-      };
-      await createPromotedProductController(promotedProductData);
+      });
       await Swal.fire({
         icon: "success",
         title: "Success!",
@@ -73,11 +110,38 @@ const PromotionDetailPage = () => {
         confirmButtonText: "OK",
         confirmButtonColor: "#3085d6",
       });
-
       setSelectedProductId(null);
+      await fetchPromotedProducts();
     } catch (error) {
       toast.error("Failed to add product to promotion");
       console.error("Error adding product to promotion:", error);
+    }
+  };
+
+  const handleDeletePromotedProduct = async (promotedProductId: string) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You want to remove this product from the promotion?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, remove it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deletePromotedProductController(promotedProductId);
+        await Swal.fire(
+          "Removed!",
+          "Product has been removed from the promotion.",
+          "success"
+        );
+        await fetchPromotedProducts();
+      } catch (error) {
+        toast.error("Failed to remove product from promotion");
+        console.error("Error:", error);
+      }
     }
   };
 
@@ -117,67 +181,90 @@ const PromotionDetailPage = () => {
           ← Back to Promotions
         </Link>
       </div>
-      <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
-        <h1 className="text-3xl font-bold mb-6 text-gray-800">
-          {promotion.title}
-        </h1>
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">
-              Description
-            </h2>
-            <p className="text-gray-600 leading-relaxed">
-              {promotion.description}
-            </p>
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">
-              Discount
-            </h2>
-            <p className="text-gray-600">
-              {promotion.discount_percentage}% off
-            </p>
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">
-              Duration
-            </h2>
-            <p className="text-gray-600">
-              From{" "}
-              <span className="font-medium">
-                {new Date(promotion.start_date).toLocaleDateString()}
-              </span>{" "}
-              to{" "}
-              <span className="font-medium">
-                {new Date(promotion.end_date).toLocaleDateString()}
-              </span>
-            </p>
+      <div className="max-w-4xl mx-auto space-y-8">
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h2 className="text-2xl font-bold mb-4">Promotion Details</h2>
+          <Table>
+            <TableBody>
+              <TableRow>
+                <TableCell className="font-medium">Title</TableCell>
+                <TableCell>{promotion?.title}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium">Description</TableCell>
+                <TableCell>{promotion?.description}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium">Discount</TableCell>
+                <TableCell>{promotion?.discount_percentage}% off</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium">Duration</TableCell>
+                <TableCell>
+                  {new Date(promotion?.start_date!).toLocaleDateString()} to{" "}
+                  {new Date(promotion?.end_date!).toLocaleDateString()}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h2 className="text-2xl font-bold mb-4">Associated Products</h2>
+          <div className="mb-4 flex items-center space-x-4">
+            <Select
+              value={selectedProductId || ""}
+              onValueChange={(value) => setSelectedProductId(value)}
+            >
+              <SelectTrigger className="w-[300px]">
+                <SelectValue placeholder="Select a product" />
+              </SelectTrigger>
+              <SelectContent>
+                {products.map((product) => (
+                  <SelectItem key={product._id} value={product._id!}>
+                    {product.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={handleAddProductToPromotion}>Add Product</Button>
           </div>
 
-          {/* Add Product to Promotion */}
-          <div>
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">
-              Add Product to Promotion
-            </h2>
-            <div className="flex items-center space-x-4">
-              <Select
-                value={selectedProductId || ""}
-                onValueChange={(value) => setSelectedProductId(value)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a product" />
-                </SelectTrigger>
-                <SelectContent>
-                  {products.map((product) => (
-                    <SelectItem key={product._id} value={product._id!}>
-                      {product.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button onClick={handleAddProductToPromotion}>Add Product</Button>
-            </div>
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Product Name</TableHead>
+                <TableHead>Price</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {promotedProducts.map(({ product, promotedProduct }) => (
+                <TableRow key={promotedProduct._id}>
+                  <TableCell>{product.name}</TableCell>
+                  <TableCell>${product.price}</TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Link
+                        href={`/admin/product/${product._id}`}
+                        className="text-blue-500 hover:text-blue-700"
+                      >
+                        View
+                      </Link>
+                      <button
+                        onClick={() =>
+                          handleDeletePromotedProduct(promotedProduct._id)
+                        }
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>
