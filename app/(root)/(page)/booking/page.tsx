@@ -10,12 +10,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
 import { Doctor } from "../../../types/doctor";
 import { fetchAllDoctors } from "@/app/controller/doctorController";
 import BookingModal from "@/components/BookingModal";
 
 const BookingPage: FC = () => {
+  const { data: session } = useSession();
+  const router = useRouter();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
   const [isFilterVisible, setIsFilterVisible] = useState(false);
@@ -107,6 +112,22 @@ const BookingPage: FC = () => {
   };
 
   const handleBookAppointment = (doctor: Doctor) => {
+    if (!session) {
+      Swal.fire({
+        title: 'Login Required',
+        text: 'Please login to book an appointment',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Login',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#3085d6',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          router.push('/sign-in');
+        }
+      });
+      return;
+    }
     setSelectedDoctor(doctor);
     setIsModalOpen(true);
   };
@@ -322,9 +343,13 @@ const BookingPage: FC = () => {
                 </div>
                 <button
                   onClick={() => handleBookAppointment(doctor)}
-                  className="bg-black text-white font-bold py-2 px-4 rounded-full transition cursor-pointer"
+                  className={`px-4 py-2 rounded-md transition-all duration-200 ${
+                    session 
+                      ? 'bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow-md hover:shadow-lg'
+                      : 'bg-gray-300 text-gray-500'
+                  }`}
                 >
-                  Book Appointment
+                  {session ? 'Book Appointment' : 'Login to Book'}
                 </button>
               </div>
             </div>

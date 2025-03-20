@@ -19,8 +19,10 @@ export async function middleware(req: NextRequest) {
 
   // Doctor routes protection
   if (
-    path.startsWith("/doctor") && role !== "Doctor")
-   {
+    (path.startsWith("/doctor")||
+    path.startsWith("/doctorSchedule") 
+    )&& role !== "Doctor"
+  ){
     return unauthorized();
   }
   // Staff routes protection
@@ -56,6 +58,6 @@ export const config = {
     "/employee/:path*",
     "/overview/:path*",
     "/schedule/:path*",
-    
+    "/doctorSchedule/:path*",
   ],
 };

@@ -15,3 +15,9 @@ export interface Schedule {
   dayOfWeek: string;
   slots?: ScheduleSlot[];
 }
+
+export interface UpdateSchedule {
+  date: string;
+  dayOfWeek: string;
+  slots?: ScheduleSlot[];
+}
