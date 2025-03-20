@@ -256,6 +256,16 @@ const SchedulePage: FC = () => {
     setCurrentWeekDates(weekDates);
   }, []);
 
+  useEffect(() => {
+    // Get current week dates
+    const today = new Date();
+    const startOfCurrentWeek = startOfWeek(today, { weekStartsOn: 1 }); // Start from Monday
+    const weekDates = Array.from({ length: 6 }, (_, i) => 
+      addDays(startOfCurrentWeek, i)
+    );
+    setCurrentWeekDates(weekDates);
+  }, []);
+
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     setActiveDoctorId(active.id as string);

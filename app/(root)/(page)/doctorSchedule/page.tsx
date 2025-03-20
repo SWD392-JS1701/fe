@@ -8,7 +8,23 @@ import { Doctor } from "@/app/types/doctor";
 import Swal from "sweetalert2";
 import { initialSchedule } from "@/app/data/initialSchedule";
 import { format, startOfWeek, addDays } from "date-fns";
+import {
+  DndContext,
+  closestCorners,
+  DragEndEvent,
+  useSensor,
+  useSensors,
+  PointerSensor,
+  DragStartEvent,
+  DragOverlay,
+} from "@dnd-kit/core";
+import { useSortable } from "@dnd-kit/sortable";
+import { useDroppable } from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
 
+import { getAllUsers } from "@/app/services/userService";
+import { getSchedule, updateSlot } from "@/app/services/scheduleService";
+import { User } from "@/app/types/user";
 interface ScheduleSlot {
   id: string;
   time: string;
