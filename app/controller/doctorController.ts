@@ -6,6 +6,7 @@ import {
   createDoctor,
   updateDoctor,
   deleteDoctor,
+  getDoctorByUserId,
 } from "@/app/services/doctorService";
 
 export const fetchAllDoctors = async (): Promise<Doctor[]> => {
@@ -61,6 +62,16 @@ export const deleteExistingDoctor = async (doctorId: string): Promise<void> => {
   try {
     await deleteDoctor(doctorId);
     toast.success("Doctor deleted successfully!");
+  } catch (error: any) {
+    toast.error(error.message);
+    throw error;
+  }
+};
+
+export const fetchDoctorByUserId = async (userId: string): Promise<Doctor | null> => {
+  try {
+    const doctor = await getDoctorByUserId(userId);
+    return doctor;
   } catch (error: any) {
     toast.error(error.message);
     throw error;

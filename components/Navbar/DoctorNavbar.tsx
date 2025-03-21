@@ -107,7 +107,7 @@ const DoctorNavbar: FC = () => {
                   My Patients
                 </Link>
                 <Link
-                  href="/doctor/schedule"
+                  href="/doctorSchedule"
                   className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
                 >
                   My Schedule
@@ -129,7 +129,7 @@ const DoctorNavbar: FC = () => {
         <Link href="/doctor/dashboard">DASHBOARD</Link>
         <Link href="/doctor/view-appointment">APPOINTMENTS</Link>
         <Link href="/doctor/patient">PATIENTS</Link>
-        <Link href="/doctor/schedule">SCHEDULE</Link>
+        <Link href="/doctorSchedule">SCHEDULE</Link>
         <Link href="/view-blog">VIEW BLOG</Link>
 
         {/* Border Animation */}

@@ -1,5 +1,5 @@
 import axiosInstance from "./axiosInstance";
-import { Schedule, ScheduleSlot } from "../types/schedule";
+import { Schedule, ScheduleSlot, UpdateSchedule } from "../types/schedule";
 
 export const getSchedule = async () => {
   try {
@@ -27,7 +27,7 @@ export const getScheduleById = async (id: string) => {
   }
 };
 
-export const updateSchedule = async (id: string, schedule: Schedule) => {
+export const updateSchedule = async (id: string, schedule: UpdateSchedule) => {
   try {
     const response = await axiosInstance.put(`/schedules/${id}`, schedule);
     return response.data;
@@ -83,12 +83,25 @@ export const getSlotOfWeek = async (dateOfWeek: string, slotId: string) => {
     );
   }
 };
-
-export const getScheduleByDoctorId = async (
+//return slot of the doctor
+export const getScheduleSlotsByDoctorId = async (
   id: string
 ): Promise<ScheduleSlot[]> => {
   try {
     const response = await axiosInstance.get(`/schedules/slots/doctor/${id}`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Schedule API Error:", error);
+    throw new Error(
+      error.response?.data?.message ||
+        "Failed to fetch schedule. Please try again."
+    );
+  }
+};
+
+export const getSchedulesByDoctorId = async (doctorId: string): Promise<Schedule[]> => {
+  try {
+    const response = await axiosInstance.get(`/schedules/doctor/${doctorId}/schedules`);
     return response.data;
   } catch (error: any) {
     console.error("Schedule API Error:", error);

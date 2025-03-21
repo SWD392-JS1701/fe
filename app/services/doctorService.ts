@@ -91,3 +91,16 @@ export const deleteDoctor = async (doctorId: string): Promise<void> => {
     );
   }
 };
+
+export const getDoctorByUserId = async (userId: string): Promise<Doctor> => {
+  try {
+    const response = await axiosInstance.get(`/doctors/user/${userId}`);
+    return response.data as Doctor;
+  } catch (error: any) {
+    console.error("Doctor API Error:", error);
+    throw new Error(
+      error.response?.data?.message ||
+        "Failed to fetch doctor information. Please try again."
+    );
+  }
+};
