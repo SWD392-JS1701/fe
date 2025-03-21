@@ -17,7 +17,11 @@ import { CSS } from "@dnd-kit/utilities";
 import { format, startOfWeek, addDays } from "date-fns";
 
 import { getAllDoctors } from "@/app/services/doctorService";
-import { getSchedule, updateSlot, updateSchedule } from "@/app/services/scheduleService";
+import {
+  getSchedule,
+  updateSlot,
+  updateSchedule,
+} from "@/app/services/scheduleService";
 import { Doctor } from "@/app/types/doctor";
 import { UpdateSchedule } from "@/app/types/schedule";
 import Swal from "sweetalert2";
@@ -174,19 +178,21 @@ const SchedulePage: FC = () => {
           throw new Error("Invalid schedule data: Expected an array.");
         }
 
-        const transformedSchedule = apiSchedules.map((daySchedule: any, dayIndex: number) => ({
-          _id: daySchedule._id,
-          day: daySchedule.dayOfWeek,
-          slots: daySchedule.slots.map((slot: any) => ({
-            id: slot.slotId,
-            time: `${slot.startTime} - ${slot.endTime}`,
-            doctorId: slot.doctorId || null,
-            doctorName: slot.doctorName || null,
-            specialization: slot.specialization || null,
-            status: slot.status || "available",
-            date: currentWeekDates[dayIndex]
-          })),
-        }));
+        const transformedSchedule = apiSchedules.map(
+          (daySchedule: any, dayIndex: number) => ({
+            _id: daySchedule._id,
+            day: daySchedule.dayOfWeek,
+            slots: daySchedule.slots.map((slot: any) => ({
+              id: slot.slotId,
+              time: `${slot.startTime} - ${slot.endTime}`,
+              doctorId: slot.doctorId || null,
+              doctorName: slot.doctorName || null,
+              specialization: slot.specialization || null,
+              status: slot.status || "available",
+              date: currentWeekDates[dayIndex],
+            })),
+          })
+        );
 
         // Update schedule dates in the database
         for (let i = 0; i < transformedSchedule.length; i++) {
@@ -194,12 +200,15 @@ const SchedulePage: FC = () => {
           if (daySchedule._id && currentWeekDates[i]) {
             try {
               const updateData: UpdateSchedule = {
-                date: format(currentWeekDates[i], 'yyyy-MM-dd'),
-                dayOfWeek: daySchedule.day
+                date: format(currentWeekDates[i], "yyyy-MM-dd"),
+                dayOfWeek: daySchedule.day,
               };
               await updateSchedule(daySchedule._id, updateData);
             } catch (error) {
-              console.error(`Error updating schedule for ${daySchedule.day}:`, error);
+              console.error(
+                `Error updating schedule for ${daySchedule.day}:`,
+                error
+              );
             }
           }
         }
@@ -250,7 +259,7 @@ const SchedulePage: FC = () => {
     // Get current week dates
     const today = new Date();
     const startOfCurrentWeek = startOfWeek(today, { weekStartsOn: 1 }); // Start from Monday
-    const weekDates = Array.from({ length: 6 }, (_, i) => 
+    const weekDates = Array.from({ length: 6 }, (_, i) =>
       addDays(startOfCurrentWeek, i)
     );
     setCurrentWeekDates(weekDates);
@@ -260,7 +269,7 @@ const SchedulePage: FC = () => {
     // Get current week dates
     const today = new Date();
     const startOfCurrentWeek = startOfWeek(today, { weekStartsOn: 1 }); // Start from Monday
-    const weekDates = Array.from({ length: 6 }, (_, i) => 
+    const weekDates = Array.from({ length: 6 }, (_, i) =>
       addDays(startOfCurrentWeek, i)
     );
     setCurrentWeekDates(weekDates);
@@ -300,9 +309,11 @@ const SchedulePage: FC = () => {
               ...slot,
               doctorId,
               doctorName: assignedDoctor ? assignedDoctor.name : null,
-              specialization: assignedDoctor?.specialties?.join(", ") || "No specialties specified",
+              specialization:
+                assignedDoctor?.specialties?.join(", ") ||
+                "No specialties specified",
               status: "available",
-              date: currentWeekDates[dayIndex]
+              date: currentWeekDates[dayIndex],
             };
           }
           return slot;
@@ -358,7 +369,7 @@ const SchedulePage: FC = () => {
             doctorName: updatedSlot.doctorName,
             specialization: updatedSlot.specialization,
             status: updatedSlot.status,
-            dayOfWeek: daySchedule.day
+            // dayOfWeek: daySchedule.day
           });
         }
       }
@@ -433,17 +444,16 @@ const SchedulePage: FC = () => {
                 />
               </svg>
               Available Doctors
-             
             </h2>
-             {/* Save Button */}
+            {/* Save Button */}
             <div className=" pb-4 ">
-                <button
-                  onClick={handleSaveChanges}
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors"
-                >
-                  Save Changes
-                </button>
-              </div>
+              <button
+                onClick={handleSaveChanges}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors"
+              >
+                Save Changes
+              </button>
+            </div>
             <div className="space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto">
               {doctors.length === 0 ? (
                 <p className="text-gray-500 italic">No doctors available.</p>
@@ -477,25 +487,33 @@ const SchedulePage: FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-6 gap-4 min-w-max">
               {schedule.map((day, index) => {
-                const isToday = currentWeekDates[index] && 
-                  format(currentWeekDates[index], 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
-                
+                const isToday =
+                  currentWeekDates[index] &&
+                  format(currentWeekDates[index], "yyyy-MM-dd") ===
+                    format(new Date(), "yyyy-MM-dd");
+
                 return (
-                  <div 
-                    key={day.day} 
+                  <div
+                    key={day.day}
                     className={`border-r last:border-r-0 pb-2 ${
-                      isToday ? 'bg-blue-50' : ''
+                      isToday ? "bg-blue-50" : ""
                     }`}
                   >
-                    <div className={`text-lg font-semibold text-center mb-3 py-2 sticky top-0 ${
-                      isToday ? 'bg-blue-100' : 'bg-gray-50'
-                    }`}>
+                    <div
+                      className={`text-lg font-semibold text-center mb-3 py-2 sticky top-0 ${
+                        isToday ? "bg-blue-100" : "bg-gray-50"
+                      }`}
+                    >
                       <div>{day.day}</div>
-                      <div className={`text-sm ${
-                        isToday ? 'text-blue-600 font-medium' : 'text-gray-600'
-                      }`}>
-                        {currentWeekDates[index] && 
-                          format(currentWeekDates[index], 'MMM dd, yyyy')}
+                      <div
+                        className={`text-sm ${
+                          isToday
+                            ? "text-blue-600 font-medium"
+                            : "text-gray-600"
+                        }`}
+                      >
+                        {currentWeekDates[index] &&
+                          format(currentWeekDates[index], "MMM dd, yyyy")}
                       </div>
                     </div>
                     <div className="space-y-3 px-2">
@@ -509,7 +527,9 @@ const SchedulePage: FC = () => {
                             />
                             {slot.doctorId && (
                               <button
-                                onClick={() => handleClearSlot(day.day, slot.id)}
+                                onClick={() =>
+                                  handleClearSlot(day.day, slot.id)
+                                }
                                 className="absolute top-1 right-1 bg-red-100 hover:bg-red-200 text-red-600 rounded-full p-1"
                                 title="Remove assignment"
                               >
@@ -547,7 +567,6 @@ const SchedulePage: FC = () => {
           ) : null}
         </DragOverlay>
       </DndContext>
-
     </div>
   );
 };
