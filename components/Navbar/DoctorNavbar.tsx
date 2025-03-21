@@ -126,20 +126,22 @@ const DoctorNavbar: FC = () => {
 
       {/* Shortcuts */}
       <div className="flex justify-center items-center py-2 space-x-20 relative">
-        <Link href="/doctor/dashboard">DASHBOARD</Link>
-        <Link href="/doctor/view-appointment">APPOINTMENTS</Link>
-        <Link href="/doctor/patient">PATIENTS</Link>
-        <Link href="/doctor/schedule">SCHEDULE</Link>
-        <Link href="/view-blog">VIEW BLOG</Link>
-
-        {/* Border Animation */}
-        <div
-          className="absolute bottom-0 h-[2px] bg-white transition-all duration-500 ease-in-out"
-          style={{
-            width: `${(scrollCount / maxScrollCount) * maxBorderWidth}px`,
-            opacity: scrollCount > 0 ? 1 : 0,
-          }}
-        ></div>
+        {[
+          { label: "DASHBOARD", href: "/doctor/dashboard" },
+          { label: "APPOINTMENTS", href: "/doctor/view-appointment" },
+          { label: "PATIENTS", href: "/doctor/patient" },
+          { label: "SCHEDULE", href: "/doctor/schedule" },
+          { label: "VIEW BLOG", href: "/view-blog" },
+        ].map(({ label, href }, index) => (
+          <Link key={index} href={href} className="relative group">
+            <span>{label}</span>
+            <span
+              className={`absolute left-0 bottom-0 h-[2px] transition-all duration-300 w-0 group-hover:w-full ${
+                scrollCount === maxScrollCount ? "bg-white" : "bg-black"
+              }`}
+            ></span>
+          </Link>
+        ))}
       </div>
     </div>
   );

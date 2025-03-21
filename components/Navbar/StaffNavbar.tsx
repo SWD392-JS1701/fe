@@ -12,7 +12,7 @@ const StaffNavbar: FC = () => {
   const maxScrollCount = 3;
   const maxBorderWidth = 250;
   const router = useRouter();
-  
+
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -48,9 +48,7 @@ const StaffNavbar: FC = () => {
     >
       {/* Top navbar */}
       <div className="container mx-auto flex justify-between items-center px-6">
-      <div className="relative w-full max-w-lg">
-          
-          </div>
+        <div className="relative w-full max-w-lg"></div>
         {/* Logo */}
         <div className="flex-1 flex justify-center">
           <Link href="/">
@@ -125,22 +123,25 @@ const StaffNavbar: FC = () => {
 
       {/* Shortcuts */}
       <div className="flex justify-center items-center py-2 space-x-20 relative">
-        <Link href="/staff/orders">CHECK ORDERS</Link>
-        <Link href="/staff/schedule">CHECK SCHEDULE</Link>
-        <Link href="/staff/edit-quiz"> EDIT QUIZ</Link>
-        <Link href="/blog">BLOG</Link>
-        <Link href="/view-blog">VIEW BLOG</Link>
-        {/* Border Animation */}
-        <div
-          className="absolute bottom-0 h-[2px] bg-white transition-all duration-500 ease-in-out"
-          style={{
-            width: `${(scrollCount / maxScrollCount) * maxBorderWidth}px`,
-            opacity: scrollCount > 0 ? 1 : 0,
-          }}
-        ></div>
+        {[
+          { label: "CHECK ORDERS", href: "/staff/orders" },
+          { label: "CHECK SCHEDULE", href: "/staff/schedule" },
+          { label: "EDIT QUIZ", href: "/staff/edit-quiz" },
+          { label: "BLOG", href: "/blog" },
+          { label: "VIEW BLOG", href: "/view-blog" },
+        ].map(({ label, href }, index) => (
+          <Link key={index} href={href} className="relative group">
+            <span>{label}</span>
+            <span
+              className={`absolute left-0 bottom-0 h-[2px] transition-all duration-300 w-0 group-hover:w-full ${
+                scrollCount === maxScrollCount ? "bg-white" : "bg-black"
+              }`}
+            ></span>
+          </Link>
+        ))}
       </div>
     </div>
   );
 };
 
-export default StaffNavbar; 
+export default StaffNavbar;
