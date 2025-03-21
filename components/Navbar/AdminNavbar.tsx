@@ -109,6 +109,7 @@ const DoctorNavbar: FC = () => {
           { label: "OVERVIEW", href: "/admin/overview" },
           { label: "PRODUCT", href: "/admin/product" },
           { label: "SCHEDULE", href: "/admin/schedule" },
+          { label: "PROMOTION", href: "/admin/promotion" },
           { label: "EMPLOYEE MANAGEMENT", href: "/admin/employee" },
         ].map(({ label, href }, index) => (
           <Link key={index} href={href} className="relative group">

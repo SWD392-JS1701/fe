@@ -14,10 +14,16 @@ import {
 import { useSortable } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import { format, startOfWeek, addDays } from "date-fns";
 
-import { getAllUsers } from "@/app/services/userService";
-import { getSchedule, updateSlot } from "@/app/services/scheduleService";
-import { User } from "@/app/types/user";
+import { getAllDoctors } from "@/app/services/doctorService";
+import {
+  getSchedule,
+  updateSlot,
+  updateSchedule,
+} from "@/app/services/scheduleService";
+import { Doctor } from "@/app/types/doctor";
+import { UpdateSchedule } from "@/app/types/schedule";
 import Swal from "sweetalert2";
 import { initialSchedule } from "@/app/data/initialSchedule";
 
@@ -28,6 +34,7 @@ interface ScheduleSlot {
   doctorName?: string | null;
   specialization?: string | null;
   status?: string;
+  date?: Date;
 }
 
 interface DaySchedule {
@@ -37,7 +44,7 @@ interface DaySchedule {
 }
 
 interface DoctorItemProps {
-  doctor: User;
+  doctor: Doctor;
 }
 
 const DoctorItem: FC<DoctorItemProps> = ({ doctor }) => {
@@ -70,28 +77,28 @@ const DoctorItem: FC<DoctorItemProps> = ({ doctor }) => {
       {...listeners}
       className="bg-blue-100 p-3 rounded-lg shadow-sm hover:bg-blue-200 transition-colors cursor-move"
     >
-      <p className="text-blue-800 font-medium">
-        {doctor.first_name} {doctor.last_name}
+      <p className="text-blue-800 font-medium">{doctor.name}</p>
+      <p className="text-sm text-gray-600 truncate">
+        {doctor.specialties?.join(", ") || "No specialties specified"}
       </p>
-      <p className="text-sm text-gray-600 truncate">{doctor.email}</p>
     </div>
   );
 };
 
-const DraggableDoctorOverlay: FC<{ doctor: User }> = ({ doctor }) => {
+const DraggableDoctorOverlay: FC<{ doctor: Doctor }> = ({ doctor }) => {
   return (
     <div className="bg-blue-200 p-3 rounded-lg shadow-md opacity-90 w-64">
-      <p className="text-blue-800 font-medium">
-        {doctor.first_name} {doctor.last_name}
+      <p className="text-blue-800 font-medium">{doctor.name}</p>
+      <p className="text-sm text-gray-600 truncate">
+        {doctor.specialties?.join(", ") || "No specialties specified"}
       </p>
-      <p className="text-sm text-gray-600 truncate">{doctor.email}</p>
     </div>
   );
 };
 
 interface ScheduleSlotProps {
   slot: ScheduleSlot;
-  doctors: User[];
+  doctors: Doctor[];
   day: string;
 }
 
@@ -137,7 +144,7 @@ const ScheduleSlot: FC<ScheduleSlotProps> = ({ slot, day = "" }) => {
 };
 
 const SchedulePage: FC = () => {
-  const [doctors, setDoctors] = useState<User[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [schedule, setSchedule] = useState<DaySchedule[]>(initialSchedule);
   const [loading, setLoading] = useState(true);
   const [activeDoctorId, setActiveDoctorId] = useState<string | null>(null);
@@ -145,6 +152,7 @@ const SchedulePage: FC = () => {
   const [changes, setChanges] = useState<
     { day: string; slotId: string; doctorId: string | null }[]
   >([]);
+  const [currentWeekDates, setCurrentWeekDates] = useState<Date[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
   const sensors = useSensors(
@@ -162,26 +170,48 @@ const SchedulePage: FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const users = await getAllUsers();
-        const doctorUsers = users.filter((user) => user.role === "Doctor");
-        setDoctors(doctorUsers);
+        const fetchedDoctors = await getAllDoctors();
+        setDoctors(fetchedDoctors);
+
         const apiSchedules = await getSchedule();
         if (!Array.isArray(apiSchedules)) {
           throw new Error("Invalid schedule data: Expected an array.");
         }
 
-        const transformedSchedule = apiSchedules.map((daySchedule: any) => ({
-          _id: daySchedule._id,
-          day: daySchedule.dayOfWeek,
-          slots: daySchedule.slots.map((slot: any) => ({
-            id: slot.slotId,
-            time: `${slot.startTime} - ${slot.endTime}`,
-            doctorId: slot.doctorId || null,
-            doctorName: slot.doctorName || null,
-            specialization: slot.specialization || null,
-            status: slot.status || "available",
-          })),
-        }));
+        const transformedSchedule = apiSchedules.map(
+          (daySchedule: any, dayIndex: number) => ({
+            _id: daySchedule._id,
+            day: daySchedule.dayOfWeek,
+            slots: daySchedule.slots.map((slot: any) => ({
+              id: slot.slotId,
+              time: `${slot.startTime} - ${slot.endTime}`,
+              doctorId: slot.doctorId || null,
+              doctorName: slot.doctorName || null,
+              specialization: slot.specialization || null,
+              status: slot.status || "available",
+              date: currentWeekDates[dayIndex],
+            })),
+          })
+        );
+
+        // Update schedule dates in the database
+        for (let i = 0; i < transformedSchedule.length; i++) {
+          const daySchedule = transformedSchedule[i];
+          if (daySchedule._id && currentWeekDates[i]) {
+            try {
+              const updateData: UpdateSchedule = {
+                date: format(currentWeekDates[i], "yyyy-MM-dd"),
+                dayOfWeek: daySchedule.day,
+              };
+              await updateSchedule(daySchedule._id, updateData);
+            } catch (error) {
+              console.error(
+                `Error updating schedule for ${daySchedule.day}:`,
+                error
+              );
+            }
+          }
+        }
 
         const mergedSchedule = initialSchedule.map((defaultDay) => {
           const fetchedDay = transformedSchedule.find(
@@ -191,7 +221,7 @@ const SchedulePage: FC = () => {
           if (fetchedDay) {
             return {
               ...defaultDay,
-              _id: fetchedDay._id, // Preserve _id
+              _id: fetchedDay._id,
               slots: defaultDay.slots.map((defaultSlot) => {
                 const fetchedSlot = fetchedDay.slots.find(
                   (s: ScheduleSlot) => s.id === defaultSlot.id
@@ -223,6 +253,26 @@ const SchedulePage: FC = () => {
     };
 
     fetchData();
+  }, [currentWeekDates]);
+
+  useEffect(() => {
+    // Get current week dates
+    const today = new Date();
+    const startOfCurrentWeek = startOfWeek(today, { weekStartsOn: 1 }); // Start from Monday
+    const weekDates = Array.from({ length: 6 }, (_, i) =>
+      addDays(startOfCurrentWeek, i)
+    );
+    setCurrentWeekDates(weekDates);
+  }, []);
+
+  useEffect(() => {
+    // Get current week dates
+    const today = new Date();
+    const startOfCurrentWeek = startOfWeek(today, { weekStartsOn: 1 }); // Start from Monday
+    const weekDates = Array.from({ length: 6 }, (_, i) =>
+      addDays(startOfCurrentWeek, i)
+    );
+    setCurrentWeekDates(weekDates);
   }, []);
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -250,7 +300,7 @@ const SchedulePage: FC = () => {
     const day = parts[1];
     const slotId = parts.slice(2).join("-");
 
-    const updatedSchedule = schedule.map((daySchedule) => {
+    const updatedSchedule = schedule.map((daySchedule, dayIndex) => {
       if (daySchedule.day.toLowerCase() === day) {
         const updatedSlots = daySchedule.slots.map((slot) => {
           if (slot.id === slotId) {
@@ -258,11 +308,12 @@ const SchedulePage: FC = () => {
             return {
               ...slot,
               doctorId,
-              doctorName: assignedDoctor
-                ? `${assignedDoctor.first_name} ${assignedDoctor.last_name}`
-                : null,
-              specialization: assignedDoctor?.specialization || null,
+              doctorName: assignedDoctor ? assignedDoctor.name : null,
+              specialization:
+                assignedDoctor?.specialties?.join(", ") ||
+                "No specialties specified",
               status: "available",
+              date: currentWeekDates[dayIndex],
             };
           }
           return slot;
@@ -316,7 +367,9 @@ const SchedulePage: FC = () => {
           await updateSlot(daySchedule._id, change.slotId, {
             doctorId: updatedSlot.doctorId,
             doctorName: updatedSlot.doctorName,
+            specialization: updatedSlot.specialization,
             status: updatedSlot.status,
+            // dayOfWeek: daySchedule.day
           });
         }
       }
@@ -374,7 +427,7 @@ const SchedulePage: FC = () => {
       >
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left Sidebar: Doctors List */}
-          <div className="w-full lg:w-1/4 bg-white p-4 rounded-lg shadow-md">
+          <div className="w-full lg:w-1/6 bg-white p-4 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center">
               <svg
                 className="w-5 h-5 mr-2"
@@ -392,7 +445,15 @@ const SchedulePage: FC = () => {
               </svg>
               Available Doctors
             </h2>
-
+            {/* Save Button */}
+            <div className=" pb-4 ">
+              <button
+                onClick={handleSaveChanges}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors"
+              >
+                Save Changes
+              </button>
+            </div>
             <div className="space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto">
               {doctors.length === 0 ? (
                 <p className="text-gray-500 italic">No doctors available.</p>
@@ -405,7 +466,7 @@ const SchedulePage: FC = () => {
           </div>
 
           {/* Right Side: Calendar */}
-          <div className="w-full lg:w-3/4 bg-white p-4 rounded-lg shadow-md overflow-x-auto">
+          <div className="w-full lg:w-5/6 bg-white p-4 rounded-lg shadow-md overflow-x-auto">
             <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center">
               <svg
                 className="w-5 h-5 mr-2"
@@ -424,49 +485,77 @@ const SchedulePage: FC = () => {
               Weekly Schedule
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-7 gap-4 min-w-max">
-              {schedule.map((day) => (
-                <div key={day.day} className="border-r last:border-r-0 pb-2">
-                  <h3 className="text-lg font-semibold text-center mb-3 bg-gray-50 py-2 sticky top-0">
-                    {day.day}
-                  </h3>
-                  <div className="space-y-3 px-2">
-                    {day.slots.map((slot) => (
-                      <div key={slot.id} className="relative">
-                        <>
-                          <ScheduleSlot
-                            slot={slot}
-                            doctors={doctors}
-                            day={day.day}
-                          />
-                          {slot.doctorId && (
-                            <button
-                              onClick={() => handleClearSlot(day.day, slot.id)}
-                              className="absolute top-1 right-1 bg-red-100 hover:bg-red-200 text-red-600 rounded-full p-1"
-                              title="Remove assignment"
-                            >
-                              <svg
-                                className="w-3 h-3"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M6 18L18 6M6 6l12 12"
-                                />
-                              </svg>
-                            </button>
-                          )}
-                        </>
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-4 min-w-max">
+              {schedule.map((day, index) => {
+                const isToday =
+                  currentWeekDates[index] &&
+                  format(currentWeekDates[index], "yyyy-MM-dd") ===
+                    format(new Date(), "yyyy-MM-dd");
+
+                return (
+                  <div
+                    key={day.day}
+                    className={`border-r last:border-r-0 pb-2 ${
+                      isToday ? "bg-blue-50" : ""
+                    }`}
+                  >
+                    <div
+                      className={`text-lg font-semibold text-center mb-3 py-2 sticky top-0 ${
+                        isToday ? "bg-blue-100" : "bg-gray-50"
+                      }`}
+                    >
+                      <div>{day.day}</div>
+                      <div
+                        className={`text-sm ${
+                          isToday
+                            ? "text-blue-600 font-medium"
+                            : "text-gray-600"
+                        }`}
+                      >
+                        {currentWeekDates[index] &&
+                          format(currentWeekDates[index], "MMM dd, yyyy")}
                       </div>
-                    ))}
+                    </div>
+                    <div className="space-y-3 px-2">
+                      {day.slots.map((slot) => (
+                        <div key={slot.id} className="relative">
+                          <>
+                            <ScheduleSlot
+                              slot={slot}
+                              doctors={doctors}
+                              day={day.day}
+                            />
+                            {slot.doctorId && (
+                              <button
+                                onClick={() =>
+                                  handleClearSlot(day.day, slot.id)
+                                }
+                                className="absolute top-1 right-1 bg-red-100 hover:bg-red-200 text-red-600 rounded-full p-1"
+                                title="Remove assignment"
+                              >
+                                <svg
+                                  className="w-3 h-3"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M6 18L18 6M6 6l12 12"
+                                  />
+                                </svg>
+                              </button>
+                            )}
+                          </>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -478,21 +567,6 @@ const SchedulePage: FC = () => {
           ) : null}
         </DragOverlay>
       </DndContext>
-
-      {/* Save Button */}
-      <div className="fixed bottom-4 right-4">
-        <button
-          onClick={handleSaveChanges}
-          disabled={isSaving}
-          className={`${
-            isSaving
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-500 hover:bg-blue-600"
-          } text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors`}
-        >
-          {isSaving ? "Saving..." : "Save Changes"}
-        </button>
-      </div>
     </div>
   );
 };

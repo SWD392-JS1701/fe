@@ -15,7 +15,7 @@ import InstructionNotification from "./InstructionNotification";
 
 import { Doctor } from "../app/types/doctor";
 import { ScheduleSlot } from "@/app/types/schedule";
-import { fetchScheduleByDoctorId } from "@/app/controller/scheduleController";
+import { fetchScheduleSlotsByDoctorId } from "@/app/controller/scheduleController";
 
 interface BookingModalProps {
   doctor: Doctor;
@@ -37,11 +37,12 @@ const BookingModal: FC<BookingModalProps> = ({
   const [showInstructions, setShowInstructions] = useState(false);
 
   useEffect(() => {
-    if (isOpen && doctor?.user_Id) {
+    if (isOpen && doctor?._id) {
       const fetchData = async () => {
         setLoadingSlots(true);
         try {
-          const scheduleData = await fetchScheduleByDoctorId(doctor.user_Id);
+          const scheduleData = await fetchScheduleSlotsByDoctorId(doctor._id);
+          console.log("Schedule",scheduleData);
           setSlots(scheduleData);
         } catch (error) {
           console.error("Failed to fetch data:", error);
@@ -57,7 +58,7 @@ const BookingModal: FC<BookingModalProps> = ({
   const getDaySlots = (dayOfWeek: string) => {
     return slots.filter(
       (slot) =>
-        slot.doctorId === doctor?.user_Id && slot.dayOfWeek === dayOfWeek
+        slot.doctorId === doctor?._id && slot.dayOfWeek === dayOfWeek
     );
   };
 
@@ -98,7 +99,9 @@ const BookingModal: FC<BookingModalProps> = ({
           <div className="bg-blue-50 p-4 rounded-md mb-4">
             <div className="flex items-center space-x-4">
               <Image
-                src={doctor?.profilePicture || "/images/default-doctor.jpg"}
+                src={
+                  "https://th.bing.com/th/id/R.c01bfe8e1f11dfe3a1af580cfa3bbc89?rik=4XJslhCYu9u8CA&riu=http%3a%2f%2fhakomed.net%2fwp-content%2fuploads%2f2018%2f11%2f03.jpg&ehk=hVGis2mazsfZKbGSNt2KebgoX7%2b9lh%2bIUJTdYnIiXic%3d&risl=&pid=ImgRaw&r=0"
+                }
                 alt={doctor?.name}
                 width={50}
                 height={50}
@@ -117,8 +120,9 @@ const BookingModal: FC<BookingModalProps> = ({
               Select Date & Time Slot
             </label>
             <div className="flex space-x-2 mb-2 overflow-x-auto">
-              {Array.from(new Set(slots.map((slot) => slot.dayOfWeek))).map(
-                (day) => (
+              {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+                .filter(day => slots.some(slot => slot.dayOfWeek === day))
+                .map((day) => (
                   <button
                     key={day}
                     className={`px-3 py-1 rounded-md text-sm ${
@@ -130,13 +134,13 @@ const BookingModal: FC<BookingModalProps> = ({
                   >
                     {day}
                   </button>
-                )
-              )}
+                ))}
             </div>
             <div className="grid grid-cols-4 gap-2">
               {loadingSlots ? (
                 <p>Loading slots...</p>
               ) : (
+                console.log("Slots for selected date:", getDaySlots(selectedDate)),
                 getDaySlots(selectedDate).map((slot) => (
                   <button
                     key={slot._id}
@@ -173,16 +177,20 @@ const BookingModal: FC<BookingModalProps> = ({
           <DialogFooter>
             <button
               onClick={onClose}
-              className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600"
+              className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleConfirm}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
               disabled={!selectedTime}
+              className={`px-4 py-2 rounded-md transition-all duration-200 ${
+                selectedTime 
+                  ? 'bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow-md hover:shadow-lg'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
             >
-              Continue
+              {selectedTime ? 'Continue Booking' : 'Select a Time Slot'}
             </button>
           </DialogFooter>
         </DialogContent>

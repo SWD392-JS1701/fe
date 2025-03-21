@@ -5,7 +5,8 @@ import {
   updateSlot,
   getSlot,
   getSlotOfWeek,
-  getScheduleByDoctorId,
+  getScheduleSlotsByDoctorId,
+  getSchedulesByDoctorId,
 } from "@/app/services/scheduleService";
 import { toast } from "react-hot-toast";
 import { Schedule } from "../types/schedule";
@@ -79,10 +80,20 @@ export const fetchSlotOfWeek = async (dateOfWeek: string, slotId: string) => {
   }
 };
 
-export const fetchScheduleByDoctorId = async (doctorId: string) => {
+export const fetchScheduleSlotsByDoctorId = async (doctorId: string) => {
   try {
-    const schedule = await getScheduleByDoctorId(doctorId);
+    const schedule = await getScheduleSlotsByDoctorId(doctorId);
     return schedule;
+  } catch (error: any) {
+    toast.error(error.message);
+    throw error;
+  }
+};
+
+export const fetchSchedulesByDoctorId = async (doctorId: string) => {
+  try {
+    const schedules = await getSchedulesByDoctorId(doctorId);
+    return schedules;
   } catch (error: any) {
     toast.error(error.message);
     throw error;
