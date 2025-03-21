@@ -149,7 +149,7 @@ const ProductsPage: FC = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen relative">
+    <div className="p-6 bg-gray-100 min-h-screen relative mt-30">
       {/* Breadcrumb and Add Button */}
       <div className="bg-gray-100 p-4 mb-4 flex justify-between items-center rounded-lg">
         <nav className="text-gray-600 text-sm">

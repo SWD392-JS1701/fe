@@ -11,12 +11,11 @@ const AdminPage = () => {
     { name: "Accessories", quantity: 300 },
   ];
 
-  
   const { data: session } = useSession();
 
   return (
     <>
-      <div className="min-h-screen bg-gray-100 p-6">
+      <div className="min-h-screen bg-gray-100 p-6 mt-30">
         {/* Header */}
         <header className="mb-8 flex justify-between items-center">
           <div>

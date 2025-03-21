@@ -164,7 +164,7 @@ const EmployeePage = () => {
 
   return (
     <>
-      <div className="bg-gray-100 min-h-screen p-6">
+      <div className="bg-gray-100 min-h-screen p-6 mt-30">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold text-gray-800">Recommended</h1>

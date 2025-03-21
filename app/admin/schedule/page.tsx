@@ -414,7 +414,7 @@ const SchedulePage: FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-6">
+    <div className="min-h-screen bg-gray-100 p-4 md:p-6 mt-30">
       <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-6">
         Doctor Schedule Management
       </h1>

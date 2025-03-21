@@ -45,4 +45,4 @@ const StaffLayout: FC<StaffLayoutProps> = ({ children }) => {
   );
 };
 
-export default StaffLayout; 
+export default StaffLayout;

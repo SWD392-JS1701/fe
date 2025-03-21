@@ -122,7 +122,6 @@ const DoctorNavbar: FC = () => {
           </Link>
         ))}
       </div>
-      ;s
     </div>
   );
 };
