@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, ChangeEvent } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/lib/redux/store";
 import {
@@ -8,12 +11,7 @@ import {
   removeFromCart,
   clearCart,
 } from "@/lib/redux/cartSlice";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import Swal from "sweetalert2";
-import { createOrder, createOrderDetail } from "@/app/services/orderService";
-import { getUserById } from "@/app/services/userService";
-import { useSession } from "next-auth/react";
+
 import {
   Select,
   SelectContent,
@@ -21,30 +19,66 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button"; // Import shadcn Button component
+import { Button } from "@/components/ui/button";
+import Swal from "sweetalert2";
+
+import { Promotion } from "@/app/types/promotion";
+import { createOrder, createOrderDetail } from "@/app/services/orderService";
+import { getPromotedProductByProductIdController } from "@/app/controller/promotionController";
+import { getUserById } from "@/app/services/userService";
+import { useSession } from "next-auth/react";
 
 const CartPage = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const cartItems = useSelector((state: RootState) => state.cart.items);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+  const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(
+    null
+  );
+  const [discountedTotal, setDiscountedTotal] = useState(totalPrice);
   const shippingCost = 10.0;
-  const totalCost = totalPrice + shippingCost;
+  const totalCost = discountedTotal + shippingCost;
   const [loading, setLoading] = useState(false);
   const { data: session } = useSession();
 
-  // Initialize userInfo with empty strings
   const [userInfo, setUserInfo] = useState({
     fullname: "",
     telephone: "",
     address: "",
   });
 
-  // Update userInfo when session changes
+  useEffect(() => {
+    const fetchPromotions = async () => {
+      try {
+        const allPromotions: Promotion[] = [];
+        for (const item of cartItems) {
+          const promotions = await getPromotedProductByProductIdController(
+            item.id
+          );
+          console.log("Promotions:", promotions);
+          if (promotions && promotions.length > 0) {
+            promotions.forEach((promotion) => {
+              if (!allPromotions.find((p) => p._id === promotion._id)) {
+                allPromotions.push(promotion);
+              }
+            });
+          }
+        }
+        setPromotions(allPromotions);
+      } catch (error) {
+        console.error("Error fetching promotions:", error);
+      }
+    };
+
+    fetchPromotions();
+  }, [cartItems]);
+
   useEffect(() => {
     const fetchUserData = async () => {
       if (session) {
@@ -68,13 +102,18 @@ const CartPage = () => {
     fetchUserData();
   }, [session]);
 
-  // Add state for active tab
+  useEffect(() => {
+    if (selectedPromotion) {
+      const discount =
+        (totalPrice * selectedPromotion.discount_percentage) / 100;
+      setDiscountedTotal(totalPrice - discount);
+    } else {
+      setDiscountedTotal(totalPrice);
+    }
+  }, [selectedPromotion, totalPrice]);
+
   const [activeTab, setActiveTab] = useState<"summary" | "delivery">("summary");
 
-  // Add state for promo code
-  const [promoCode, setPromoCode] = useState("");
-
-  // Handle user info changes
   const handleUserInfoChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUserInfo((prev) => ({
@@ -84,7 +123,7 @@ const CartPage = () => {
   };
 
   const handlePhoneNumberChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, ""); // Remove any non-digit characters
+    const value = e.target.value.replace(/\D/g, "");
     setUserInfo((prev) => ({
       ...prev,
       telephone: value,
@@ -121,7 +160,6 @@ const CartPage = () => {
       return;
     }
 
-    // Validate user information
     if (!userInfo.fullname || !userInfo.telephone || !userInfo.address) {
       Swal.fire({
         icon: "error",
@@ -215,26 +253,43 @@ const CartPage = () => {
               htmlFor="promo"
               className="font-bold inline-block mb-3 text-lg uppercase"
             >
-              Promo Code
+              Select Promotion
             </label>
-            <input
-              type="text"
-              id="promo"
-              value={promoCode}
-              onChange={(e) => setPromoCode(e.target.value)}
-              placeholder="Enter your code"
-              className="p-2 text-sm w-full"
-            />
+            {promotions.length > 0 ? (
+              <Select
+                onValueChange={(value) => {
+                  const selected = promotions.find(
+                    (promo) => promo._id === value
+                  );
+                  setSelectedPromotion(selected || null);
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a promotion" />
+                </SelectTrigger>
+                <SelectContent>
+                  {promotions.map((promotion) => (
+                    <SelectItem key={promotion._id} value={promotion._id}>
+                      {promotion.title} - {promotion.discount_percentage}% off
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <p className="text-gray-600">No promotions available.</p>
+            )}
           </div>
-          <Button
-            onClick={() => {
-              // Handle promo code application here
-              console.log("Applying promo code:", promoCode);
-            }}
-            className="bg-red-500 border rounded-md hover:bg-red-600 px-5 py-2 text-sm text-white uppercase"
-          >
-            Apply
-          </Button>
+          {selectedPromotion && (
+            <div className="mb-4">
+              <p className="text-green-600">
+                Applied Promotion: {selectedPromotion.title} -{" "}
+                {selectedPromotion.discount_percentage}% off
+              </p>
+              <p className="text-lg font-bold">
+                Discounted Total: ${discountedTotal.toFixed(2)}
+              </p>
+            </div>
+          )}
         </div>
       );
     }
@@ -304,7 +359,7 @@ const CartPage = () => {
         Continue Shopping
       </Link>
       <div className="my-10 w-full max-w-2xl mx-auto relative">
-        {/* Giỏ hàng */}
+        {/* Cart Items */}
         <div className="w-full max-w-3xl mx-auto bg-white px-6 py-6">
           <div className="flex justify-between border-b pb-4">
             <h1 className="font-bold text-3xl italic">YOUR CART</h1>
@@ -321,7 +376,7 @@ const CartPage = () => {
                 key={item.id}
                 className="flex items-start py-6 border-b border-gray-200"
               >
-                {/* Hình ảnh sản phẩm */}
+                {/* Product Image */}
                 <div className="w-1/4">
                   <img
                     src={item.image_url}
@@ -330,7 +385,7 @@ const CartPage = () => {
                   />
                 </div>
 
-                {/* Thông tin sản phẩm */}
+                {/* Product Info */}
                 <div className="w-3/4 pl-4 flex flex-col justify-between">
                   <div className="flex justify-between">
                     <p className="text-xl font-bold">{item.name}</p>
@@ -339,7 +394,7 @@ const CartPage = () => {
                     </p>
                   </div>
 
-                  {/* Số lượng & nút xóa */}
+                  {/* Quantity & Remove Button */}
                   <div className="flex items-center justify-between pt-4">
                     <div className="flex items-center border border-gray-300 rounded-md">
                       <button
