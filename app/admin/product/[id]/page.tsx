@@ -21,7 +21,7 @@ const ProductDetailPage: FC<ProductDetailPageProps> = async ({ params }) => {
   }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-30 bg-gray-50 min-h-screen">
       {/* Breadcrumb */}
       <div className="mb-4 text-sm text-gray-500 flex items-center">
         <Link href="/admin/overview" className="hover:text-gray-700">
@@ -98,9 +98,6 @@ const ProductDetailPage: FC<ProductDetailPageProps> = async ({ params }) => {
             <div className="flex items-baseline gap-2">
               <span className="text-2xl font-bold text-gray-900">
                 ${product.price.toFixed(2)}
-              </span>
-              <span className="text-lg text-gray-500 line-through">
-                ${(product.price * 1.2).toFixed(2)} {/* Example discount */}
               </span>
             </div>
           </div>
