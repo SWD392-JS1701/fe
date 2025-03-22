@@ -10,8 +10,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
+import UserCard from "@/components/UserCard";
 import CreateEmployeeModal from "@/components/CreateEmployeeModal";
 import { createNewDoctor } from "@/app/controller/doctorController";
 import {
@@ -25,6 +33,7 @@ const EmployeePage = () => {
   const [loading, setLoading] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>("Doctor");
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
@@ -98,6 +107,20 @@ const EmployeePage = () => {
     }
   };
 
+  const handleBlockUser = async (userId: string) => {
+    // try {
+    //   await updateExistingUser(userId, { status: "blocked" });
+    //   setUsers((prevUsers) =>
+    //     prevUsers.map((u) =>
+    //       u._id === userId ? { ...u, status: "blocked" } : u
+    //     )
+    //   );
+    //   setSelectedUser(null);
+    // } catch (error) {
+    //   console.error("Error blocking user:", error);
+    // }
+  };
+
   return (
     <div className="px-6 py-1 bg-gray-100 min-h-screen relative mt-30">
       {/* Breadcrumb and Add Button */}
@@ -169,11 +192,15 @@ const EmployeePage = () => {
             <tbody>
               {currentUsers.map((user) => (
                 <tr key={user._id} className="border-t hover:bg-gray-50">
-                  <td className="p-3">
+                  <td
+                    className="p-3 cursor-pointer hover:text-blue-600"
+                    onClick={() => setSelectedUser(user)}
+                  >
                     <div className="font-medium">
                       {user.first_name} {user.last_name}
                     </div>
                   </td>
+
                   <td className="p-3">{user.email}</td>
                   <td className="p-3">{user.phone_number || "N/A"}</td>
                   <td className="p-3">
@@ -216,6 +243,38 @@ const EmployeePage = () => {
             </tbody>
           </table>
         </div>
+
+        <Dialog
+          open={!!selectedUser}
+          onOpenChange={() => setSelectedUser(null)}
+        >
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>User Details</DialogTitle>
+            </DialogHeader>
+            {selectedUser && (
+              <>
+                <UserCard
+                  user={selectedUser}
+                  isAdmin={true}
+                  isLoading={loading === selectedUser._id}
+                  selectedRole={selectedRole}
+                  onRoleChange={setSelectedRole}
+                  onRecruit={() => handleRecruit(selectedUser)}
+                />
+                <div className="mt-4">
+                  <Button
+                    variant="destructive"
+                    className="w-full"
+                    onClick={() => handleBlockUser(selectedUser._id)}
+                  >
+                    Block User
+                  </Button>
+                </div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Pagination */}
         <div className="flex justify-between items-center mt-6">
