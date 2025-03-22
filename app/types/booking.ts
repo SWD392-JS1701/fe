@@ -5,6 +5,11 @@ export interface Booking {
   doctor_id: string;
   combo_id: string;
   booking_time: Date | string;
+  booking_date?: string;
+  dayofweek?: string;
+  status?: string;
+  scheduleId: string;
+  slotId: string;
   createdAt?: string;
   updatedAt?: string;
   __v?: number;
@@ -16,6 +21,11 @@ export interface CreateBookingRequest {
   doctor_id: string;
   combo_id: string;
   booking_time: Date;
+  booking_date: string;
+  dayofweek: string;
+  status?: string;
+  scheduleId: string;
+  slotId: string;
 }
 
 export interface UpdateBookingRequest {
@@ -24,4 +34,9 @@ export interface UpdateBookingRequest {
   doctor_id?: string;
   combo_id?: string;
   booking_time?: Date;
+  booking_date?: string;
+  dayofweek?: string;
+  status?: string;
+  scheduleId?: string;
+  slotId?: string;
 }

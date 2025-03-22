@@ -5,13 +5,16 @@ import React, { FC, useEffect, useState, KeyboardEvent } from "react";
 import { Search, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/lib/redux/store";
 import { useSession, signOut } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { searchProductsByName } from "@/app/services/productService";
 import { Product } from "@/app/types/product";
 import debounce from "lodash/debounce";
+import { resetBookingCount, setBookingCount } from "@/lib/redux/bookingSlice";
+import { getAllBookingsController } from "@/app/controller/bookingController";
+import { isPast } from "date-fns";
 
 // Dynamically import Lottie with no SSR
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
@@ -25,9 +28,11 @@ const Navbar: FC = () => {
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [logoAnimation, setLogoAnimation] = useState<any>(null);
-  const cartCount = useSelector((state: RootState) => state.cart.items.length);
-  const router = useRouter();
+  const dispatch = useDispatch();
   const { data: session } = useSession();
+  const cartCount = useSelector((state: RootState) => state.cart.items.length);
+  const bookingCount = useSelector((state: RootState) => state.booking.count);
+  const router = useRouter();
 
   // Debounced search function
   const debouncedSearch = debounce(async (term: string) => {
@@ -85,8 +90,30 @@ const Navbar: FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [scrollCount]);
 
+  // Fetch and set booking count when session changes
+  useEffect(() => {
+    const fetchBookingCount = async () => {
+      if (session?.user?.id) {
+        try {
+          const allBookings = await getAllBookingsController();
+          const userBookings = allBookings.filter(booking => booking.user_id === session.user.id);
+          const activeBookings = userBookings.filter(booking => !isPast(new Date(booking.booking_time)));
+          dispatch(setBookingCount(activeBookings.length));
+        } catch (error) {
+          console.error("Error fetching booking count:", error);
+          dispatch(resetBookingCount());
+        }
+      } else {
+        dispatch(resetBookingCount());
+      }
+    };
+
+    fetchBookingCount();
+  }, [session, dispatch]);
+
   const handleLogout = async () => {
     await signOut({ redirect: false });
+    dispatch(resetBookingCount());
     router.push("/");
   };
 
@@ -223,7 +250,7 @@ const Navbar: FC = () => {
         {/* Icons */}
         <div className="flex-1 flex justify-end items-center space-x-3">
           <div className="relative group">
-            <Link href={session ? "/profile" : "/sign-in"}>
+            <Link href={session ? "/profile" : "/sign-in"} className="relative">
               <svg
                 className={`w-6 h-6 transition-all duration-500 ${
                   scrollCount === maxScrollCount
@@ -242,6 +269,11 @@ const Navbar: FC = () => {
                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                 />
               </svg>
+              {session && bookingCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                  {bookingCount}
+                </span>
+              )}
             </Link>
             <div className="absolute w-full h-5 bg-transparent"></div>
 
@@ -255,6 +287,17 @@ const Navbar: FC = () => {
                       className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
                     >
                       My Rewards
+                    </Link>
+                    <Link
+                      href="/my-bookings"
+                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4 relative"
+                    >
+                      My Bookings
+                      {bookingCount > 0 && (
+                        <span className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                          {bookingCount}
+                        </span>
+                      )}
                     </Link>
                     <Link
                       href="/routine"

@@ -1,6 +1,7 @@
 import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { getUserFromToken } from "@/lib/redux/auth";
 import cartReducer from "./cartSlice";
+import bookingReducer from "./bookingSlice";
 
 export interface User {
   id: string;
@@ -45,7 +46,8 @@ export const { login, logout, setUser } = authSlice.actions;
 export const store = configureStore({
   reducer: {
     cart: cartReducer,
-    auth: authSlice.reducer, // Thêm auth vào reducer
+    auth: authSlice.reducer,
+    booking: bookingReducer,
   },
 });
 

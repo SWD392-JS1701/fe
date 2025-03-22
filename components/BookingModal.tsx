@@ -1,8 +1,15 @@
 "use client";
 
-import React, { FC, useState, useEffect } from "react";
+import React, { FC, useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
+import { createBookingController, findBookingsByUserIdController } from "@/app/controller/bookingController";
+import { format, isBefore, parse, startOfToday, isToday, addDays } from "date-fns";
+import { useRouter } from "next/navigation";
+import { updateExistingSlot } from "@/app/controller/scheduleController";
+import { useDispatch } from "react-redux";
+import { incrementBookingCount } from "@/lib/redux/bookingSlice";
 
 import {
   Dialog,
@@ -30,19 +37,67 @@ const BookingModal: FC<BookingModalProps> = ({
   onClose,
   onConfirm,
 }) => {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const dispatch = useDispatch();
   const [slots, setSlots] = useState<ScheduleSlot[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<string>("Tomorrow");
+  const [selectedDate, setSelectedDate] = useState<string>("Monday");
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [showInstructions, setShowInstructions] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<ScheduleSlot | null>(null);
+  const [isBooking, setIsBooking] = useState(false);
+  const [weekDates, setWeekDates] = useState<Date[]>([]);
 
+  // Helper function to convert 12-hour format to 24-hour format
+  const convertTo24Hour = (time12h: string) => {
+    const [time, modifier] = time12h.split(' ');
+    let [hours, minutes] = time.split(':');
+
+    if (hours === '12') {
+      hours = '00';
+    }
+
+    if (modifier === 'PM') {
+      hours = String(parseInt(hours, 10) + 12);
+    }
+
+    return `${hours.padStart(2, '0')}:${minutes}`;
+  };
+
+  // Helper function to check if a slot is in the past or within 2 hours from now
+  const isSlotUnavailable = useCallback((slotDate: Date, startTime: string) => {
+    const now = new Date();
+    // Convert the slot time from 12-hour to 24-hour format
+    const time24h = convertTo24Hour(startTime);
+    const [hours, minutes] = time24h.split(':').map(Number);
+    
+    const slotDateTime = new Date(slotDate);
+    slotDateTime.setHours(hours, minutes, 0, 0);
+
+    // Add 2 hours buffer to current time
+    const bufferTime = new Date(now.getTime() + (2 * 60 * 60 * 1000));
+    
+    return isBefore(slotDateTime, bufferTime);
+  }, []);
+
+  useEffect(() => {
+    // Get dates for the next 7 days starting from today
+    const today = new Date();
+    const dates = Array.from({ length: 7 }, (_, i) => addDays(today, i));
+    setWeekDates(dates);
+    // Set the initial selected date to today's day name
+    setSelectedDate(format(today, 'EEEE'));
+  }, []);
+
+  // Fetch slots and check availability
   useEffect(() => {
     if (isOpen && doctor?._id) {
       const fetchData = async () => {
         setLoadingSlots(true);
         try {
           const scheduleData = await fetchScheduleSlotsByDoctorId(doctor._id);
-          console.log("Schedule",scheduleData);
+          console.log("scheduleData", scheduleData);
           setSlots(scheduleData);
         } catch (error) {
           console.error("Failed to fetch data:", error);
@@ -52,32 +107,143 @@ const BookingModal: FC<BookingModalProps> = ({
         }
       };
       fetchData();
+
+      // Set up interval to check availability
+      const availabilityCheck = setInterval(() => {
+        // Force a re-render to update slot availability
+        setSlots(prevSlots => [...prevSlots]);
+      }, 60000); // Check every minute
+
+      return () => clearInterval(availabilityCheck);
     }
   }, [isOpen, doctor?._id]);
 
-  const getDaySlots = (dayOfWeek: string) => {
-    return slots.filter(
-      (slot) =>
-        slot.doctorId === doctor?._id && slot.dayOfWeek === dayOfWeek
-    );
-  };
+  // Check if selected slot is still available
+  useEffect(() => {
+    if (selectedTime && selectedSlot && selectedDate) {
+      const slotDate = weekDates[weekDates.findIndex(date => 
+        format(date, 'EEEE') === selectedDate
+      )];
+      
+      if (slotDate && isSlotUnavailable(slotDate, selectedTime)) {
+        setSelectedTime(null);
+        setSelectedSlot(null);
+        toast.error("Selected time slot is no longer available");
+      }
+    }
+  }, [selectedTime, selectedSlot, selectedDate, weekDates, isSlotUnavailable]);
+
+  const getDaySlots = useCallback((dayOfWeek: string) => {
+    const dayIndex = weekDates.findIndex(date => format(date, 'EEEE') === dayOfWeek);
+    const currentDate = weekDates[dayIndex];
+
+    return slots.filter((slot) => {
+      if (slot.doctorId !== doctor?._id || slot.dayOfWeek !== dayOfWeek) {
+        return false;
+      }
+
+      // Check if slot is booked
+      if (slot.status === "booked") {
+        return true; // Still show booked slots
+      }
+
+      // Check if slot is within 2 hours
+      if (currentDate && isSlotUnavailable(currentDate, slot.startTime)) {
+        return true; // Still show unavailable slots
+      }
+
+      return true;
+    });
+  }, [slots, weekDates, doctor?._id, isSlotUnavailable]);
 
   const handleDateSelect = (date: string) => {
     setSelectedDate(date);
     setSelectedTime(null);
   };
 
-  const handleTimeSelect = (time: string) => {
+  const handleTimeSelect = (time: string, slot: ScheduleSlot) => {
     setSelectedTime(time);
+    setSelectedSlot(slot);
   };
 
-  const handleConfirm = () => {
-    if (!selectedTime) {
+  const handleConfirm = async () => {
+    if (!selectedTime || !selectedSlot || !session?.user?.id) {
       toast.error("Please select a time slot to continue");
       return;
     }
-    onClose();
-    setShowInstructions(true);
+
+    try {
+      setIsBooking(true);
+      // Get the selected date from weekDates
+      const selectedSlotDate = weekDates[weekDates.findIndex(date => 
+        format(date, 'EEEE') === selectedDate
+      )];
+      
+      if (!selectedSlotDate) {
+        throw new Error("Invalid date selected");
+      }
+
+      // Create the booking with the correct selected date
+      const bookingTime = new Date(
+        selectedSlotDate.getFullYear(),
+        selectedSlotDate.getMonth(),
+        selectedSlotDate.getDate(),
+        ...convertTo24Hour(selectedSlot.startTime).split(':').map(Number)
+      );
+
+      if (!selectedSlot.scheduleId || !selectedSlot.slotId) {
+        throw new Error("Invalid slot data: missing schedule or slot ID");
+      }
+
+      const bookingData = {
+        user_id: session.user.id,
+        doctor_id: doctor._id,
+        combo_id: "default",
+        booking_time: bookingTime,
+        booking_date: format(bookingTime, 'yyyy-MM-dd'),
+        dayofweek: selectedDate,
+        status: "Pending",
+        scheduleId: selectedSlot.scheduleId,
+        slotId: selectedSlot.slotId
+      };
+
+      // Create the booking
+      await createBookingController(bookingData);
+      
+      // Update the slot status to booked
+      if (selectedSlot._id && selectedSlot.scheduleId) {
+        console.log("Selected Slot:", selectedSlot);
+        console.log("Schedule ID:", selectedSlot.scheduleId);
+        console.log("Slot ID:", selectedSlot.slotId || selectedSlot._id);
+        const updateData = {
+          status: "booked",
+          doctorId: selectedSlot.doctorId,
+          doctorName: selectedSlot.doctorName,
+          specialization: selectedSlot.specialization
+        };
+        console.log("Update Data being sent:", updateData);
+        
+        await updateExistingSlot(
+          selectedSlot.scheduleId,
+          selectedSlot.slotId || selectedSlot._id,
+          updateData
+        );
+      }
+      
+      // Increment the booking count in Redux
+      dispatch(incrementBookingCount());
+      
+      toast.success("Booking created successfully!");
+      setShowInstructions(true);
+      onClose();
+      
+      // Redirect to my-bookings page
+      router.push('/my-bookings');
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create booking");
+    } finally {
+      setIsBooking(false);
+    }
   };
 
   const handleInstructionsClose = () => {
@@ -120,44 +286,77 @@ const BookingModal: FC<BookingModalProps> = ({
               Select Date & Time Slot
             </label>
             <div className="flex space-x-2 mb-2 overflow-x-auto">
-              {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-                .filter(day => slots.some(slot => slot.dayOfWeek === day))
-                .map((day) => (
+              {weekDates.map((date, index) => {
+                const dayName = format(date, 'EEEE');
+                // Show days that have any slots
+                if (!slots.some(slot => slot.dayOfWeek === dayName)) {
+                  return null;
+                }
+                const isToday = index === 0;
+
+                return (
                   <button
-                    key={day}
-                    className={`px-3 py-1 rounded-md text-sm ${
-                      selectedDate === day
+                    key={dayName}
+                    className={`px-3 py-2 rounded-md text-sm ${
+                      selectedDate === dayName
                         ? "bg-blue-500 text-white"
+                        : isToday
+                        ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
                         : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    } whitespace-nowrap`}
-                    onClick={() => handleDateSelect(day)}
+                    } whitespace-nowrap flex flex-col items-center`}
+                    onClick={() => handleDateSelect(dayName)}
                   >
-                    {day}
+                    <span>{dayName}</span>
+                    <span className="text-xs mt-1">
+                      {format(date, 'MMM dd')}
+                      {isToday && " (Today)"}
+                    </span>
                   </button>
-                ))}
+                );
+              })}
             </div>
             <div className="grid grid-cols-4 gap-2">
               {loadingSlots ? (
                 <p>Loading slots...</p>
               ) : (
-                console.log("Slots for selected date:", getDaySlots(selectedDate)),
-                getDaySlots(selectedDate).map((slot) => (
-                  <button
-                    key={slot._id}
-                    className={`px-3 py-1 rounded-md text-sm ${
-                      selectedTime === slot.startTime
-                        ? "bg-green-500 text-white"
-                        : slot.status === "booked"
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-green-200 text-green-800 hover:bg-green-300"
-                    }`}
-                    disabled={slot.status === "booked"}
-                    onClick={() => handleTimeSelect(slot.startTime)}
-                  >
-                    {`${slot.startTime} - ${slot.endTime}`}
-                    {slot.status === "booked" ? " (Booked)" : " (Available)"}
-                  </button>
-                ))
+                getDaySlots(selectedDate).map((slot) => {
+                  const slotDate = weekDates[weekDates.findIndex(date => 
+                    format(date, 'EEEE') === selectedDate
+                  )];
+                  const isUnavailable = slotDate && (
+                    slot.status === "booked" || 
+                    isSlotUnavailable(slotDate, slot.startTime)
+                  );
+                  
+                  return (
+                    <button
+                      key={slot._id}
+                      className={`px-3 py-2 rounded-md text-sm ${
+                        selectedTime === slot.startTime
+                          ? "bg-green-500 text-white"
+                          : isUnavailable
+                          ? "bg-gray-300 text-gray-500"
+                          : "bg-green-200 text-green-800 hover:bg-green-300"
+                      }`}
+                      disabled={isUnavailable}
+                      onClick={() => handleTimeSelect(slot.startTime, slot)}
+                    >
+                      <div className="flex flex-col items-center">
+                        <span>{`${slot.startTime} - ${slot.endTime}`}</span>
+                        <span className="text-xs mt-1">
+                          {format(slotDate, 'MMM dd')}
+                        </span>
+                        <span className="text-xs">
+                          {slot.status === "booked" 
+                            ? "(Booked)" 
+                            : isUnavailable
+                            ? "(Unavailable)"
+                            : "(Available)"}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })
               )}
             </div>
 
@@ -166,7 +365,7 @@ const BookingModal: FC<BookingModalProps> = ({
                 Selected
               </span>
               <span className="bg-gray-300 text-gray-500 px-2 py-1 rounded">
-                Booked
+                Unavailable
               </span>
               <span className="bg-green-200 text-green-800 px-2 py-1 rounded">
                 Available
@@ -178,19 +377,20 @@ const BookingModal: FC<BookingModalProps> = ({
             <button
               onClick={onClose}
               className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors"
+              disabled={isBooking}
             >
               Cancel
             </button>
             <button
               onClick={handleConfirm}
-              disabled={!selectedTime}
+              disabled={!selectedTime || isBooking}
               className={`px-4 py-2 rounded-md transition-all duration-200 ${
-                selectedTime 
+                selectedTime && !isBooking
                   ? 'bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow-md hover:shadow-lg'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >
-              {selectedTime ? 'Continue Booking' : 'Select a Time Slot'}
+              {isBooking ? 'Creating Booking...' : selectedTime ? 'Continue Booking' : 'Select a Time Slot'}
             </button>
           </DialogFooter>
         </DialogContent>

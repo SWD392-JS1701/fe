@@ -13,6 +13,7 @@ import {
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
+import { toast } from "react-hot-toast";
 
 import { Doctor } from "../../../types/doctor";
 import { fetchAllDoctors } from "@/app/controller/doctorController";
@@ -128,6 +129,7 @@ const BookingPage: FC = () => {
       });
       return;
     }
+
     setSelectedDoctor(doctor);
     setIsModalOpen(true);
   };
@@ -344,12 +346,15 @@ const BookingPage: FC = () => {
                 <button
                   onClick={() => handleBookAppointment(doctor)}
                   className={`px-4 py-2 rounded-md transition-all duration-200 ${
-                    session 
-                      ? 'bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow-md hover:shadow-lg'
-                      : 'bg-gray-300 text-gray-500'
+                    !session 
+                      ? 'bg-gray-300 text-gray-500'
+                      : 'bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow-md hover:shadow-lg'
                   }`}
+                  disabled={!session}
                 >
-                  {session ? 'Book Appointment' : 'Login to Book'}
+                  {!session 
+                    ? 'Login to Book'
+                    : 'Book Appointment'}
                 </button>
               </div>
             </div>

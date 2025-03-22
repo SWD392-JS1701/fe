@@ -7,31 +7,30 @@ import { fetchDoctorByUserId } from "@/app/controller/doctorController";
 import { Doctor } from "@/app/types/doctor";
 import Swal from "sweetalert2";
 import { initialSchedule } from "@/app/data/initialSchedule";
-import { format, startOfWeek, addDays } from "date-fns";
-import {
-  DndContext,
-  closestCorners,
-  DragEndEvent,
-  useSensor,
-  useSensors,
-  PointerSensor,
-  DragStartEvent,
-  DragOverlay,
-} from "@dnd-kit/core";
-import { useSortable } from "@dnd-kit/sortable";
-import { useDroppable } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
+import { format, addDays } from "date-fns";
 
-import { getAllUsers } from "@/app/services/userService";
-import { getSchedule, updateSlot } from "@/app/services/scheduleService";
-import { User } from "@/app/types/user";
+interface Schedule {
+  _id: string;
+  dayOfWeek: string;
+  slots: ApiScheduleSlot[];
+}
+
+interface ApiScheduleSlot {
+  startTime: string;
+  endTime: string;
+  doctorId: string | null;
+  doctorName: string | null;
+  specialization: string | null;
+  status: string;
+}
+
 interface ScheduleSlot {
   id: string;
   time: string;
   doctorId: string | null;
-  doctorName?: string | null;
-  specialization?: string | null;
-  status?: string;
+  doctorName: string | null;
+  specialization: string | null;
+  status: string;
   date?: Date;
 }
 
@@ -67,19 +66,16 @@ const ScheduleSlot: FC<ScheduleSlotProps> = ({ slot }) => {
 
 const SchedulePage: FC = () => {
   const { data: session } = useSession();
-  const [schedule, setSchedule] = useState<DaySchedule[]>(initialSchedule);
+  const [schedule, setSchedule] = useState<DaySchedule[]>(initialSchedule as DaySchedule[]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentDoctor, setCurrentDoctor] = useState<Doctor | null>(null);
   const [currentWeekDates, setCurrentWeekDates] = useState<Date[]>([]);
 
   useEffect(() => {
-    // Get current week dates
+    // Get dates starting from today and the next 6 days (total 7 days)
     const today = new Date();
-    const startOfCurrentWeek = startOfWeek(today, { weekStartsOn: 1 }); // Start from Monday
-    const weekDates = Array.from({ length: 6 }, (_, i) => 
-      addDays(startOfCurrentWeek, i)
-    );
+    const weekDates = Array.from({ length: 7 }, (_, i) => addDays(today, i));
     setCurrentWeekDates(weekDates);
   }, []);
 
@@ -90,11 +86,8 @@ const SchedulePage: FC = () => {
           throw new Error("No user session found");
         }
 
-        console.log("User ID from session:", session.user.id);
-
         // Fetch current doctor's information
         const doctorInfo = await fetchDoctorByUserId(session.user.id);
-        console.log("Doctor Info:", doctorInfo);
         setCurrentDoctor(doctorInfo);
 
         if (!doctorInfo?._id) {
@@ -103,46 +96,41 @@ const SchedulePage: FC = () => {
 
         // Fetch doctor's complete schedule
         const doctorSchedules = await getSchedulesByDoctorId(doctorInfo._id);
-        console.log("Doctor Schedules:", doctorSchedules);
 
-        // Transform the schedules into the required format
-        const transformedSchedule = doctorSchedules.map((daySchedule: any, dayIndex: number) => ({
-          _id: daySchedule._id,
-          day: daySchedule.dayOfWeek,
-          slots: daySchedule.slots.map((slot: any) => ({
-            id: slot.slotId,
-            time: `${slot.startTime} - ${slot.endTime}`,
-            doctorId: slot.doctorId || null,
-            doctorName: slot.doctorName || null,
-            specialization: slot.specialization || null,
-            status: slot.status || "available",
-            date: currentWeekDates[dayIndex]
-          })),
-        }));
+        // Create a mapping of day names to their schedules
+        const scheduleMap = new Map(
+          doctorSchedules.map(schedule => [schedule.dayOfWeek.toLowerCase(), schedule])
+        );
 
-        // Merge with initialSchedule to maintain correct day order
-        const mergedSchedule = initialSchedule.map((defaultDay) => {
-          const fetchedDay = transformedSchedule.find(
-            (d: DaySchedule) =>
-              d.day.toLowerCase() === defaultDay.day.toLowerCase()
-          );
-          if (fetchedDay) {
-            return {
-              ...defaultDay,
-              _id: fetchedDay._id,
-              slots: defaultDay.slots.map((defaultSlot) => {
-                const fetchedSlot = fetchedDay.slots.find(
-                  (s: ScheduleSlot) => s.id === defaultSlot.id
-                );
-                return fetchedSlot ? fetchedSlot : defaultSlot;
-              }),
-            };
-          }
-          return defaultDay;
+        // Transform the schedule to start from today
+        const transformedSchedule = currentWeekDates.map((date, index) => {
+          const dayName = format(date, 'EEEE');
+          const existingSchedule = scheduleMap.get(dayName.toLowerCase()) as Schedule | undefined;
+
+          return {
+            _id: existingSchedule?._id || '',
+            day: dayName,
+            slots: initialSchedule[0].slots.map(slot => {
+              const [startTime, endTime] = slot.time.split(' - ');
+              const matchingSlot = existingSchedule?.slots?.find(s => 
+                s.startTime === startTime && 
+                s.endTime === endTime
+              );
+
+              return {
+                id: slot.id,
+                time: slot.time,
+                doctorId: matchingSlot?.doctorId || null,
+                doctorName: matchingSlot?.doctorName || null,
+                specialization: matchingSlot?.specialization || null,
+                status: matchingSlot?.status || "available",
+                date: date
+              };
+            })
+          };
         });
 
-        console.log("Final Schedule:", mergedSchedule);
-        setSchedule(mergedSchedule);
+        setSchedule(transformedSchedule);
 
         if (doctorSchedules.length === 0) {
           Swal.fire({
@@ -161,10 +149,10 @@ const SchedulePage: FC = () => {
       }
     };
 
-    if (session?.user?.id) {
+    if (session?.user?.id && currentWeekDates.length > 0) {
       fetchData();
     }
-  }, [session?.user?.id]);
+  }, [session?.user?.id, currentWeekDates]);
 
   if (loading) {
     return (
@@ -202,14 +190,14 @@ const SchedulePage: FC = () => {
                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-            Weekly Dr. {currentDoctor.name} Schedule
+            Full Week Schedule - Dr. {currentDoctor.name}
           </h2>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 min-w-max">
+        <div className="grid grid-cols-1 md:grid-cols-7 gap-4 min-w-max">
           {schedule.map((day, index) => {
-            const isToday = currentWeekDates[index] && 
-              format(currentWeekDates[index], 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
+            const isToday = index === 0;
+            const date = currentWeekDates[index];
             
             return (
               <div 
@@ -225,8 +213,7 @@ const SchedulePage: FC = () => {
                   <div className={`text-sm ${
                     isToday ? 'text-blue-600 font-medium' : 'text-gray-600'
                   }`}>
-                    {currentWeekDates[index] && 
-                      format(currentWeekDates[index], 'MMM dd, yyyy')}
+                    {date && format(date, 'MMM dd, yyyy')}
                   </div>
                 </div>
                 <div className="space-y-3 px-2">
