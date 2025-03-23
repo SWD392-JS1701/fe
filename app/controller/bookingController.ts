@@ -4,6 +4,8 @@ import {
   createBooking,
   updateBooking,
   deleteBooking,
+  findBookingsByUserId,
+  hasActiveBooking
 } from "@/app/services/bookingService";
 import { toast } from "react-hot-toast";
 import {
@@ -11,6 +13,7 @@ import {
   CreateBookingRequest,
   UpdateBookingRequest,
 } from "@/app/types/booking";
+
 
 export const getAllBookingsController = async (): Promise<Booking[]> => {
   try {
@@ -107,5 +110,26 @@ export const deleteBookingController = async (
   } catch (error: any) {
     toast.error(error.message);
     throw error;
+  }
+};
+
+export const findBookingsByUserIdController = async (userId: string): Promise<Booking> => {
+  try {
+    const booking = await findBookingsByUserId(userId);
+    return booking;
+  } catch (error: any) {
+    toast.error(error.message);
+    console.error(error.message);
+    throw error;
+  }
+};
+
+export const hasActiveBookingController = async (userId: string): Promise<boolean> => {
+  try {
+    const hasActive = await hasActiveBooking(userId);
+    return hasActive;
+  } catch (error: any) {
+    console.error("Error checking active booking:", error);
+    return false; // Return false on error to allow booking
   }
 };

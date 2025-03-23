@@ -14,7 +14,7 @@ import {
 import { useSortable } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { format, startOfWeek, addDays } from "date-fns";
+import { format, addDays, isBefore, startOfToday } from "date-fns";
 
 import { getAllDoctors } from "@/app/services/doctorService";
 import {
@@ -26,6 +26,15 @@ import { Doctor } from "@/app/types/doctor";
 import { UpdateSchedule } from "@/app/types/schedule";
 import Swal from "sweetalert2";
 import { initialSchedule } from "@/app/data/initialSchedule";
+
+interface ApiScheduleSlot {
+  startTime: string;
+  endTime: string;
+  doctorId: string | null;
+  doctorName: string | null;
+  specialization: string | null;
+  status: string;
+}
 
 interface ScheduleSlot {
   id: string;
@@ -168,6 +177,13 @@ const SchedulePage: FC = () => {
     : null;
 
   useEffect(() => {
+    // Get dates starting from today and the next 6 days (total 7 days)
+    const today = new Date();
+    const weekDates = Array.from({ length: 7 }, (_, i) => addDays(today, i));
+    setCurrentWeekDates(weekDates);
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const fetchedDoctors = await getAllDoctors();
@@ -178,72 +194,55 @@ const SchedulePage: FC = () => {
           throw new Error("Invalid schedule data: Expected an array.");
         }
 
-        const transformedSchedule = apiSchedules.map(
-          (daySchedule: any, dayIndex: number) => ({
-            _id: daySchedule._id,
-            day: daySchedule.dayOfWeek,
-            slots: daySchedule.slots.map((slot: any) => ({
-              id: slot.slotId,
-              time: `${slot.startTime} - ${slot.endTime}`,
-              doctorId: slot.doctorId || null,
-              doctorName: slot.doctorName || null,
-              specialization: slot.specialization || null,
-              status: slot.status || "available",
-              date: currentWeekDates[dayIndex],
-            })),
-          })
+        // Create a mapping of day names to their schedules
+        const scheduleMap = new Map(
+          apiSchedules.map(schedule => [schedule.dayOfWeek.toLowerCase(), schedule])
         );
 
+        // Transform the schedule to start from today
+        const transformedSchedule = currentWeekDates.map((date, index) => {
+          const dayName = format(date, 'EEEE');
+          const existingSchedule = scheduleMap.get(dayName.toLowerCase());
+
+          return {
+            _id: existingSchedule?._id,
+            day: dayName,
+            slots: initialSchedule[0].slots.map(slot => {
+              const matchingSlot = existingSchedule?.slots.find((s: ApiScheduleSlot) => 
+                s.startTime === slot.time.split(' - ')[0] && 
+                s.endTime === slot.time.split(' - ')[1]
+              );
+
+              return {
+                id: slot.id,
+                time: slot.time,
+                doctorId: matchingSlot?.doctorId || null,
+                doctorName: matchingSlot?.doctorName || null,
+                specialization: matchingSlot?.specialization || null,
+                status: matchingSlot?.status || "available",
+                date: date
+              };
+            })
+          };
+        });
+
         // Update schedule dates in the database
-        for (let i = 0; i < transformedSchedule.length; i++) {
-          const daySchedule = transformedSchedule[i];
-          if (daySchedule._id && currentWeekDates[i]) {
+        for (const daySchedule of transformedSchedule) {
+          if (daySchedule._id) {
             try {
               const updateData: UpdateSchedule = {
-                date: format(currentWeekDates[i], "yyyy-MM-dd"),
-                dayOfWeek: daySchedule.day,
+                date: format(daySchedule.slots[0].date, 'yyyy-MM-dd'),
+                dayOfWeek: daySchedule.day
               };
               await updateSchedule(daySchedule._id, updateData);
             } catch (error) {
-              console.error(
-                `Error updating schedule for ${daySchedule.day}:`,
-                error
-              );
+              console.error(`Error updating schedule for ${daySchedule.day}:`, error);
             }
           }
         }
 
-        const mergedSchedule = initialSchedule.map((defaultDay) => {
-          const fetchedDay = transformedSchedule.find(
-            (d: DaySchedule) =>
-              d.day.toLowerCase() === defaultDay.day.toLowerCase()
-          );
-          if (fetchedDay) {
-            return {
-              ...defaultDay,
-              _id: fetchedDay._id,
-              slots: defaultDay.slots.map((defaultSlot) => {
-                const fetchedSlot = fetchedDay.slots.find(
-                  (s: ScheduleSlot) => s.id === defaultSlot.id
-                );
-                return fetchedSlot ? fetchedSlot : defaultSlot;
-              }),
-            };
-          }
-          return defaultDay;
-        });
+        setSchedule(transformedSchedule);
 
-        setSchedule(mergedSchedule);
-
-        if (transformedSchedule.length === 0) {
-          Swal.fire({
-            icon: "warning",
-            title: "No valid schedules found",
-            text: "Using default schedule instead.",
-            showConfirmButton: false,
-            timer: 1500,
-          });
-        }
       } catch (error: any) {
         console.error("Error fetching data:", error);
         setError(error.message || "Failed to load data. Please try again.");
@@ -252,28 +251,10 @@ const SchedulePage: FC = () => {
       }
     };
 
-    fetchData();
+    if (currentWeekDates.length > 0) {
+      fetchData();
+    }
   }, [currentWeekDates]);
-
-  useEffect(() => {
-    // Get current week dates
-    const today = new Date();
-    const startOfCurrentWeek = startOfWeek(today, { weekStartsOn: 1 }); // Start from Monday
-    const weekDates = Array.from({ length: 6 }, (_, i) =>
-      addDays(startOfCurrentWeek, i)
-    );
-    setCurrentWeekDates(weekDates);
-  }, []);
-
-  useEffect(() => {
-    // Get current week dates
-    const today = new Date();
-    const startOfCurrentWeek = startOfWeek(today, { weekStartsOn: 1 }); // Start from Monday
-    const weekDates = Array.from({ length: 6 }, (_, i) =>
-      addDays(startOfCurrentWeek, i)
-    );
-    setCurrentWeekDates(weekDates);
-  }, []);
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
@@ -364,12 +345,14 @@ const SchedulePage: FC = () => {
         );
 
         if (updatedSlot && daySchedule?._id) {
+          console.log("updatedSlot ",updatedSlot)
+          console.log("daySchedule?._id",daySchedule?._id)
           await updateSlot(daySchedule._id, change.slotId, {
             doctorId: updatedSlot.doctorId,
             doctorName: updatedSlot.doctorName,
             specialization: updatedSlot.specialization,
             status: updatedSlot.status,
-            // dayOfWeek: daySchedule.day
+            
           });
         }
       }
@@ -482,16 +465,14 @@ const SchedulePage: FC = () => {
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              Weekly Schedule
+              Full Week Schedule (Starting Today)
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-4 min-w-max">
+            <div className="grid grid-cols-1 md:grid-cols-7 gap-4 min-w-max">
               {schedule.map((day, index) => {
-                const isToday =
-                  currentWeekDates[index] &&
-                  format(currentWeekDates[index], "yyyy-MM-dd") ===
-                    format(new Date(), "yyyy-MM-dd");
-
+                const isToday = index === 0;
+                const date = currentWeekDates[index];
+                
                 return (
                   <div
                     key={day.day}
@@ -505,15 +486,10 @@ const SchedulePage: FC = () => {
                       }`}
                     >
                       <div>{day.day}</div>
-                      <div
-                        className={`text-sm ${
-                          isToday
-                            ? "text-blue-600 font-medium"
-                            : "text-gray-600"
-                        }`}
-                      >
-                        {currentWeekDates[index] &&
-                          format(currentWeekDates[index], "MMM dd, yyyy")}
+                      <div className={`text-sm ${
+                        isToday ? 'text-blue-600 font-medium' : 'text-gray-600'
+                      }`}>
+                        {date && format(date, 'MMM dd, yyyy')}
                       </div>
                     </div>
                     <div className="space-y-3 px-2">

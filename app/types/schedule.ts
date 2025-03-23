@@ -1,5 +1,6 @@
 export interface ScheduleSlot {
   _id: string;
+  slotId?: string;
   startTime: string;
   endTime: string;
   doctorId: string | null;
@@ -7,6 +8,7 @@ export interface ScheduleSlot {
   specialization?: string | null;
   status?: string;
   dayOfWeek: string;
+  scheduleId?: string;
 }
 
 export interface Schedule {

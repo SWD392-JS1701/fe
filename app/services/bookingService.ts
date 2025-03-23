@@ -96,3 +96,29 @@ export const deleteBooking = async (bookingId: string): Promise<void> => {
     );
   }
 };
+
+export const findBookingsByUserId = async (userId: string) => {
+  try {
+    const response = await axiosInstance.get(`/bookings/user/${userId}`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fetching user bookings:", error);
+    throw new Error(
+      error.response?.data?.message || 
+      "Failed to fetch user bookings. Please try again."
+    );
+  }
+};
+
+export const hasActiveBooking = async (userId: string): Promise<boolean> => {
+  try {
+    const response = await axiosInstance.get(`/bookings/user/${userId}/active`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error checking active booking:", error);
+    throw new Error(
+      error.response?.data?.message || 
+      "Failed to check active booking status. Please try again."
+    );
+  }
+};
