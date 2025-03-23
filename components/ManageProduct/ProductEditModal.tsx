@@ -19,7 +19,6 @@ import Swal from "sweetalert2";
 import { motion } from "framer-motion";
 import { app } from "@/firebaseconfig";
 
-// ShadCN Components
 import {
   Dialog,
   DialogContent,
@@ -37,6 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { set } from "lodash";
 
 const storage = getStorage(app);
 
@@ -53,10 +53,11 @@ const EditProductModal: FC<EditProductModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<Product>({
     ...product,
-    expired_date: new Date(product.expired_date).toISOString().split("T")[0], // Format date for input
+    expired_date: new Date(product.expired_date).toISOString().split("T")[0],
   });
   const [productTypes, setProductTypes] = useState<ProductType[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchProductTypes = async () => {
@@ -105,8 +106,8 @@ const EditProductModal: FC<EditProductModalProps> = ({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
-    // Validate numeric fields
     const productRating = parseFloat(
       formData.product_rating?.toString() || "0"
     );
@@ -124,7 +125,6 @@ const EditProductModal: FC<EditProductModalProps> = ({
       return;
     }
 
-    // Validate expired_date
     const expiredDate = new Date(formData.expired_date);
     if (isNaN(expiredDate.getTime())) {
       Swal.fire({
@@ -138,7 +138,6 @@ const EditProductModal: FC<EditProductModalProps> = ({
 
     let imageUrl = formData.image_url;
 
-    // Upload new image if selected
     if (imageFile) {
       const storageRef = ref(storage, `images/${product._id}`);
       try {
@@ -153,7 +152,7 @@ const EditProductModal: FC<EditProductModalProps> = ({
           );
           const oldImageRef = ref(storage, storagePath);
           try {
-            await getDownloadURL(oldImageRef); // Check if image exists
+            await getDownloadURL(oldImageRef);
             await deleteObject(oldImageRef);
           } catch (error: any) {
             if (error.code !== "storage/object-not-found") {
@@ -207,6 +206,8 @@ const EditProductModal: FC<EditProductModalProps> = ({
         text: "Failed to update product.",
         showConfirmButton: true,
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -412,7 +413,9 @@ const EditProductModal: FC<EditProductModalProps> = ({
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit">Save Changes</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Updating..." : "Update Product"}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>

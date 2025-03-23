@@ -1,4 +1,34 @@
 import React, { FC, useState, useEffect, ChangeEvent, FormEvent } from "react";
+
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
+import Swal from "sweetalert2";
+import { motion } from "framer-motion";
+import { app } from "@/firebaseconfig";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+
 import {
   Product,
   ProductType,
@@ -8,17 +38,7 @@ import {
   createProduct,
   getAllProductTypes,
 } from "@/app/services/productService";
-import {
-  getStorage,
-  ref,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject,
-} from "firebase/storage";
-import Swal from "sweetalert2";
-import { X } from "lucide-react";
-import { motion } from "framer-motion";
-import { app } from "@/firebaseconfig";
+import { set } from "lodash";
 
 const storage = getStorage(app);
 
@@ -42,6 +62,7 @@ const ProductAddModal: FC<ProductAddModalProps> = ({ onClose, onCreate }) => {
   });
   const [productTypes, setProductTypes] = useState<ProductType[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchProductTypes = async () => {
@@ -61,7 +82,7 @@ const ProductAddModal: FC<ProductAddModalProps> = ({ onClose, onCreate }) => {
   }, []);
 
   const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -75,6 +96,13 @@ const ProductAddModal: FC<ProductAddModalProps> = ({ onClose, onCreate }) => {
     }));
   };
 
+  const handleSelectChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      product_type_id: value,
+    }));
+  };
+
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setImageFile(e.target.files[0]);
@@ -83,8 +111,8 @@ const ProductAddModal: FC<ProductAddModalProps> = ({ onClose, onCreate }) => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
-    // Validate required fields
     if (
       !formData.name ||
       !formData.price ||
@@ -117,7 +145,6 @@ const ProductAddModal: FC<ProductAddModalProps> = ({ onClose, onCreate }) => {
       return;
     }
 
-    // Validate expired_date
     const expiredDate = new Date(formData.expired_date);
     if (isNaN(expiredDate.getTime())) {
       Swal.fire({
@@ -129,7 +156,6 @@ const ProductAddModal: FC<ProductAddModalProps> = ({ onClose, onCreate }) => {
       return;
     }
 
-    // Require image file for new product
     if (!imageFile) {
       Swal.fire({
         icon: "error",
@@ -140,10 +166,8 @@ const ProductAddModal: FC<ProductAddModalProps> = ({ onClose, onCreate }) => {
       return;
     }
 
-    // Upload image to Firebase
     let imageUrl = "";
     try {
-      // Using a temporary unique ID since product ID isn't available yet
       const tempId = Date.now().toString();
       const storageRef = ref(storage, `images/${tempId}`);
       const snapshot = await uploadBytes(storageRef, imageFile);
@@ -185,7 +209,6 @@ const ProductAddModal: FC<ProductAddModalProps> = ({ onClose, onCreate }) => {
         onClose();
       }
     } catch (error) {
-      // Clean up uploaded image if product creation fails
       if (imageUrl) {
         const storagePath = decodeURIComponent(
           imageUrl.split("/o/")[1].split("?")[0]
@@ -201,255 +224,232 @@ const ProductAddModal: FC<ProductAddModalProps> = ({ onClose, onCreate }) => {
         text: "Failed to create product.",
         showConfirmButton: true,
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 backdrop-blur-md bg-white/30 flex justify-center items-center z-50"
-    >
+    <Dialog open={true} onOpenChange={onClose}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 20 }}
         transition={{ duration: 0.3 }}
-        className="bg-white rounded-lg shadow-xl p-8 w-full max-w-2xl relative"
       >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors"
-        >
-          <X size={24} />
-        </button>
+        <DialogContent className="max-w-4xl max-h-[70vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Product</DialogTitle>
+          </DialogHeader>
 
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">
-          Add New Product
-        </h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Product Name */}
+              <div>
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Product Name
+                </label>
+                <Input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Product Name */}
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Product Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                required
-              />
+              {/* Price */}
+              <div>
+                <label
+                  htmlFor="price"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Price
+                </label>
+                <Input
+                  type="number"
+                  id="price"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  step="0.01"
+                  required
+                />
+              </div>
+
+              {/* Product Rating */}
+              <div>
+                <label
+                  htmlFor="product_rating"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Product Rating
+                </label>
+                <Input
+                  type="number"
+                  id="product_rating"
+                  name="product_rating"
+                  value={formData.product_rating}
+                  onChange={handleChange}
+                  step="0.1"
+                  min="0"
+                  max="5"
+                />
+              </div>
+
+              {/* Stock */}
+              <div>
+                <label
+                  htmlFor="stock"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Stock
+                </label>
+                <Input
+                  type="number"
+                  id="stock"
+                  name="stock"
+                  value={formData.stock}
+                  onChange={handleChange}
+                  min="0"
+                  required
+                />
+              </div>
+
+              {/* Volume */}
+              <div>
+                <label
+                  htmlFor="volume"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Volume (ml)
+                </label>
+                <Input
+                  type="number"
+                  id="volume"
+                  name="volume"
+                  value={formData.volume}
+                  onChange={handleChange}
+                  step="0.1"
+                  min="0"
+                />
+              </div>
+
+              {/* Expired Date */}
+              <div>
+                <label
+                  htmlFor="expired_date"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Expiration Date
+                </label>
+                <Input
+                  type="date"
+                  id="expired_date"
+                  name="expired_date"
+                  value={formData.expired_date}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              {/* Product Type */}
+              <div>
+                <label
+                  htmlFor="product_type_id"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Product Type
+                </label>
+                <Select
+                  value={formData.product_type_id}
+                  onValueChange={handleSelectChange}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {productTypes.map((type) => (
+                      <SelectItem key={type._id} value={type._id}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Supplier Name */}
+              <div>
+                <label
+                  htmlFor="supplier_name"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Supplier Name
+                </label>
+                <Input
+                  type="text"
+                  id="supplier_name"
+                  name="supplier_name"
+                  value={formData.supplier_name}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* Description */}
+              <div className="md:col-span-2">
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Description
+                </label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  className="h-16"
+                />
+              </div>
+
+              {/* Image */}
+              <div className="md:col-span-2">
+                <label
+                  htmlFor="image"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Product Image
+                </label>
+                <Input
+                  type="file"
+                  id="image"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  required
+                />
+                {imageFile && (
+                  <p className="mt-2 text-sm text-gray-500">{imageFile.name}</p>
+                )}
+              </div>
             </div>
 
-            {/* Price */}
-            <div>
-              <label
-                htmlFor="price"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Price
-              </label>
-              <input
-                type="number"
-                id="price"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                step="0.01"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                required
-              />
-            </div>
-
-            {/* Product Rating */}
-            <div>
-              <label
-                htmlFor="product_rating"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Product Rating
-              </label>
-              <input
-                type="number"
-                id="product_rating"
-                name="product_rating"
-                value={formData.product_rating}
-                onChange={handleChange}
-                step="0.1"
-                min="0"
-                max="5"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-              />
-            </div>
-
-            {/* Stock */}
-            <div>
-              <label
-                htmlFor="stock"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Stock
-              </label>
-              <input
-                type="number"
-                id="stock"
-                name="stock"
-                value={formData.stock}
-                onChange={handleChange}
-                min="0"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                required
-              />
-            </div>
-
-            {/* Volume */}
-            <div>
-              <label
-                htmlFor="volume"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Volume (ml)
-              </label>
-              <input
-                type="number"
-                id="volume"
-                name="volume"
-                value={formData.volume}
-                onChange={handleChange}
-                step="0.1"
-                min="0"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-              />
-            </div>
-
-            {/* Expired Date */}
-            <div>
-              <label
-                htmlFor="expired_date"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Expiration Date
-              </label>
-              <input
-                type="date"
-                id="expired_date"
-                name="expired_date"
-                value={formData.expired_date}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                required
-              />
-            </div>
-
-            {/* Product Type */}
-            <div>
-              <label
-                htmlFor="product_type_id"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Product Type
-              </label>
-              <select
-                id="product_type_id"
-                name="product_type_id"
-                value={formData.product_type_id}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                required
-              >
-                <option value="">Select a type</option>
-                {productTypes.map((type) => (
-                  <option key={type._id} value={type._id}>
-                    {type.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Supplier Name */}
-            <div>
-              <label
-                htmlFor="supplier_name"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Supplier Name
-              </label>
-              <input
-                type="text"
-                id="supplier_name"
-                name="supplier_name"
-                value={formData.supplier_name}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-              />
-            </div>
-
-            {/* Description */}
-            <div className="md:col-span-2">
-              <label
-                htmlFor="description"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Description
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg h-24 resize-none"
-              />
-            </div>
-
-            {/* Image */}
-            <div className="md:col-span-2">
-              <label
-                htmlFor="image"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Product Image
-              </label>
-              <input
-                type="file"
-                id="image"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                required
-              />
-              {imageFile && (
-                <p className="mt-2 text-sm text-gray-500">{imageFile.name}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex justify-end space-x-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg"
-            >
-              Create Product
-            </button>
-          </div>
-        </form>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Adding..." : "Add Product"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
       </motion.div>
-    </motion.div>
+    </Dialog>
   );
 };
 
