@@ -122,7 +122,7 @@ const EmployeePage = () => {
   };
 
   return (
-    <div className="px-6 py-1 bg-gray-100 min-h-screen relative mt-30">
+    <div className="px-6 bg-gray-100 min-h-screen relative mt-30">
       {/* Breadcrumb and Add Button */}
       <div className="bg-gray-100 p-4 mb-4 flex justify-between items-center rounded-lg">
         <nav className="text-gray-600 text-sm">
