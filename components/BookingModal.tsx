@@ -48,6 +48,8 @@ const BookingModal: FC<BookingModalProps> = ({
   const [selectedSlot, setSelectedSlot] = useState<ScheduleSlot | null>(null);
   const [isBooking, setIsBooking] = useState(false);
   const [weekDates, setWeekDates] = useState<Date[]>([]);
+  const [bookingType, setBookingType] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
 
   // Helper function to convert 12-hour format to 24-hour format
   const convertTo24Hour = (time12h: string) => {
@@ -167,8 +169,8 @@ const BookingModal: FC<BookingModalProps> = ({
   };
 
   const handleConfirm = async () => {
-    if (!selectedTime || !selectedSlot || !session?.user?.id) {
-      toast.error("Please select a time slot to continue");
+    if (!selectedTime || !selectedSlot || !session?.user?.id || !bookingType) {
+      toast.error("Please select a time slot and booking type to continue");
       return;
     }
 
@@ -204,7 +206,9 @@ const BookingModal: FC<BookingModalProps> = ({
         dayofweek: selectedDate,
         status: "Pending",
         scheduleId: selectedSlot.scheduleId,
-        slotId: selectedSlot.slotId
+        slotId: selectedSlot.slotId,
+        type: bookingType,
+        description: description.trim() || undefined
       };
 
       // Create the booking
@@ -212,16 +216,12 @@ const BookingModal: FC<BookingModalProps> = ({
       
       // Update the slot status to booked
       if (selectedSlot._id && selectedSlot.scheduleId) {
-        console.log("Selected Slot:", selectedSlot);
-        console.log("Schedule ID:", selectedSlot.scheduleId);
-        console.log("Slot ID:", selectedSlot.slotId || selectedSlot._id);
         const updateData = {
           status: "booked",
           doctorId: selectedSlot.doctorId,
           doctorName: selectedSlot.doctorName,
           specialization: selectedSlot.specialization
         };
-        console.log("Update Data being sent:", updateData);
         
         await updateExistingSlot(
           selectedSlot.scheduleId,
@@ -373,19 +373,57 @@ const BookingModal: FC<BookingModalProps> = ({
             </p>
           </div>
 
+          {/* Booking Type and Description */}
+          {selectedTime && (
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Type of Counselling*
+                </label>
+                <select
+                  value={bookingType}
+                  onChange={(e) => setBookingType(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                >
+                  <option value="">Select a type</option>
+                  <option value="Regular Checkup">Regular Checkup</option>
+                  <option value="Skin Consultation">Skin Consultation</option>
+                  <option value="Treatment Follow-up">Treatment Follow-up</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Message for Doctor (Optional)
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe your concerns or any specific requirements..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
+                />
+              </div>
+            </div>
+          )}
+
           <DialogFooter>
             <button
               onClick={onClose}
-              className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition-colors"
+              className="flex items-center px-4 py-2 bg-red-100 text-red-600 rounded-md hover:bg-red-200 transition-colors duration-200 font-medium"
               disabled={isBooking}
             >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
               Cancel
             </button>
             <button
               onClick={handleConfirm}
-              disabled={!selectedTime || isBooking}
+              disabled={!selectedTime || !bookingType || isBooking}
               className={`px-4 py-2 rounded-md transition-all duration-200 ${
-                selectedTime && !isBooking
+                selectedTime && bookingType && !isBooking
                   ? 'bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow-md hover:shadow-lg'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}

@@ -16,6 +16,8 @@ import Image from "next/image";
 
 interface BookingWithDoctor extends Booking {
   doctor?: Doctor | null;
+  type?: string;
+  description?: string;
 }
 
 const MyBookingsPage = () => {
@@ -192,13 +194,26 @@ const MyBookingsPage = () => {
                       {booking.doctor.contactNumber}
                     </p>
                   )}
+                  <p className="text-gray-700">
+                    <span className="font-medium">Type:</span>{" "}
+                    {booking.type || "Not specified"}
+                  </p>
+                  {booking.description && (
+                    <p className="text-gray-700">
+                      <span className="font-medium">Message:</span>{" "}
+                      {booking.description}
+                    </p>
+                  )}
                 </div>
 
-                <div className="flex justify-end">
+                <div className="flex justify-end mt-4 pt-4 border-t border-gray-200">
                   <button
                     onClick={() => handleCancelBooking(booking._id!)}
-                    className="text-red-500 hover:text-red-600 font-medium"
+                    className="flex items-center px-4 py-2 bg-red-100 text-red-600 rounded-md hover:bg-red-200 transition-colors duration-200 font-medium"
                   >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                     Cancel Booking
                   </button>
                 </div>
