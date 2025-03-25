@@ -109,7 +109,18 @@ export const findBookingsByUserId = async (userId: string) => {
     );
   }
 };
-
+export const findBookingsByDoctorId = async (DoctorId: string) => {
+  try {
+    const response = await axiosInstance.get(`/bookings/doctor/${DoctorId}`);
+    return response.data;
+  } catch (error: any) {
+    console.error("Error fetching doctor bookings:", error);
+    throw new Error(
+      error.response?.data?.message || 
+      "Failed to fetch user bookings. Please try again."
+    );
+  }
+};
 export const hasActiveBooking = async (userId: string): Promise<boolean> => {
   try {
     const response = await axiosInstance.get(`/bookings/user/${userId}/active`);

@@ -5,7 +5,8 @@ import {
   updateBooking,
   deleteBooking,
   findBookingsByUserId,
-  hasActiveBooking
+  hasActiveBooking,
+  findBookingsByDoctorId
 } from "@/app/services/bookingService";
 import { toast } from "react-hot-toast";
 import {
@@ -123,7 +124,16 @@ export const findBookingsByUserIdController = async (userId: string): Promise<Bo
     throw error;
   }
 };
-
+export const findBookingsByDoctorIdController = async (DoctorId: string): Promise<Booking> => {
+  try {
+    const booking = await findBookingsByDoctorId(DoctorId);
+    return booking;
+  } catch (error: any) {
+    toast.error(error.message);
+    console.error(error.message);
+    throw error;
+  }
+};
 export const hasActiveBookingController = async (userId: string): Promise<boolean> => {
   try {
     const hasActive = await hasActiveBooking(userId);

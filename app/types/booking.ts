@@ -12,6 +12,8 @@ export interface Booking {
   slotId: string;
   createdAt?: string;
   updatedAt?: string;
+  type?: string;
+  description?: string;
   __v?: number;
 }
 

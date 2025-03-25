@@ -39,6 +39,10 @@ const SignIn: FC = () => {
       const decoded: JWTPayload = jwtDecode(session.user.access_token);
       if (decoded.role === "Admin") {
         router.push("/admin/overview");
+      } else if (decoded.role === "Doctor") {
+        router.push("/doctor/schedule");
+      } else if (decoded.role === "Staff") {
+        router.push("/staff/orders");
       } else {
         router.push("/");
       }
