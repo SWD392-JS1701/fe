@@ -253,19 +253,23 @@ const StaffOrdersPage = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Order Management</h1>
         <div className="flex gap-4">
-          <select
+          <Select
             value={filterStatus}
-            onChange={(e) => {
-              setFilterStatus(e.target.value);
-              setCurrentPage(1); // Reset to first page when filtering
+            onValueChange={(value) => {
+              setFilterStatus(value);
+              setCurrentPage(1);
             }}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           >
-            <option value="all">All Orders</option>
-            <option value="0">Pending</option>
-            <option value="1">Completed</option>
-            <option value="2">Cancelled</option>
-          </select>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Orders</SelectItem>
+              <SelectItem value="0">Pending</SelectItem>
+              <SelectItem value="1">Completed</SelectItem>
+              <SelectItem value="2">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
