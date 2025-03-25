@@ -164,7 +164,7 @@ const ProductDetail = () => {
       </div>
 
       {/* Review Section */}
-      <Comment />
+      <Comment productId={id as string} />
     </div>
   );
 };
