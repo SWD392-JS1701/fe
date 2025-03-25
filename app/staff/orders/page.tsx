@@ -3,14 +3,22 @@
 import React, { useEffect, useState, Fragment } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Order } from "@/app/types/order";
+import { toast } from "react-hot-toast";
+import Loading from "@/components/Loading";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import {
   getOrders,
   updateOrder,
   getOrderDetailsByOrderId,
 } from "@/app/services/orderService";
-import { Order } from "@/app/types/order";
-import { toast } from "react-hot-toast";
-import Loading from "@/components/Loading";
 
 interface OrderWithDetails extends Order {
   orderDetails?: {
@@ -338,20 +346,21 @@ const StaffOrdersPage = () => {
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <select
-                        value={order.status}
-                        onChange={(e) =>
-                          handleStatusChange(
-                            order._id,
-                            parseInt(e.target.value)
-                          )
+                      <Select
+                        value={order.status.toString()}
+                        onValueChange={(value) =>
+                          handleStatusChange(order._id, parseInt(value))
                         }
-                        className="px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       >
-                        <option value={0}>Pending</option>
-                        <option value={1}>Completed</option>
-                        <option value={2}>Cancelled</option>
-                      </select>
+                        <SelectTrigger className="w-[130px]">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0">Pending</SelectItem>
+                          <SelectItem value="1">Completed</SelectItem>
+                          <SelectItem value="2">Cancelled</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </td>
                   </tr>
                   {renderOrderDetails(order)}

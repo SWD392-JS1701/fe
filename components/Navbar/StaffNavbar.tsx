@@ -109,6 +109,41 @@ const StaffNavbar: FC = () => {
                 >
                   Check Schedule
                 </Link>
+                <div className="relative group/blog">
+                  <Link
+                    href="/staff/blog"
+                    className="py-2 text-md text-gray-800 hover:bg-gray-200 px-4 flex justify-between items-center"
+                  >
+                    Blog
+                    <svg
+                      className="w-4 h-4 transform -rotate-90"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </Link>
+                  <div className="absolute right-full top-0 hidden group-hover/blog:block w-48 bg-white rounded-md shadow-lg">
+                    <Link
+                      href="/view-blog"
+                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
+                    >
+                      View Blog
+                    </Link>
+                  </div>
+                </div>
+                <Link
+                  href="/staff/edit-quiz"
+                  className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
+                >
+                  Edit Quiz
+                </Link>
               </div>
               <button
                 onClick={handleLogout}
@@ -125,7 +160,6 @@ const StaffNavbar: FC = () => {
       <div className="flex justify-center items-center py-2 space-x-20 relative">
         {[
           { label: "CHECK ORDERS", href: "/staff/orders" },
-          { label: "CHECK SCHEDULE", href: "/staff/schedule" },
           { label: "EDIT QUIZ", href: "/staff/edit-quiz" },
           { label: "BLOG", href: "/staff/blog" },
           { label: "VIEW BLOG", href: "/view-blog" },
