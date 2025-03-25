@@ -161,10 +161,12 @@ const ProductDetail = () => {
             </div>
           </div>
         </div>
+        <h3 className="text-3xl font-extrabold italic text-black uppercase text-center mt-15 mb-10">
+          Reviews
+        </h3>
+        {/* Review Section */}
+        <Comment productId={id as string} />
       </div>
-
-      {/* Review Section */}
-      <Comment productId={id as string} />
     </div>
   );
 };

@@ -167,3 +167,22 @@ export const deleteUser = async (userId: string): Promise<void> => {
     console.error("Error deleting user:", error);
   }
 };
+
+export const getUserDetailsById = async (
+  userId: string
+): Promise<User | null> => {
+  try {
+    const response = await axiosInstance.get<User>(
+      `${API_URL}/users/${userId}`,
+      {
+        headers: {
+          accept: "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching user details (${userId}):`, error);
+    return null;
+  }
+};
