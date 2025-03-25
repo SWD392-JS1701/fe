@@ -101,12 +101,6 @@ const DoctorNavbar: FC = () => {
                   My Appointments
                 </Link>
                 <Link
-                  href="/doctor/patient"
-                  className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
-                >
-                  My Patients
-                </Link>
-                <Link
                   href="/doctorSchedule"
                   className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
                 >
@@ -127,11 +121,8 @@ const DoctorNavbar: FC = () => {
       {/* Shortcuts */}
       <div className="flex justify-center items-center py-2 space-x-20 relative">
         {[
-          { label: "DASHBOARD", href: "/doctor/dashboard" },
           { label: "APPOINTMENTS", href: "/doctor/view-appointment" },
-          { label: "PATIENTS", href: "/doctor/patient" },
           { label: "SCHEDULE", href: "/doctor/schedule" },
-          { label: "VIEW BLOG", href: "/view-blog" },
         ].map(({ label, href }, index) => (
           <Link key={index} href={href} className="relative group">
             <span>{label}</span>
