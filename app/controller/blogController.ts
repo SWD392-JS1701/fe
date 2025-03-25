@@ -28,12 +28,12 @@ export const getBlogById = async (id: string) => {
 };
 
 export const createBlog = async (
-  doctor_id: string,
+  user_id: string,
   title: string,
   content: string
 ) => {
   try {
-    const newBlog = await createNewBlog(doctor_id, title, content);
+    const newBlog = await createNewBlog(user_id, title, content);
     toast.success("Blog created successfully!");
     return newBlog;
   } catch (error: any) {

@@ -127,7 +127,7 @@ const StaffNavbar: FC = () => {
           { label: "CHECK ORDERS", href: "/staff/orders" },
           { label: "CHECK SCHEDULE", href: "/staff/schedule" },
           { label: "EDIT QUIZ", href: "/staff/edit-quiz" },
-          { label: "BLOG", href: "/blog" },
+          { label: "BLOG", href: "/staff/blog" },
           { label: "VIEW BLOG", href: "/view-blog" },
         ].map(({ label, href }, index) => (
           <Link key={index} href={href} className="relative group">

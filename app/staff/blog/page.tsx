@@ -10,19 +10,8 @@ import {
   deleteBlog,
 } from "@/app/services/blogService";
 import { useSession } from "next-auth/react";
+import { Blog } from "@/app/types/blog";
 
-interface Blog {
-  _id: string;
-  title: string;
-  content: string;
-  image_url: string;
-  doctor_id: string;
-  created_at: string;
-  updated_at: string;
-  author: string;
-}
-
-// Extend the Session User type to include _id
 declare module "next-auth" {
   interface User {
     _id: string;
@@ -38,7 +27,6 @@ const BlogPage = () => {
     "view"
   );
   const [formData, setFormData] = useState(() => {
-    // Try to load saved draft from localStorage
     if (typeof window !== "undefined") {
       const savedDraft = localStorage.getItem("blogDraft");
       if (savedDraft) {
@@ -55,12 +43,12 @@ const BlogPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    console.log(session);
     fetchBlogs();
   }, []);
 
   useEffect(() => {
     if (activeTab === "create") {
-      // Only save if there's actual content
       if (formData.title.trim() || formData.content.trim()) {
         localStorage.setItem("blogDraft", JSON.stringify(formData));
       }
@@ -81,12 +69,15 @@ const BlogPage = () => {
 
   const handleDeleteBlog = async (id: string) => {
     try {
+      setLoading(true);
       await deleteBlog(id);
       toast.success("Blog deleted successfully");
       fetchBlogs();
     } catch (error) {
       toast.error("Failed to delete blog");
       console.error("Error deleting blog:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -100,12 +91,11 @@ const BlogPage = () => {
   };
 
   const handleViewBlog = (id: string) => {
-    router.push(`/blog/${id}`);
+    router.push(`/staff/blog/${id}`);
   };
 
   const handleTabChange = (tab: "view" | "create" | "edit") => {
     if (tab === "create") {
-      // Try to restore draft when switching to create tab
       const savedDraft = localStorage.getItem("blogDraft");
       if (savedDraft) {
         try {
@@ -401,7 +391,7 @@ const BlogPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="h-screen pt-28">
+      <div className="h-screen py-1">
         <div className="flex h-[calc(100%-1rem)]">
           {/* Vertical Navigation Bar */}
           <div className="w-64 bg-white shadow-lg">
