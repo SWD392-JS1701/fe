@@ -4,15 +4,11 @@ import Link from "next/link";
 import React, { FC, useEffect, useState } from "react";
 import Image from "next/image";
 import Logo from "@/assets/logo.png";
-import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 
 const StaffNavbar: FC = () => {
   const [scrollCount, setScrollCount] = useState(0);
   const maxScrollCount = 3;
-  const maxBorderWidth = 250;
-  const router = useRouter();
-
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -37,6 +33,11 @@ const StaffNavbar: FC = () => {
   const handleLogout = async () => {
     await signOut({ callbackUrl: "/sign-in" });
   };
+
+  // Redirect if not logged in
+  if (!session) {
+    return null;
+  }
 
   return (
     <div
@@ -109,6 +110,12 @@ const StaffNavbar: FC = () => {
                 >
                   Check Schedule
                 </Link>
+                <Link
+                  href="/staff/reviews"
+                  className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
+                >
+                  Check Reviews
+                </Link>
               </div>
               <button
                 onClick={handleLogout}
@@ -126,6 +133,7 @@ const StaffNavbar: FC = () => {
         {[
           { label: "CHECK ORDERS", href: "/staff/orders" },
           { label: "CHECK SCHEDULE", href: "/staff/schedule" },
+          { label: "CHECK REVIEW", href: "/staff/reviews" },
           { label: "EDIT QUIZ", href: "/staff/edit-quiz" },
           { label: "BLOG", href: "/blog" },
           { label: "VIEW BLOG", href: "/view-blog" },

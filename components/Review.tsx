@@ -94,13 +94,13 @@ const Review: React.FC<ReviewProps> = ({
 
       <div className="flex justify-between items-center">
         <button
-          className="px-4 py-5 text-sm font-medium text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          className="px-4 py-5 text-sm font-medium cursor-pointer text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200 "
           onClick={() => onFilterChange(null)}
         >
           FILTERS
         </button>
         <button
-          className="px-6 py-5 text-sm font-medium text-white bg-red-400 rounded-full hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400"
+          className="px-6 py-5 text-sm font-medium cursor-pointer text-black bg-[#66FF80] rounded-full hover:bg-[#5eae6b]"
           onClick={onWriteReviewClick}
         >
           WRITE A REVIEW
