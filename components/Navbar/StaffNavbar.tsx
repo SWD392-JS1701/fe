@@ -110,6 +110,12 @@ const StaffNavbar: FC = () => {
                 >
                   Check Schedule
                 </Link>
+                <Link
+                  href="/staff/reviews"
+                  className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
+                >
+                  Check Reviews
+                </Link>
                 <div className="relative group/blog">
                   <Link
                     href="/staff/blog"
@@ -161,6 +167,7 @@ const StaffNavbar: FC = () => {
       <div className="flex justify-center items-center py-2 space-x-20 relative">
         {[
           { label: "CHECK ORDERS", href: "/staff/orders" },
+          { label: "CHECK REVIEW", href: "/staff/reviews" },
           { label: "EDIT QUIZ", href: "/staff/edit-quiz" },
           { label: "BLOG", href: "/staff/blog" },
           { label: "VIEW BLOG", href: "/view-blog" },
