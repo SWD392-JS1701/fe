@@ -16,7 +16,7 @@ export const getAllProducts = async (): Promise<Product[]> => {
     });
     return (response.data as Product[]).map((product) => ({
       ...product,
-      supplier_name: product.supplier_name || product.Supplier,
+      Supplier: product.Supplier,
     }));
   } catch (error: any) {
     console.error("Error fetching products:", error.message || error);
@@ -38,7 +38,7 @@ export const getProductById = async (
     const product = response.data as Product;
     return {
       ...product,
-      supplier_name: product.supplier_name || product.Supplier,
+      Supplier: product.Supplier,
     };
   } catch (error: any) {
     console.error("Error fetching product details:", error.message || error);
@@ -61,7 +61,7 @@ export const createProduct = async (
     const createdProduct = response.data as Product;
     return {
       ...createdProduct,
-      supplier_name: createdProduct.supplier_name || createdProduct.Supplier,
+      Supplier: createdProduct.Supplier,
     };
   } catch (error: any) {
     console.error("Error creating product:", {
@@ -93,7 +93,7 @@ export const updateProduct = async (
     const updatedProduct = response.data as Product;
     return {
       ...updatedProduct,
-      supplier_name: updatedProduct.supplier_name || updatedProduct.Supplier,
+      Supplier: updatedProduct.Supplier,
     };
   } catch (error: any) {
     console.error("Error updating product:", error.message || error);
@@ -132,7 +132,7 @@ export const searchProductsByName = async (
     );
     return (response.data as Product[]).map((product) => ({
       ...product,
-      supplier_name: product.supplier_name || product.Supplier,
+      Supplier: product.Supplier,
     }));
   } catch (error: any) {
     console.error("Error searching products by name:", error);
@@ -171,7 +171,7 @@ export const searchProducts = async (
     );
     return (response.data as Product[]).map((product) => ({
       ...product,
-      supplier_name: product.supplier_name || product.Supplier,
+      Supplier: product.Supplier,
     }));
   } catch (error: any) {
     console.error("Error searching products:", error);

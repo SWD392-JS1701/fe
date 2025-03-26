@@ -179,6 +179,7 @@ const EditProductModal: FC<EditProductModalProps> = ({
       image_url: imageUrl,
       product_type_id: formData.product_type_id,
       description: formData.description,
+      Supplier: formData.Supplier,
     };
 
     try {
@@ -343,16 +344,16 @@ const EditProductModal: FC<EditProductModalProps> = ({
               {/* Supplier Name */}
               <div className="md:col-span-2">
                 <label
-                  htmlFor="supplier_name"
+                  htmlFor="Supplier"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
                   Supplier Name
                 </label>
                 <Input
                   type="text"
-                  id="supplier_name"
-                  name="supplier_name"
-                  value={formData.supplier_name || ""}
+                  id="Supplier"
+                  name="Supplier"
+                  value={formData.Supplier || ""}
                   onChange={handleChange}
                 />
               </div>
