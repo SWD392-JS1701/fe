@@ -107,15 +107,11 @@ const EditProductModal: FC<EditProductModalProps> = ({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    const productRating = parseFloat(
-      formData.product_rating?.toString() || "0"
-    );
     const price = parseFloat(formData.price.toString());
     const stock = parseInt(formData.stock.toString(), 10);
     const volume = parseFloat(formData.volume?.toString() || "0");
 
-    if (isNaN(productRating) || isNaN(price) || isNaN(stock) || isNaN(volume)) {
+    if (isNaN(price) || isNaN(stock) || isNaN(volume)) {
       Swal.fire({
         icon: "error",
         title: "Invalid Input",
@@ -177,7 +173,6 @@ const EditProductModal: FC<EditProductModalProps> = ({
     const requestBody: ProductUpdateRequest = {
       name: formData.name,
       price,
-      product_rating: productRating,
       stock,
       volume,
       expired_date: expiredDate.toISOString(),

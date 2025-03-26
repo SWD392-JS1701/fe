@@ -30,7 +30,6 @@ export interface CreateProductRequest {
 
 export interface ProductUpdateRequest {
   name: string;
-  product_rating: number;
   description?: string;
   price: number;
   stock: number;
