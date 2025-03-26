@@ -3,7 +3,7 @@
 import Head from "next/head";
 import { useState } from "react";
 import QuizQuestion from "@/components/QuizQuestion";
-import { questions, skinTypeDescriptions } from "@/app/data/quizQuestions";
+import { questions } from "@/app/data/quizQuestions";
 
 const QuizQuestionsPage = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -25,12 +25,6 @@ const QuizQuestionsPage = () => {
       const totals = {
         Dry: 0,
         Oily: 0,
-        Sensitive: 0,
-        Insensitive: 0,
-        Pigmented: 0,
-        NonPigmented: 0,
-        Wrinkled: 0,
-        Tight: 0,
       };
 
       // Sum points for each answer
@@ -46,12 +40,8 @@ const QuizQuestionsPage = () => {
         });
       });
 
-      // Determine skin type based on highest scores
-      const skinTypeResult =
-        (totals.Dry > totals.Oily ? "D" : "O") +
-        (totals.Sensitive > totals.Insensitive ? "S" : "I") +
-        (totals.Pigmented > totals.NonPigmented ? "P" : "N") +
-        (totals.Wrinkled > totals.Tight ? "W" : "T");
+      // Determine skin type based on highest score
+      const skinTypeResult = totals.Dry > totals.Oily ? "Dry" : "Oily";
 
       setSkinType(skinTypeResult);
     }
@@ -99,8 +89,9 @@ const QuizQuestionsPage = () => {
               Your skin type is <span className="font-bold">{skinType}</span>.
             </p>
             <p className="text-gray-600 mb-6">
-              {skinTypeDescriptions[skinType] ||
-                "No description available for this skin type."}
+              {skinType === "Dry"
+                ? "Your skin tends to be dry and may need extra moisture and gentle care."
+                : "Your skin produces more oil and may need oil-control products."}
             </p>
             <button
               className="bg-black text-white px-6 py-2 rounded-full transition duration-300"

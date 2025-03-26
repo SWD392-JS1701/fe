@@ -1,6 +1,6 @@
 interface Answer {
   text: string;
-  points: Record<string, number>;
+  points: Record<"Oily" | "Dry", number>;
 }
 
 interface Question {
@@ -10,191 +10,151 @@ interface Question {
   answers: Answer[];
 }
 
-export const skinTypeDescriptions: Record<string, string> = {
-  DSPW: "Dry, Sensitive, Pigmented, Wrinkled: Your skin tends to be dry and easily irritated, with visible pigmentation and signs of aging like wrinkles. Focus on gentle, hydrating products with anti-aging and brightening ingredients.",
-  DSPT: "Dry, Sensitive, Pigmented, Tight: Your skin is dry and sensitive with pigmentation issues, but remains firm. Use soothing, moisturizing products with ingredients to address dark spots and maintain skin firmness.",
-  DSNW: "Dry, Sensitive, Non-Pigmented, Wrinkled: Your skin is dry and sensitive, with wrinkles but no significant pigmentation. Prioritize hydration, calming ingredients, and anti-aging treatments.",
-  DSNT: "Dry, Sensitive, Non-Pigmented, Tight: Your skin is dry and sensitive but lacks pigmentation and remains firm. Focus on gentle hydration and maintaining elasticity with protective ingredients.",
-  DIPW: "Dry, Insensitive, Pigmented, Wrinkled: Your skin is dry and less prone to irritation, with pigmentation and wrinkles. Use hydrating products with brightening and anti-aging properties.",
-  DIPT: "Dry, Insensitive, Pigmented, Tight: Your skin is dry and not easily irritated, with pigmentation but good firmness. Opt for moisturizing products that address dark spots and support skin elasticity.",
-  DINW: "Dry, Insensitive, Non-Pigmented, Wrinkled: Your skin is dry, not sensitive, with wrinkles but no pigmentation. Focus on deep hydration and anti-aging treatments.",
-  DINT: "Dry, Insensitive, Non-Pigmented, Tight: Your skin is dry, not sensitive, with no pigmentation and good firmness. Use hydrating products to maintain moisture and elasticity.",
-  OSPW: "Oily, Sensitive, Pigmented, Wrinkled: Your skin is oily and sensitive, with pigmentation and wrinkles. Choose oil-free, non-irritating products with brightening and anti-aging benefits.",
-  OSPT: "Oily, Sensitive, Pigmented, Tight: Your skin is oily and sensitive, with pigmentation but firm. Use oil-controlling, gentle products that address dark spots and maintain firmness.",
-  OSNW: "Oily, Sensitive, Non-Pigmented, Wrinkled: Your skin is oily and sensitive, with wrinkles but no pigmentation. Opt for oil-free, soothing products with anti-aging properties.",
-  OSNT: "Oily, Sensitive, Non-Pigmented, Tight: Your skin is oily and sensitive, with no pigmentation and good firmness. Use gentle, oil-controlling products to maintain balance and elasticity.",
-  OIPW: "Oily, Insensitive, Pigmented, Wrinkled: Your skin is oily and not easily irritated, with pigmentation and wrinkles. Focus on oil-control, brightening, and anti-aging products.",
-  OIPT: "Oily, Insensitive, Pigmented, Tight: Your skin is oily and not sensitive, with pigmentation but firm. Use oil-controlling products with brightening ingredients to maintain firmness.",
-  OINW: "Oily, Insensitive, Non-Pigmented, Wrinkled: Your skin is oily, not sensitive, with wrinkles but no pigmentation. Choose oil-free products with anti-aging benefits.",
-  OINT: "Oily, Insensitive, Non-Pigmented, Tight: Your skin is oily, not sensitive, with no pigmentation and good firmness. Use oil-controlling products to maintain balance and elasticity.",
-};
-
-// Quiz questions
+// Skin Type Questions
 export const questions: Question[] = [
   {
     id: 1,
-    text: "How does your skin feel after washing?",
+    text: "How does your skin feel after washing your face?",
     type: "single",
     answers: [
       { text: "Tight and dry", points: { Dry: 1, Oily: 0 } },
       { text: "Smooth and balanced", points: { Dry: 0.5, Oily: 0.5 } },
-      { text: "Oily and shiny", points: { Dry: 0, Oily: 1 } },
+      { text: "Oily and greasy", points: { Dry: 0, Oily: 1 } },
     ],
   },
   {
     id: 2,
-    text: "Does your skin react to products or environmental factors?",
+    text: "Are your pores visible and large?",
     type: "single",
     answers: [
-      {
-        text: "Yes, it gets red or irritated",
-        points: { Sensitive: 1, Insensitive: 0 },
-      },
-      {
-        text: "No, it’s rarely irritated",
-        points: { Sensitive: 0, Insensitive: 1 },
-      },
+      { text: "Yes, they are large", points: { Oily: 1, Dry: 0 } },
+      { text: "No, they are small", points: { Oily: 0, Dry: 1 } },
     ],
   },
   {
     id: 3,
-    text: "Do you have dark spots or uneven skin tone?",
+    text: "Does your skin get shiny and oily throughout the day?",
     type: "single",
     answers: [
-      { text: "Yes, noticeably", points: { Pigmented: 1, NonPigmented: 0 } },
-      {
-        text: "No, it’s fairly even",
-        points: { Pigmented: 0, NonPigmented: 1 },
-      },
+      { text: "Yes, very oily", points: { Oily: 1, Dry: 0 } },
+      { text: "No, it stays dry", points: { Oily: 0, Dry: 1 } },
     ],
   },
   {
     id: 4,
-    text: "Do you notice fine lines or wrinkles on your skin?",
+    text: "How often do you notice blackheads or whiteheads?",
     type: "single",
     answers: [
-      { text: "Yes, they are visible", points: { Wrinkled: 1, Tight: 0 } },
-      { text: "No, my skin feels tight", points: { Wrinkled: 0, Tight: 1 } },
+      { text: "Frequently", points: { Oily: 1, Dry: 0 } },
+      { text: "Rarely", points: { Oily: 0, Dry: 1 } },
     ],
   },
   {
     id: 5,
-    text: "Which of these describe your skin throughout the day?",
-    type: "multiple",
+    text: "How does your skin feel in humid weather?",
+    type: "single",
     answers: [
-      { text: "Feels dry by midday", points: { Dry: 1, Oily: 0 } },
-      { text: "Becomes oily in the T-zone", points: { Dry: 0, Oily: 1 } },
-      { text: "Stays balanced", points: { Dry: 0.5, Oily: 0.5 } },
+      { text: "Gets even oilier", points: { Oily: 1, Dry: 0 } },
+      { text: "Feels normal or slightly dry", points: { Oily: 0, Dry: 1 } },
     ],
   },
   {
     id: 6,
-    text: "How does your skin react to sun exposure?",
+    text: "How does your skin feel in cold weather?",
     type: "single",
     answers: [
-      { text: "Burns easily", points: { Sensitive: 1, Insensitive: 0 } },
-      {
-        text: "Tans without burning",
-        points: { Sensitive: 0, Insensitive: 1 },
-      },
+      { text: "Very dry and flaky", points: { Dry: 1, Oily: 0 } },
+      { text: "Still oily", points: { Dry: 0, Oily: 1 } },
     ],
   },
   {
     id: 7,
-    text: "Do you experience redness or flushing?",
+    text: "Do you need to use a moisturizer daily?",
     type: "single",
     answers: [
-      { text: "Yes, often", points: { Sensitive: 1, Insensitive: 0 } },
-      { text: "No, rarely", points: { Sensitive: 0, Insensitive: 1 } },
+      { text: "Yes, my skin gets dry without it", points: { Dry: 1, Oily: 0 } },
+      { text: "No, my skin stays hydrated", points: { Dry: 0, Oily: 1 } },
     ],
   },
   {
     id: 8,
-    text: "Are you sensitive to fragrances or alcohol in products?",
-    type: "multiple",
+    text: "Does your skin absorb skincare products quickly?",
+    type: "single",
     answers: [
-      {
-        text: "Yes, to fragrances",
-        points: { Sensitive: 1, Insensitive: 0 },
-      },
-      { text: "Yes, to alcohol", points: { Sensitive: 1, Insensitive: 0 } },
-      { text: "No, to both", points: { Sensitive: 0, Insensitive: 1 } },
+      { text: "Yes, it absorbs everything fast", points: { Dry: 1, Oily: 0 } },
+      { text: "No, products sit on my skin", points: { Dry: 0, Oily: 1 } },
     ],
   },
   {
     id: 9,
-    text: "Do you have visible pores?",
+    text: "How does your skin react to wearing foundation or makeup?",
     type: "single",
     answers: [
-      { text: "Yes, large pores", points: { Oily: 1, Dry: 0 } },
-      { text: "No, small pores", points: { Oily: 0, Dry: 1 } },
+      { text: "Looks flaky or patchy", points: { Dry: 1, Oily: 0 } },
+      { text: "Gets greasy quickly", points: { Dry: 0, Oily: 1 } },
     ],
   },
   {
     id: 10,
-    text: "How often do you see blackheads or whiteheads?",
+    text: "How does your skin feel in the morning?",
     type: "single",
     answers: [
-      { text: "Rarely", points: { Oily: 0, Dry: 1 } },
-      { text: "Occasionally", points: { Oily: 0.5, Dry: 0.5 } },
-      { text: "Frequently", points: { Oily: 1, Dry: 0 } },
+      { text: "Dry and tight", points: { Dry: 1, Oily: 0 } },
+      { text: "Oily and shiny", points: { Dry: 0, Oily: 1 } },
     ],
   },
   {
     id: 11,
-    text: "Does your skin feel tight after cleansing?",
+    text: "How often do you need to blot your skin or use oil-absorbing sheets?",
     type: "single",
     answers: [
-      { text: "Always", points: { Dry: 1, Oily: 0 } },
-      { text: "Sometimes", points: { Dry: 0.5, Oily: 0.5 } },
-      { text: "Never", points: { Dry: 0, Oily: 1 } },
+      { text: "Rarely or never", points: { Dry: 1, Oily: 0 } },
+      { text: "Frequently", points: { Dry: 0, Oily: 1 } },
     ],
   },
   {
     id: 12,
-    text: "Do you notice hyperpigmentation from acne scars?",
+    text: "Do you experience dry patches on your skin?",
     type: "single",
     answers: [
-      { text: "Yes", points: { Pigmented: 1, NonPigmented: 0 } },
-      { text: "No", points: { Pigmented: 0, NonPigmented: 1 } },
+      { text: "Yes, very often", points: { Dry: 1, Oily: 0 } },
+      { text: "No, never", points: { Dry: 0, Oily: 1 } },
     ],
   },
   {
     id: 13,
-    text: "How elastic is your skin when pinched?",
+    text: "How does your skin feel after using a mattifying (oil-control) product?",
     type: "single",
     answers: [
-      { text: "Very elastic", points: { Tight: 1, Wrinkled: 0 } },
-      { text: "Somewhat elastic", points: { Tight: 0.5, Wrinkled: 0.5 } },
-      { text: "Not elastic", points: { Tight: 0, Wrinkled: 1 } },
+      { text: "Too dry and uncomfortable", points: { Dry: 1, Oily: 0 } },
+      { text: "Still oily after a while", points: { Dry: 0, Oily: 1 } },
     ],
   },
   {
     id: 14,
-    text: "Do you see fine lines around your eyes or mouth?",
+    text: "How does your skin react to skipping moisturizer for a day?",
     type: "single",
     answers: [
-      { text: "Yes", points: { Wrinkled: 1, Tight: 0 } },
-      { text: "No", points: { Wrinkled: 0, Tight: 1 } },
+      { text: "Feels tight and uncomfortable", points: { Dry: 1, Oily: 0 } },
+      { text: "Still looks hydrated", points: { Dry: 0, Oily: 1 } },
     ],
   },
   {
     id: 15,
-    text: "How does your skin react to humid weather?",
-    type: "multiple",
+    text: "Which best describes your skin after waking up?",
+    type: "single",
     answers: [
-      { text: "Gets oily", points: { Oily: 1, Dry: 0 } },
-      { text: "Stays balanced", points: { Oily: 0.5, Dry: 0.5 } },
-      { text: "Becomes dry", points: { Oily: 0, Dry: 1 } },
+      { text: "Dry and rough", points: { Dry: 1, Oily: 0 } },
+      { text: "Oily and shiny", points: { Dry: 0, Oily: 1 } },
     ],
   },
   {
     id: 16,
-    text: "Have you noticed sagging or loss of firmness?",
+    text: "How does your skin react to using hydrating products?",
     type: "single",
     answers: [
-      { text: "Yes", points: { Wrinkled: 1, Tight: 0 } },
-      { text: "No", points: { Wrinkled: 0, Tight: 1 } },
+      { text: "Absorbs it immediately", points: { Dry: 1, Oily: 0 } },
+      { text: "Feels greasy afterward", points: { Dry: 0, Oily: 1 } },
     ],
   },
 ];
