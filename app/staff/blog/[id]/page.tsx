@@ -6,17 +6,7 @@ import Image from "next/image";
 import axiosInstance from "@/app/services/axiosInstance";
 import { API_URL } from "@/config";
 import { toast } from "react-hot-toast";
-
-interface Blog {
-  _id: string;
-  title: string;
-  content: string;
-  image_url: string;
-  doctor_id: string;
-  created_at: string;
-  updated_at: string;
-  author: string;  // Virtual field from user_Id.first_name + user_Id.last_name
-}
+import { Blog } from "../../../types/blog";
 
 export default function ViewBlogPage() {
   const params = useParams();
@@ -27,8 +17,10 @@ export default function ViewBlogPage() {
   useEffect(() => {
     const fetchBlog = async () => {
       try {
-        const response = await axiosInstance.get(`${API_URL}/blogs/${params.id}`);
-        console.log('Blog data:', response.data); // Add this to debug
+        const response = await axiosInstance.get(
+          `${API_URL}/blogs/${params.id}`
+        );
+        console.log("Blog data:", response.data);
         setBlog(response.data);
       } catch (err) {
         console.error("Error fetching blog:", err);
@@ -81,7 +73,9 @@ export default function ViewBlogPage() {
       <div className="min-h-screen bg-gray-50 pt-28">
         <div className="max-w-4xl mx-auto px-4">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-            <h2 className="text-yellow-800 text-lg font-semibold mb-2">Not Found</h2>
+            <h2 className="text-yellow-800 text-lg font-semibold mb-2">
+              Not Found
+            </h2>
             <p className="text-yellow-600">Blog post not found</p>
           </div>
         </div>
@@ -90,7 +84,7 @@ export default function ViewBlogPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-28">
+    <div className="min-h-screen bg-gray-50 py-2">
       <div className="max-w-4xl mx-auto px-4">
         <article className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Blog Header */}
@@ -106,18 +100,20 @@ export default function ViewBlogPage() {
 
           {/* Blog Content */}
           <div className="p-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">{blog.title}</h1>
-            
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+              {blog.title}
+            </h1>
+
             {/* Author Info */}
             <div className="flex items-center text-gray-600 mb-6">
               <div className="flex items-center">
                 <span className="font-medium">{blog.author}</span>
                 <span className="mx-2">•</span>
                 <time dateTime={blog.created_at}>
-                  {new Date(blog.created_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
+                  {new Date(blog.created_at).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
                   })}
                 </time>
               </div>
@@ -125,7 +121,7 @@ export default function ViewBlogPage() {
 
             {/* Blog Content */}
             <div className="prose prose-lg max-w-none">
-              {blog.content.split('\n').map((paragraph, index) => (
+              {blog.content.split("\n").map((paragraph, index) => (
                 <p key={index} className="mb-4 text-gray-700">
                   {paragraph}
                 </p>
@@ -135,10 +131,11 @@ export default function ViewBlogPage() {
             {/* Last Updated */}
             <div className="mt-8 pt-6 border-t border-gray-200">
               <p className="text-sm text-gray-500">
-                Last updated: {new Date(blog.updated_at).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
+                Last updated:{" "}
+                {new Date(blog.updated_at).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
                 })}
               </p>
             </div>
@@ -147,4 +144,4 @@ export default function ViewBlogPage() {
       </div>
     </div>
   );
-} 
+}

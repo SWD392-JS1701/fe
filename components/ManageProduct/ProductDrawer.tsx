@@ -15,7 +15,6 @@ const ProductDrawer: FC<ProductDrawerProps> = ({ product, onClose }) => {
 
     try {
       const date = new Date(dateString);
-      // Check if date is valid
       if (isNaN(date.getTime())) return "Invalid Date";
 
       return date.toLocaleDateString("en-US", {

@@ -10,6 +10,7 @@ import {
   updatePromotedProduct,
   deletePromotion,
   deletePromotedProduct,
+  getPromotedProductByProductId,
 } from "../services/promotionService";
 import { Promotion, PromotedProduct } from "../types/promotion";
 
@@ -153,6 +154,18 @@ export const deletePromotedProductController = async (
 ): Promise<void> => {
   try {
     await deletePromotedProduct(id);
+  } catch (error) {
+    console.error("Controller error:", error);
+    throw error;
+  }
+};
+
+export const getPromotedProductByProductIdController = async (
+  productId: string
+): Promise<Promotion[]> => {
+  try {
+    const promotions = await getPromotedProductByProductId(productId);
+    return promotions;
   } catch (error) {
     console.error("Controller error:", error);
     throw error;

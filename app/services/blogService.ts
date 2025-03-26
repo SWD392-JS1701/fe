@@ -26,13 +26,13 @@ export const getBlogById = async (id: string) => {
 };
 
 export const createBlog = async (
-  doctor_id: string,
+  user_id: string,
   title: string,
   content: string
 ) => {
   try {
     const response = await axiosInstance.post("/blogs/blogcreate", {
-      doctor_id,
+      user_id,
       title,
       content,
     });

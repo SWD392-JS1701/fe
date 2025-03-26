@@ -156,3 +156,30 @@ export const deletePromotedProduct = async (id: string): Promise<void> => {
     );
   }
 };
+
+export const getPromotedProductByProductId = async (
+  productId: string
+): Promise<Promotion[]> => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/promoted-products?productId=${productId}`
+    );
+    const promotedProducts = response.data;
+
+    const promotions = await Promise.all(
+      promotedProducts.map(async (pp: PromotedProduct) => {
+        const promotionResponse = await axios.get(
+          `${API_URL}/promotions/${pp.promotion_id}`
+        );
+        return promotionResponse.data;
+      })
+    );
+
+    return promotions;
+  } catch (error: any) {
+    console.error("Error fetching promoted products:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch promoted products"
+    );
+  }
+};
