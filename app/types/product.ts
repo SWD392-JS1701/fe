@@ -18,7 +18,6 @@ export interface Product {
 
 export interface CreateProductRequest {
   name: string;
-  product_rating: number;
   description: string;
   price: number;
   stock: number;

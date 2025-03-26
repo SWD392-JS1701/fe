@@ -263,26 +263,6 @@ const EditProductModal: FC<EditProductModalProps> = ({
                 />
               </div>
 
-              {/* Product Rating */}
-              <div>
-                <label
-                  htmlFor="product_rating"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Product Rating
-                </label>
-                <Input
-                  type="number"
-                  id="product_rating"
-                  name="product_rating"
-                  value={formData.product_rating || ""}
-                  onChange={handleChange}
-                  step="0.1"
-                  min="0"
-                  max="5"
-                />
-              </div>
-
               {/* Stock */}
               <div>
                 <label
@@ -352,10 +332,10 @@ const EditProductModal: FC<EditProductModalProps> = ({
                   onValueChange={handleSelectChange}
                   required
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-[215px]">
                     <SelectValue placeholder="Select a type" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="w-[215px]">
                     {productTypes.map((type) => (
                       <SelectItem key={type._id} value={type._id}>
                         {type.name}
@@ -363,6 +343,23 @@ const EditProductModal: FC<EditProductModalProps> = ({
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Supplier Name */}
+              <div className="md:col-span-2">
+                <label
+                  htmlFor="supplier_name"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Supplier Name
+                </label>
+                <Input
+                  type="text"
+                  id="supplier_name"
+                  name="supplier_name"
+                  value={formData.supplier_name || ""}
+                  onChange={handleChange}
+                />
               </div>
 
               {/* Description */}

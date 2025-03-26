@@ -38,7 +38,6 @@ import {
   createProduct,
   getAllProductTypes,
 } from "@/app/services/productService";
-import { set } from "lodash";
 
 const storage = getStorage(app);
 
@@ -50,7 +49,6 @@ interface ProductAddModalProps {
 const ProductAddModal: FC<ProductAddModalProps> = ({ onClose, onCreate }) => {
   const [formData, setFormData] = useState<CreateProductRequest>({
     name: "",
-    product_rating: 0,
     description: "",
     price: 0,
     stock: 0,
@@ -129,13 +127,11 @@ const ProductAddModal: FC<ProductAddModalProps> = ({ onClose, onCreate }) => {
       return;
     }
 
-    // Validate numeric fields
-    const productRating = parseFloat(formData.product_rating.toString());
     const price = parseFloat(formData.price.toString());
     const stock = parseInt(formData.stock.toString(), 10);
     const volume = parseFloat(formData.volume.toString());
 
-    if (isNaN(productRating) || isNaN(price) || isNaN(stock) || isNaN(volume)) {
+    if (isNaN(price) || isNaN(stock) || isNaN(volume)) {
       Swal.fire({
         icon: "error",
         title: "Invalid Input",
@@ -185,7 +181,6 @@ const ProductAddModal: FC<ProductAddModalProps> = ({ onClose, onCreate }) => {
     const requestBody: CreateProductRequest = {
       name: formData.name,
       price,
-      product_rating: productRating,
       stock,
       volume,
       expired_date: expiredDate.toISOString(),
@@ -281,26 +276,6 @@ const ProductAddModal: FC<ProductAddModalProps> = ({ onClose, onCreate }) => {
                 />
               </div>
 
-              {/* Product Rating */}
-              <div>
-                <label
-                  htmlFor="product_rating"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Product Rating
-                </label>
-                <Input
-                  type="number"
-                  id="product_rating"
-                  name="product_rating"
-                  value={formData.product_rating}
-                  onChange={handleChange}
-                  step="0.1"
-                  min="0"
-                  max="5"
-                />
-              </div>
-
               {/* Stock */}
               <div>
                 <label
@@ -370,10 +345,10 @@ const ProductAddModal: FC<ProductAddModalProps> = ({ onClose, onCreate }) => {
                   onValueChange={handleSelectChange}
                   required
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-[215px]">
                     <SelectValue placeholder="Select a type" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="w-[215px]">
                     {productTypes.map((type) => (
                       <SelectItem key={type._id} value={type._id}>
                         {type.name}
@@ -384,7 +359,7 @@ const ProductAddModal: FC<ProductAddModalProps> = ({ onClose, onCreate }) => {
               </div>
 
               {/* Supplier Name */}
-              <div>
+              <div className="md:col-span-2">
                 <label
                   htmlFor="supplier_name"
                   className="block text-sm font-medium text-gray-700 mb-1"
