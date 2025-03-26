@@ -100,7 +100,7 @@ const ProductDrawer: FC<ProductDrawerProps> = ({ product, onClose }) => {
               <div className="flex justify-between">
                 <span className="text-gray-600">Supplier</span>
                 <span className="text-gray-800">
-                  {product.Supplier || product.supplier_name || "N/A"}
+                  {product.Supplier || "N/A"}
                 </span>
               </div>
               <div className="flex justify-between">

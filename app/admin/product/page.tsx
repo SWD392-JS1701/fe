@@ -253,9 +253,7 @@ const ProductsPage: FC = () => {
                   </td>
                   <td className="p-3">
                     <p className="text-gray-800">
-                      {product.supplier_name ||
-                        product.Supplier ||
-                        "Currently no supplier"}
+                      {product.Supplier || "Currently no supplier"}
                     </p>
                   </td>
                   <td className="p-3">
