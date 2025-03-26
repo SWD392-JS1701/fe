@@ -1,67 +1,58 @@
 "use client";
 
-import React, { FC, useState } from "react";
+import React, { FC, useState, useEffect } from "react";
 import { Product } from "../../app/types/product";
+import { Rating } from "@/app/types/rating";
+import { getRatingsByProduct } from "@/app/services/ratingService";
+import { fetchUser } from "@/app/controller/userController";
 
 interface ProductTabsProps {
   product: Product;
 }
 
+interface RatingWithUser extends Rating {
+  userName: string;
+}
+
 const ProductTabs: FC<ProductTabsProps> = ({ product }) => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [ratings, setRatings] = useState<RatingWithUser[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear().toString();
+    return `${day}/${month}/${year}`;
   };
 
-  // Fake review data
-  const fakeReviews = [
-    {
-      id: 1,
-      rating: 5,
-      comment:
-        "Fabulous Purchase made! I purchased two of these single-seater recliner sofas. They are incredible. They offer good back support and recline to a proper angle to get a good experience.",
-      author: "Alex Smith",
-      location: "California",
-      date: new Date("2024-10-01").toISOString(),
-      certified: true,
-    },
-    {
-      id: 2,
-      rating: 5,
-      comment:
-        "Amazing product! The comfort is unmatched, and the design fits perfectly in my living room. Highly recommend!",
-      author: "Sarah Johnson",
-      location: "Texas",
-      date: new Date("2024-09-15").toISOString(),
-      certified: true,
-    },
-    {
-      id: 3,
-      rating: 4,
-      comment:
-        "Great value for money. The recliner is sturdy, but the assembly took a bit longer than expected.",
-      author: "Michael Brown",
-      location: "New York",
-      date: new Date("2024-08-20").toISOString(),
-      certified: false,
-    },
-    {
-      id: 4,
-      rating: 5,
-      comment:
-        "Fabulous Purchase made! I purchased two of these single-seater recliner sofas. They are incredible. They offer good back support and recline to a proper angle to get a good experience.",
-      author: "Emily Davis",
-      location: "Florida",
-      date: new Date("2024-07-10").toISOString(),
-      certified: true,
-    },
-  ];
+  useEffect(() => {
+    const fetchRatings = async () => {
+      if (activeTab === "reviews") {
+        setIsLoading(true);
+        try {
+          const productRatings = await getRatingsByProduct(product._id);
+          const ratingsWithUsers = await Promise.all(
+            productRatings.map(async (rating) => {
+              const user = await fetchUser(rating.user_id);
+              return {
+                ...rating,
+                userName: user?.username || "Unknown User",
+              };
+            })
+          );
+          setRatings(ratingsWithUsers);
+        } catch (error) {
+          console.error("Failed to fetch ratings:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchRatings();
+  }, [activeTab, product._id]);
 
   return (
     <div>
@@ -86,16 +77,6 @@ const ProductTabs: FC<ProductTabsProps> = ({ product }) => {
           onClick={() => setActiveTab("reviews")}
         >
           Reviews
-        </button>
-        <button
-          className={`pb-2 ${
-            activeTab === "openOrders"
-              ? "text-blue-600 border-b-2 border-blue-600"
-              : "text-gray-500 hover:text-blue-600"
-          }`}
-          onClick={() => setActiveTab("openOrders")}
-        >
-          Open Orders
         </button>
       </div>
 
@@ -159,38 +140,34 @@ const ProductTabs: FC<ProductTabsProps> = ({ product }) => {
         {activeTab === "reviews" && (
           <div>
             <h3 className="text-lg font-semibold text-gray-700">Reviews</h3>
-            <p className="text-sm text-gray-600 mb-4">112 Reviews</p>
-            {fakeReviews.map((review) => (
-              <div key={review.id} className="p-4 mb-4 bg-gray-100 rounded-lg">
-                <div className="flex items-center mb-2">
-                  <span className="text-yellow-500 text-lg">
-                    ★ {review.rating}
-                  </span>
-                  <span className="ml-2 text-gray-800 font-semibold">
-                    {review.comment.split("!")[0]}!
-                  </span>
+            <p className="text-sm text-gray-600 mb-4">
+              {ratings.length} Reviews
+            </p>
+            {isLoading ? (
+              <p className="text-gray-600">Loading reviews...</p>
+            ) : ratings.length > 0 ? (
+              ratings.map((review) => (
+                <div
+                  key={review._id}
+                  className="p-4 mb-4 bg-gray-100 rounded-lg"
+                >
+                  <div className="flex items-center mb-2">
+                    <span className="text-yellow-500 text-lg">
+                      ★ {review.rating}
+                    </span>
+                    <span className="ml-2 text-gray-800 font-semibold">
+                      {review.comment}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    By: {review.userName},{" "}
+                    {formatDate(review.createdAt.toString())}
+                  </p>
                 </div>
-                <p className="text-sm text-gray-600">
-                  {review.comment.split("!").slice(1).join("!").trim()}
-                </p>
-                <p className="text-xs text-gray-500 mt-2">
-                  {review.author}{" "}
-                  {review.certified && (
-                    <span className="text-green-500">ⓒ Certified Buyer</span>
-                  )}
-                  , {review.location} {formatDate(review.date)} ago
-                </p>
-              </div>
-            ))}
-            <a href="#" className="text-sm text-green-600 hover:underline">
-              Load more...
-            </a>
-          </div>
-        )}
-        {activeTab === "openOrders" && (
-          <div>
-            <h3 className="text-lg font-semibold text-gray-700">Open Orders</h3>
-            <p className="text-sm text-gray-600">No open orders available.</p>
+              ))
+            ) : (
+              <p className="text-gray-600">No reviews yet.</p>
+            )}
           </div>
         )}
       </div>
