@@ -1,17 +1,82 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { Order } from "@/app/types/order";
+import { Product } from "@/app/types/product";
+import { OrderDetail } from "@/app/types/order";
+import { User } from "@/app/types/user";
+import { fetchAllOrders, fetchAllOrderDetails } from "@/app/controller/orderController";
+import { fetchAllProducts } from "@/app/controller/productController";
+import { fetchAllUsers } from "@/app/controller/userController";
+import Loading from "@/components/Loading";
+import { toast } from "react-hot-toast";
 
 const AdminPage = () => {
-  const totalStockProducts = [
-    { name: "T-Shirts", quantity: 1200 },
-    { name: "Jeans", quantity: 850 },
-    { name: "Shoes", quantity: 500 },
-    { name: "Accessories", quantity: 300 },
-  ];
-
   const { data: session } = useSession();
+  const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [orderDetails, setOrderDetails] = useState<OrderDetail[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [ordersData, productsData, orderDetailsData] = await Promise.all([
+          fetchAllOrders(),
+          fetchAllProducts(),
+          fetchAllOrderDetails()
+        ]);
+        setOrders(ordersData);
+        setProducts(productsData);
+        setOrderDetails(orderDetailsData);
+      } catch (error) {
+        toast.error("Failed to fetch dashboard data");
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Calculate dashboard metrics
+  const totalRevenue = orders.reduce((sum, order) => sum + order.amount, 0);
+  const totalOrders = orders.length;
+  const successOrders = orders.filter(order => order.status === 1).length;
+  const pendingOrders = orders.filter(order => order.status === 0).length;
+
+  // Get recent transactions (last 5 orders)
+  const recentTransactions = orders
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5);
+
+  // Get product stock information
+  const productStock = products.map(product => ({
+    name: product.name,
+    quantity: product.stock
+  }));
+
+  // Calculate best selling items
+  const bestSellingItems = products.map(product => {
+    const totalSold = orderDetails.reduce((sum, detail) => {
+      const productInOrder = detail.product_List.find(item => item.product_Id === product._id);
+      return sum + (productInOrder?.quantity || 0);
+    }, 0);
+    
+    return {
+      name: product.name,
+      totalSold
+    };
+  })
+  .sort((a, b) => b.totalSold - a.totalSold)
+  .slice(0, 5);
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <>
@@ -31,6 +96,8 @@ const AdminPage = () => {
               <input
                 type="text"
                 placeholder="Search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <svg
@@ -71,19 +138,21 @@ const AdminPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-gray-500 text-sm">
-              Total Balance Your Company
+              Total Revenue
             </h2>
-            <p className="text-2xl font-bold">$124,254.62</p>
-            <p className="text-green-500 text-sm">↑ 8.2%</p>
-            <p className="text-gray-500 text-sm">Compare from last year</p>
+            <p className="text-2xl font-bold">${totalRevenue.toFixed(2)}</p>
+            <p className="text-green-500 text-sm">↑ {((successOrders / totalOrders) * 100).toFixed(1)}%</p>
+            <p className="text-gray-500 text-sm">Success Rate</p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-gray-500 text-sm">Total Income</h2>
-            <p className="text-2xl font-bold">$265,172</p>
+            <h2 className="text-gray-500 text-sm">Total Orders</h2>
+            <p className="text-2xl font-bold">{totalOrders}</p>
+            <p className="text-blue-500 text-sm">{pendingOrders} Pending</p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-gray-500 text-sm">Total Expense</h2>
-            <p className="text-2xl font-bold">$98,284</p>
+            <h2 className="text-gray-500 text-sm">Success Rate</h2>
+            <p className="text-2xl font-bold">{((successOrders / totalOrders) * 100).toFixed(1)}%</p>
+            <p className="text-green-500 text-sm">{successOrders} Completed</p>
           </div>
         </div>
 
@@ -93,53 +162,52 @@ const AdminPage = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Transaction Activity Section */}
             <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-bold mb-4">Transaction Activity</h2>
-              <div className="flex justify-between items-center mb-4">
-                <p className="text-gray-600">Total Transaction</p>
-                <p className="text-gray-600">Success Transaction</p>
-              </div>
-              <div className="h-48 bg-gray-50 rounded-lg p-4">
-                {/* Placeholder for Chart */}
-                <div className="flex justify-between h-full">
-                  {[...Array(12)].map((_, i) => (
-                    <div key={i} className="w-8 bg-blue-200 rounded-t-lg"></div>
-                  ))}
-                </div>
+              <h2 className="text-xl font-bold mb-4">Best Selling Items</h2>
+              <div className="space-y-4">
+                {bestSellingItems.map((item, index) => (
+                  <div key={index} className="flex items-center gap-4">
+                    <div className="w-2/3">
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm font-medium">{item.name}</span>
+                        <span className="text-sm text-gray-500">{item.totalSold} units</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div 
+                          className="bg-blue-600 h-2.5 rounded-full" 
+                          style={{ 
+                            width: `${(item.totalSold / bestSellingItems[0].totalSold) * 100}%` 
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Recent Transaction Section */}
             <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-bold mb-4">Recent Transaction</h2>
+              <h2 className="text-xl font-bold mb-4">Recent Transactions</h2>
               <table className="w-full">
                 <thead>
                   <tr className="text-left text-gray-500">
-                    <th>ID Transaction</th>
-                    <th>Product</th>
-                    <th>Status</th>
+                    <th>Order ID</th>
                     <th>Amount</th>
-                    <th>Action</th>
+                    <th>Status</th>
+                    <th>Date</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b">
-                    <td className="py-4">476 - 893</td>
-                    <td>Premium T-Shirt</td>
-                    <td className="text-green-500">Success</td>
-                    <td>$24.51</td>
-                    <td>
-                      <button className="text-blue-500">View</button>
-                    </td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="py-4">476 - 892</td>
-                    <td>Maxim Polo New</td>
-                    <td className="text-yellow-500">Pending</td>
-                    <td>$14.54</td>
-                    <td>
-                      <button className="text-blue-500">View</button>
-                    </td>
-                  </tr>
+                  {recentTransactions.map((order) => (
+                    <tr key={order._id} className="border-b">
+                      <td className="py-4">{order._id.slice(-6)}</td>
+                      <td>${order.amount.toFixed(2)}</td>
+                      <td className={order.status === 1 ? "text-green-500" : "text-yellow-500"}>
+                        {order.status === 1 ? "Completed" : "Pending"}
+                      </td>
+                      <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -150,42 +218,15 @@ const AdminPage = () => {
             {/* Total All Stock Product Section */}
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-bold mb-4">
-                Total All Stock Product
+                Product Stock
               </h2>
               <div className="space-y-4">
-                {totalStockProducts.map((product, index) => (
+                {productStock.map((product, index) => (
                   <div key={index} className="flex justify-between">
                     <p>{product.name}</p>
                     <p className="text-gray-500">{product.quantity} items</p>
                   </div>
                 ))}
-              </div>
-            </div>
-
-            {/* Top Employees Section */}
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-bold mb-4">Top Employees</h2>
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <p>Alexander Munie</p>
-                  <p className="text-gray-500">Sales 98 Product</p>
-                </div>
-                <div className="flex justify-between">
-                  <p>Dianne Russell</p>
-                  <p className="text-gray-500">Sales 90 Product</p>
-                </div>
-                <div className="flex justify-between">
-                  <p>Marvin McKinney</p>
-                  <p className="text-gray-500">Sales 82 Product</p>
-                </div>
-                <div className="flex justify-between">
-                  <p>Brooklyn Simmons</p>
-                  <p className="text-gray-500">Sales 76 Product</p>
-                </div>
-                <div className="flex justify-between">
-                  <p>B5</p>
-                  <p className="text-gray-500">Sales 78 Product</p>
-                </div>
               </div>
             </div>
           </div>
