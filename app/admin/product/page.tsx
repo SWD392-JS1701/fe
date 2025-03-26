@@ -159,23 +159,8 @@ const ProductsPage: FC = () => {
           <span className="text-gray-800">Products</span>
         </nav>
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="px-2 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-            <span>-</span>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="px-2 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
           <button
-            onClick={openAddModal} // Updated to open the modal
+            onClick={openAddModal}
             className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
           >
             <Plus size={16} className="mr-2" /> Add
