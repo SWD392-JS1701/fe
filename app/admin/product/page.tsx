@@ -11,7 +11,7 @@ import { Product } from "@/app/types/product";
 import { getAllProducts, deleteProduct } from "@/app/services/productService";
 import ProductDrawer from "@/components/ManageProduct/ProductDrawer";
 import EditProductModal from "@/components/ManageProduct/ProductEditModal";
-import ProductAddModal from "@/components/ManageProduct/ProductAddModal"; // Import the new modal
+import ProductAddModal from "@/components/ManageProduct/ProductAddModal";
 
 const ProductsPage: FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -19,7 +19,7 @@ const ProductsPage: FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false); // New state for add modal
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const itemsPerPage = 6;
@@ -32,7 +32,6 @@ const ProductsPage: FC = () => {
     fetchProducts();
   }, []);
 
-  // Filter products by name and date range
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const productDate = new Date(product.expired_date);

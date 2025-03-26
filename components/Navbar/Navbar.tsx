@@ -96,8 +96,12 @@ const Navbar: FC = () => {
       if (session?.user?.id) {
         try {
           const allBookings = await getAllBookingsController();
-          const userBookings = allBookings.filter(booking => booking.user_id === session.user.id);
-          const activeBookings = userBookings.filter(booking => !isPast(new Date(booking.booking_time)));
+          const userBookings = allBookings.filter(
+            (booking) => booking.user_id === session.user.id
+          );
+          const activeBookings = userBookings.filter(
+            (booking) => !isPast(new Date(booking.booking_time))
+          );
           dispatch(setBookingCount(activeBookings.length));
         } catch (error) {
           console.error("Error fetching booking count:", error);
@@ -162,7 +166,7 @@ const Navbar: FC = () => {
                 autoFocus
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyPress}
                 placeholder="Search products, brands (Press Enter to search)"
                 className={`w-full pl-12 pr-10 py-3 border rounded-full focus:outline-none focus:ring-2 ${
                   scrollCount === maxScrollCount

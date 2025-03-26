@@ -51,13 +51,9 @@ const ProfilePage: FC = () => {
 
   const { data: session, status } = useSession();
 
-  // This will handle the redirection if not authenticated
   useAuthRedirect();
 
   useEffect(() => {
-    // console.log("Session Status:", status);
-    // console.log("Session Data:", session);
-
     if (status === "loading") return;
 
     if (!session?.user?.access_token) {
@@ -67,13 +63,6 @@ const ProfilePage: FC = () => {
 
     const getUserProfile = async () => {
       try {
-        // console.log("Calling getUserById with session:", {
-        //   id: session?.user?.id,
-        //   email: session?.user?.email,
-        //   role: session?.user?.role,
-        //   token: session?.user?.access_token ? "present" : "missing",
-        // });
-
         const userData = await getUserById(session);
 
         if (!userData) {
@@ -166,13 +155,6 @@ const ProfilePage: FC = () => {
         return <ViewOrderPage user={user} />;
       case "change-password":
         return <ChangePasswordPage />;
-      case "recently-viewed":
-        return (
-          <div className="p-6 bg-white rounded-lg border">
-            <h2 className="text-2xl font-bold">Recently Viewed</h2>
-            <p>Recently viewed content coming soon...</p>
-          </div>
-        );
       case "my-bookings":
         return (
           <div className="p-6 bg-white rounded-lg border">
