@@ -277,3 +277,47 @@ export const deleteProductType = async (
     );
   }
 };
+
+export const getProductsBySkinType = async (
+  skinType: string
+): Promise<Product[]> => {
+  try {
+    // First get all product types to find the matching skin type
+    const productTypes = await getAllProductTypes();
+    console.log("Available product types:", productTypes);
+
+    // Match exact name (Dry or Oily)
+    const matchingType = productTypes.find(
+      (type) => type.name.toLowerCase() === skinType.toLowerCase()
+    );
+    console.log("Matching type for", skinType, ":", matchingType);
+
+    if (!matchingType) {
+      console.log("No matching product type found");
+      return [];
+    }
+
+    // Then get all products and filter by the matching product type
+    const allProducts = await getAllProducts();
+    console.log("Total products:", allProducts.length);
+    console.log("Looking for products with product_type_id:", matchingType._id);
+
+    const filteredProducts = allProducts.filter((product) => {
+      console.log(
+        "Checking product:",
+        product.name,
+        "with type:",
+        product.product_type_id
+      );
+      return product.product_type_id === matchingType._id;
+    });
+    console.log("Filtered products:", filteredProducts);
+
+    return filteredProducts;
+  } catch (error: any) {
+    console.error("Error fetching products by skin type:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch products by skin type"
+    );
+  }
+};
