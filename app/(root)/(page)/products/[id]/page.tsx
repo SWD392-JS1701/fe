@@ -5,28 +5,39 @@ import { useParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, updateQuantity } from "@/lib/redux/cartSlice";
 import { RootState } from "@/lib/redux/store";
-import { getProductById } from "@/app/services/productService";
-import { Product } from "@/app/types/product";
 import Comment from "@/components/Comment";
+import { Product } from "@/app/types/product";
+import { Rating } from "@/app/types/rating";
+import { getProductById } from "@/app/services/productService";
+import { getRatingsByProduct } from "@/app/services/ratingService";
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const dispatch = useDispatch();
+  const cart = useSelector((state: RootState) => state.cart.items);
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [quantity, setQuantity] = useState<number>(1);
-  const dispatch = useDispatch();
-  const cart = useSelector((state: RootState) => state.cart.items);
+  const [ratings, setRatings] = useState<Rating[]>([]);
 
   useEffect(() => {
-    if (!id) return;
-
-    const fetchProduct = async () => {
-      const data = await getProductById(id as string);
-      setProduct(data);
-      setLoading(false);
+    const fetchData = async () => {
+      if (!id) return;
+      try {
+        const [productData, ratingsData] = await Promise.all([
+          getProductById(id as string),
+          getRatingsByProduct(id as string),
+        ]);
+        setProduct(productData);
+        setRatings(ratingsData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    fetchProduct();
+    fetchData();
   }, [id]);
 
   if (loading) {
@@ -65,6 +76,13 @@ const ProductDetail = () => {
     }
   };
 
+  const averageRating =
+    ratings.length > 0
+      ? (
+          ratings.reduce((acc, curr) => acc + curr.rating, 0) / ratings.length
+        ).toFixed(1)
+      : "0.0";
+
   return (
     <div className="bg-white dark:bg-gray-900 py-12 mt-[120px]">
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -92,7 +110,7 @@ const ProductDetail = () => {
             {/* Rating */}
             <div className="flex items-center mt-4">
               <span className="text-yellow-500 text-2xl font-semibold">
-                ⭐ {product.product_rating.toFixed(1)}
+                ⭐ {averageRating}
               </span>
               <span className="text-gray-600 text-lg ml-3">
                 (Customer Reviews)

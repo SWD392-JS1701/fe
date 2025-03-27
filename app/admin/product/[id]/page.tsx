@@ -1,8 +1,11 @@
 import React, { FC } from "react";
-import { getProductById } from "@/app/services/productService";
 import Image from "next/image";
 import Link from "next/link";
+
 import ProductTabs from "@/components/ManageProduct/ProductTabs";
+import { getProductById } from "@/app/services/productService";
+import { getRatingsByProduct } from "@/app/services/ratingService";
+import { fetchAllOrderDetails } from "@/app/controller/orderController";
 
 interface ProductDetailPageProps {
   params: Promise<{ id: string }>;
@@ -10,7 +13,11 @@ interface ProductDetailPageProps {
 
 const ProductDetailPage: FC<ProductDetailPageProps> = async ({ params }) => {
   const { id } = await params;
-  const product = await getProductById(id);
+  const [product, ratings, orderDetails] = await Promise.all([
+    getProductById(id),
+    getRatingsByProduct(id),
+    fetchAllOrderDetails(),
+  ]);
 
   if (!product) {
     return (
@@ -19,6 +26,20 @@ const ProductDetailPage: FC<ProductDetailPageProps> = async ({ params }) => {
       </div>
     );
   }
+
+  const totalSold = orderDetails.reduce((sum, detail) => {
+    const productInOrder = detail.product_List.find(
+      (item) => item.product_Id === id
+    );
+    return sum + (productInOrder?.quantity || 0);
+  }, 0);
+
+  const averageRating =
+    ratings.length > 0
+      ? (
+          ratings.reduce((acc, curr) => acc + curr.rating, 0) / ratings.length
+        ).toFixed(1)
+      : "0.0";
 
   return (
     <div className="p-30 bg-gray-50 min-h-screen">
@@ -65,11 +86,9 @@ const ProductDetailPage: FC<ProductDetailPageProps> = async ({ params }) => {
           {/* Product Name, Rating, and Sales */}
           <h1 className="text-2xl font-bold text-gray-900">{product.name}</h1>
           <div className="flex items-center gap-3 text-sm">
-            <span className="text-yellow-500">
-              ★ {product.product_rating} Rating
-            </span>
+            <span className="text-yellow-500">★ {averageRating} Rating</span>
             <span className="text-gray-500">•</span>
-            <span className="text-gray-500">2.5K Reviews</span>
+            <span className="text-gray-500">{ratings.length} Reviews</span>
             <span className="text-gray-500">•</span>
             <span className="text-gray-500 flex items-center gap-1">
               <svg
@@ -86,7 +105,7 @@ const ProductDetailPage: FC<ProductDetailPageProps> = async ({ params }) => {
                   d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                 />
               </svg>
-              3560 Sold
+              {totalSold} Sold
             </span>
           </div>
 

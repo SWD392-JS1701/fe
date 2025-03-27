@@ -54,7 +54,7 @@ const ProductAddModal: FC<ProductAddModalProps> = ({ onClose, onCreate }) => {
     stock: 0,
     product_type_id: "",
     image_url: "",
-    supplier_name: "",
+    Supplier: "",
     expired_date: "",
     volume: 0,
   });
@@ -187,7 +187,7 @@ const ProductAddModal: FC<ProductAddModalProps> = ({ onClose, onCreate }) => {
       image_url: imageUrl,
       product_type_id: formData.product_type_id,
       description: formData.description || "",
-      supplier_name: formData.supplier_name || "",
+      Supplier: formData.Supplier || "",
     };
 
     try {
@@ -361,16 +361,16 @@ const ProductAddModal: FC<ProductAddModalProps> = ({ onClose, onCreate }) => {
               {/* Supplier Name */}
               <div className="md:col-span-2">
                 <label
-                  htmlFor="supplier_name"
+                  htmlFor="Supplier"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
                   Supplier Name
                 </label>
                 <Input
                   type="text"
-                  id="supplier_name"
-                  name="supplier_name"
-                  value={formData.supplier_name}
+                  id="Supplier"
+                  name="Supplier"
+                  value={formData.Supplier}
                   onChange={handleChange}
                 />
               </div>

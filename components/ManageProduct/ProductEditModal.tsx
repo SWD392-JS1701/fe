@@ -107,15 +107,11 @@ const EditProductModal: FC<EditProductModalProps> = ({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    const productRating = parseFloat(
-      formData.product_rating?.toString() || "0"
-    );
     const price = parseFloat(formData.price.toString());
     const stock = parseInt(formData.stock.toString(), 10);
     const volume = parseFloat(formData.volume?.toString() || "0");
 
-    if (isNaN(productRating) || isNaN(price) || isNaN(stock) || isNaN(volume)) {
+    if (isNaN(price) || isNaN(stock) || isNaN(volume)) {
       Swal.fire({
         icon: "error",
         title: "Invalid Input",
@@ -177,13 +173,13 @@ const EditProductModal: FC<EditProductModalProps> = ({
     const requestBody: ProductUpdateRequest = {
       name: formData.name,
       price,
-      product_rating: productRating,
       stock,
       volume,
       expired_date: expiredDate.toISOString(),
       image_url: imageUrl,
       product_type_id: formData.product_type_id,
       description: formData.description,
+      Supplier: formData.Supplier,
     };
 
     try {
@@ -348,16 +344,16 @@ const EditProductModal: FC<EditProductModalProps> = ({
               {/* Supplier Name */}
               <div className="md:col-span-2">
                 <label
-                  htmlFor="supplier_name"
+                  htmlFor="Supplier"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
                   Supplier Name
                 </label>
                 <Input
                   type="text"
-                  id="supplier_name"
-                  name="supplier_name"
-                  value={formData.supplier_name || ""}
+                  id="Supplier"
+                  name="Supplier"
+                  value={formData.Supplier || ""}
                   onChange={handleChange}
                 />
               </div>

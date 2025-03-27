@@ -1,19 +1,20 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import { Order } from "@/app/types/order";
-import { Product } from "@/app/types/product";
-import { OrderDetail } from "@/app/types/order";
-import { User } from "@/app/types/user";
-import { fetchAllOrders, fetchAllOrderDetails } from "@/app/controller/orderController";
-import { fetchAllProducts } from "@/app/controller/productController";
-import { fetchAllUsers } from "@/app/controller/userController";
+
 import Loading from "@/components/Loading";
 import { toast } from "react-hot-toast";
 
+import { Order } from "@/app/types/order";
+import { Product } from "@/app/types/product";
+import { OrderDetail } from "@/app/types/order";
+import {
+  fetchAllOrders,
+  fetchAllOrderDetails,
+} from "@/app/controller/orderController";
+import { fetchAllProducts } from "@/app/controller/productController";
+
 const AdminPage = () => {
-  const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -26,7 +27,7 @@ const AdminPage = () => {
         const [ordersData, productsData, orderDetailsData] = await Promise.all([
           fetchAllOrders(),
           fetchAllProducts(),
-          fetchAllOrderDetails()
+          fetchAllOrderDetails(),
         ]);
         setOrders(ordersData);
         setProducts(productsData);
@@ -45,34 +46,40 @@ const AdminPage = () => {
   // Calculate dashboard metrics
   const totalRevenue = orders.reduce((sum, order) => sum + order.amount, 0);
   const totalOrders = orders.length;
-  const successOrders = orders.filter(order => order.status === 1).length;
-  const pendingOrders = orders.filter(order => order.status === 0).length;
+  const successOrders = orders.filter((order) => order.status === 1).length;
+  const pendingOrders = orders.filter((order) => order.status === 0).length;
 
   // Get recent transactions (last 5 orders)
   const recentTransactions = orders
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
     .slice(0, 5);
 
   // Get product stock information
-  const productStock = products.map(product => ({
+  const productStock = products.map((product) => ({
     name: product.name,
-    quantity: product.stock
+    quantity: product.stock,
   }));
 
   // Calculate best selling items
-  const bestSellingItems = products.map(product => {
-    const totalSold = orderDetails.reduce((sum, detail) => {
-      const productInOrder = detail.product_List.find(item => item.product_Id === product._id);
-      return sum + (productInOrder?.quantity || 0);
-    }, 0);
-    
-    return {
-      name: product.name,
-      totalSold
-    };
-  })
-  .sort((a, b) => b.totalSold - a.totalSold)
-  .slice(0, 5);
+  const bestSellingItems = products
+    .map((product) => {
+      const totalSold = orderDetails.reduce((sum, detail) => {
+        const productInOrder = detail.product_List.find(
+          (item) => item.product_Id === product._id
+        );
+        return sum + (productInOrder?.quantity || 0);
+      }, 0);
+
+      return {
+        name: product.name,
+        totalSold,
+      };
+    })
+    .sort((a, b) => b.totalSold - a.totalSold)
+    .slice(0, 5);
 
   if (loading) {
     return <Loading />;
@@ -137,11 +144,11 @@ const AdminPage = () => {
         {/* Total Balance Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-gray-500 text-sm">
-              Total Revenue
-            </h2>
+            <h2 className="text-gray-500 text-sm">Total Revenue</h2>
             <p className="text-2xl font-bold">${totalRevenue.toFixed(2)}</p>
-            <p className="text-green-500 text-sm">↑ {((successOrders / totalOrders) * 100).toFixed(1)}%</p>
+            <p className="text-green-500 text-sm">
+              ↑ {((successOrders / totalOrders) * 100).toFixed(1)}%
+            </p>
             <p className="text-gray-500 text-sm">Success Rate</p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
@@ -151,7 +158,9 @@ const AdminPage = () => {
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-gray-500 text-sm">Success Rate</h2>
-            <p className="text-2xl font-bold">{((successOrders / totalOrders) * 100).toFixed(1)}%</p>
+            <p className="text-2xl font-bold">
+              {((successOrders / totalOrders) * 100).toFixed(1)}%
+            </p>
             <p className="text-green-500 text-sm">{successOrders} Completed</p>
           </div>
         </div>
@@ -169,13 +178,18 @@ const AdminPage = () => {
                     <div className="w-2/3">
                       <div className="flex justify-between mb-1">
                         <span className="text-sm font-medium">{item.name}</span>
-                        <span className="text-sm text-gray-500">{item.totalSold} units</span>
+                        <span className="text-sm text-gray-500">
+                          {item.totalSold} units
+                        </span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
-                        <div 
-                          className="bg-blue-600 h-2.5 rounded-full" 
-                          style={{ 
-                            width: `${(item.totalSold / bestSellingItems[0].totalSold) * 100}%` 
+                        <div
+                          className="bg-blue-600 h-2.5 rounded-full"
+                          style={{
+                            width: `${
+                              (item.totalSold / bestSellingItems[0].totalSold) *
+                              100
+                            }%`,
                           }}
                         ></div>
                       </div>
@@ -202,7 +216,13 @@ const AdminPage = () => {
                     <tr key={order._id} className="border-b">
                       <td className="py-4">{order._id.slice(-6)}</td>
                       <td>${order.amount.toFixed(2)}</td>
-                      <td className={order.status === 1 ? "text-green-500" : "text-yellow-500"}>
+                      <td
+                        className={
+                          order.status === 1
+                            ? "text-green-500"
+                            : "text-yellow-500"
+                        }
+                      >
                         {order.status === 1 ? "Completed" : "Pending"}
                       </td>
                       <td>{new Date(order.createdAt).toLocaleDateString()}</td>
@@ -217,9 +237,7 @@ const AdminPage = () => {
           <div className="space-y-6">
             {/* Total All Stock Product Section */}
             <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-bold mb-4">
-                Product Stock
-              </h2>
+              <h2 className="text-xl font-bold mb-4">Product Stock</h2>
               <div className="space-y-4">
                 {productStock.map((product, index) => (
                   <div key={index} className="flex justify-between">
