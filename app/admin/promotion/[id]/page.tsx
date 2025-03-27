@@ -172,7 +172,7 @@ const PromotionDetailPage = () => {
   }
 
   return (
-    <div className="p-8 min-h-screen bg-gray-50">
+    <div className="p-20 min-h-screen bg-gray-50">
       <div className="mb-6">
         <Link
           href="/admin/promotion"
