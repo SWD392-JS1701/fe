@@ -200,6 +200,11 @@ const CartPage = () => {
       console.log("Payment Response:", paymentResponse);
 
       if (paymentResponse.checkoutUrl) {
+        // Store orderCode in localStorage for verification
+        localStorage.setItem(
+          "lastOrderCode",
+          paymentResponse.orderCode.toString()
+        );
         // Redirect to PayOS checkout page
         window.location.href = paymentResponse.checkoutUrl;
       } else {

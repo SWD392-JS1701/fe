@@ -16,8 +16,16 @@ export interface PaymentResponse {
 }
 
 export interface PaymentStatusResponse {
-  order_Id: string;
-  status: number;
+  id: string;
+  orderCode: number;
+  amount: number;
+  amountPaid: number;
+  amountRemaining: number;
+  status: string;
+  canceledAt: string | null;
+  cancellationReason: string | null;
+  createdAt: string;
+  transactions: any[];
 }
 
 export const createPayment = async (
@@ -40,10 +48,10 @@ export const createPayment = async (
 };
 
 export const getPaymentStatus = async (
-  orderId: string
+  orderCode: string
 ): Promise<PaymentStatusResponse> => {
   try {
-    const response = await axios.get(`${API_URL}/payment/${orderId}`);
+    const response = await axios.get(`${API_URL}/payment/${orderCode}`);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {

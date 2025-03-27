@@ -18,23 +18,29 @@ const PaymentSuccessPage = () => {
   useEffect(() => {
     const checkPaymentStatus = async () => {
       try {
-        // Get orderId from URL query parameters
-        const orderId = searchParams.get("orderId");
-        console.log("OrderId from URL:", orderId);
+        // Get orderCode from URL query parameters
+        const orderCode = searchParams.get("orderCode");
+        console.log("OrderCode from URL:", orderCode);
 
-        if (!orderId) {
+        if (!orderCode) {
           setStatus("error");
-          setError("Order ID not found in URL");
+          setError("Order code not found in URL");
           return;
         }
 
-        const paymentStatus = await getPaymentStatus(orderId);
+        const paymentStatus = await getPaymentStatus(orderCode);
         console.log("Payment Status Response:", paymentStatus);
 
-        // Status 0 means payment successful, 1 means failed
-        if (paymentStatus.status === 0) {
+        // Check if payment is completed based on amountPaid
+        if (
+          paymentStatus.status === "PAID" ||
+          paymentStatus.amountPaid === paymentStatus.amount
+        ) {
           setStatus("success");
           dispatch(clearCart());
+        } else if (paymentStatus.status === "PENDING") {
+          setStatus("error");
+          setError("Payment is still pending. Please complete the payment.");
         } else {
           setStatus("error");
           setError("Payment was not completed successfully. Please try again.");
@@ -86,12 +92,6 @@ const PaymentSuccessPage = () => {
             <p className="mt-2 text-gray-600">Thank you for your purchase.</p>
             <div className="mt-6 space-y-3">
               <Link
-                href="/orders"
-                className="block w-full bg-indigo-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-indigo-700 transition-colors"
-              >
-                View Order
-              </Link>
-              <Link
                 href="/"
                 className="block w-full bg-gray-200 text-gray-800 px-6 py-3 rounded-md font-semibold hover:bg-gray-300 transition-colors"
               >
@@ -119,7 +119,7 @@ const PaymentSuccessPage = () => {
               </svg>
             </div>
             <h2 className="mt-6 text-2xl font-bold text-gray-900">
-              Payment Failed
+              Payment Status
             </h2>
             <p className="mt-2 text-red-600">{error}</p>
             <div className="mt-6 space-y-3">
