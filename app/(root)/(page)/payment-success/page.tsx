@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getPaymentStatus } from "@/app/services/paymentService";
 import { useDispatch } from "react-redux";
-import { clearCart } from "@/lib/redux/cartSlice";
 import Link from "next/link";
 
 const PaymentSuccessPage = () => {
@@ -37,7 +36,6 @@ const PaymentSuccessPage = () => {
           paymentStatus.amountPaid === paymentStatus.amount
         ) {
           setStatus("success");
-          dispatch(clearCart());
         } else if (paymentStatus.status === "PENDING") {
           setStatus("error");
           setError("Payment is still pending. Please complete the payment.");
@@ -123,12 +121,6 @@ const PaymentSuccessPage = () => {
             </h2>
             <p className="mt-2 text-red-600">{error}</p>
             <div className="mt-6 space-y-3">
-              <Link
-                href="/cart"
-                className="block w-full bg-indigo-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-indigo-700 transition-colors"
-              >
-                Return to Cart
-              </Link>
               <Link
                 href="/"
                 className="block w-full bg-gray-200 text-gray-800 px-6 py-3 rounded-md font-semibold hover:bg-gray-300 transition-colors"
