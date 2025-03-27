@@ -30,12 +30,6 @@ const CancelPage = () => {
           </p>
           <div className="mt-6 space-y-3">
             <Link
-              href="/cart"
-              className="block w-full bg-indigo-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-indigo-700 transition-colors"
-            >
-              Return to Cart
-            </Link>
-            <Link
               href="/"
               className="block w-full bg-gray-200 text-gray-800 px-6 py-3 rounded-md font-semibold hover:bg-gray-300 transition-colors"
             >
