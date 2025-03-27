@@ -25,16 +25,30 @@ export interface PaymentStatusResponse {
   canceledAt: string | null;
   cancellationReason: string | null;
   createdAt: string;
-  transactions: any[];
+  transactions: Array<{
+    id: string;
+    amount: number;
+    status: string;
+    createdAt: string;
+  }>;
 }
 
 export const createPayment = async (
-  order_Id: string
+  order_Id: string,
+  amount: number,
+  description: string
 ): Promise<PaymentResponse> => {
   try {
+    // Generate a random 8-digit number for orderCode
+    const orderCode = Math.floor(10000000 + Math.random() * 90000000);
+
     const response = await axios.post(`${API_URL}/payment/create`, {
-      order_Id,
-      status: 0, // Initial status for new payment
+      order_Id: order_Id,
+      amount,
+      description,
+      orderCode,
+      cancelUrl: `${window.location.origin}/cancel`,
+      returnUrl: `${window.location.origin}/payment-success?orderId=${order_Id}`,
     });
     return response.data;
   } catch (error) {
@@ -48,7 +62,7 @@ export const createPayment = async (
 };
 
 export const getPaymentStatus = async (
-  orderCode: string
+  orderCode: number
 ): Promise<PaymentStatusResponse> => {
   try {
     const response = await axios.get(`${API_URL}/payment/${orderCode}`);

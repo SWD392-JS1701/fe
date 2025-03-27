@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { getPaymentStatus } from "@/app/services/paymentService";
 import { useDispatch } from "react-redux";
+import { clearCart } from "@/lib/redux/cartSlice";
 import Link from "next/link";
 
 const PaymentSuccessPage = () => {
@@ -17,28 +17,34 @@ const PaymentSuccessPage = () => {
   useEffect(() => {
     const checkPaymentStatus = async () => {
       try {
-        // Get orderCode from URL query parameters
+        // Get parameters from URL
+        const orderId = searchParams.get("orderId");
+        const paymentStatus = searchParams.get("status");
         const orderCode = searchParams.get("orderCode");
-        console.log("OrderCode from URL:", orderCode);
+        const cancel = searchParams.get("cancel");
 
-        if (!orderCode) {
+        console.log("Payment URL Parameters:", {
+          orderId,
+          paymentStatus,
+          orderCode,
+          cancel,
+        });
+
+        if (!orderId || !orderCode) {
           setStatus("error");
-          setError("Order code not found in URL");
+          setError("Missing required payment information");
           return;
         }
 
-        const paymentStatus = await getPaymentStatus(orderCode);
-        console.log("Payment Status Response:", paymentStatus);
-
-        // Check if payment is completed based on amountPaid
-        if (
-          paymentStatus.status === "PAID" ||
-          paymentStatus.amountPaid === paymentStatus.amount
-        ) {
-          setStatus("success");
-        } else if (paymentStatus.status === "PENDING") {
+        if (cancel === "true") {
           setStatus("error");
-          setError("Payment is still pending. Please complete the payment.");
+          setError("Payment was cancelled");
+          return;
+        }
+
+        if (paymentStatus === "PAID") {
+          setStatus("success");
+          dispatch(clearCart());
         } else {
           setStatus("error");
           setError("Payment was not completed successfully. Please try again.");
@@ -117,7 +123,7 @@ const PaymentSuccessPage = () => {
               </svg>
             </div>
             <h2 className="mt-6 text-2xl font-bold text-gray-900">
-              Payment Status
+              Payment Failed
             </h2>
             <p className="mt-2 text-red-600">{error}</p>
             <div className="mt-6 space-y-3">
