@@ -45,7 +45,11 @@ const ViewOrderPage: FC<{ user: User }> = ({ user }) => {
 
       try {
         const data = await getOrdersByUserId(user.id);
-        setOrders(data);
+        const sortedOrders = data.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        setOrders(sortedOrders);
         const detailsPromises = data.map(async (order) => {
           const details = await getOrderDetailsByOrderId(order._id);
           return { orderId: order._id, details };
@@ -131,64 +135,66 @@ const ViewOrderPage: FC<{ user: User }> = ({ user }) => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-gray-100">
-                <TableHead className="font-semibold text-gray-700">
-                  No.
-                </TableHead>
-                <TableHead className="font-semibold text-gray-700">
-                  Date
-                </TableHead>
-                <TableHead className="font-semibold text-gray-700">
-                  Status
-                </TableHead>
-                <TableHead className="text-right font-semibold text-gray-700">
-                  Total
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {orders.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="text-center text-gray-500 py-4"
-                  >
-                    No orders found.
-                  </TableCell>
+          <div className="max-h-[400px] overflow-y-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-100">
+                  <TableHead className="font-semibold text-gray-700">
+                    No.
+                  </TableHead>
+                  <TableHead className="font-semibold text-gray-700">
+                    Date
+                  </TableHead>
+                  <TableHead className="font-semibold text-gray-700">
+                    Status
+                  </TableHead>
+                  <TableHead className="text-right font-semibold text-gray-700">
+                    Total
+                  </TableHead>
                 </TableRow>
-              ) : (
-                orders.map((order, index) => {
-                  return (
-                    <TableRow
-                      key={order._id}
-                      className="hover:bg-gray-50 cursor-pointer"
-                      onClick={() => handleOrderClick(order)}
+              </TableHeader>
+              <TableBody>
+                {orders.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={5}
+                      className="text-center text-gray-500 py-4"
                     >
-                      <TableCell className="font-medium text-gray-800">
-                        {index + 1}
-                      </TableCell>
-                      <TableCell className="text-gray-700">
-                        {new Date(order.createdAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={getStatusVariant(order.status).variant}
-                          className={getStatusVariant(order.status).className}
-                        >
-                          {getStatusText(order.status)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right text-gray-800">
-                        ${order.amount.toFixed(2)}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
+                      No orders found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  orders.map((order, index) => {
+                    return (
+                      <TableRow
+                        key={order._id}
+                        className="hover:bg-gray-50 cursor-pointer"
+                        onClick={() => handleOrderClick(order)}
+                      >
+                        <TableCell className="font-medium text-gray-800">
+                          {index + 1}
+                        </TableCell>
+                        <TableCell className="text-gray-700">
+                          {new Date(order.createdAt).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={getStatusVariant(order.status).variant}
+                            className={getStatusVariant(order.status).className}
+                          >
+                            {getStatusText(order.status)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right text-gray-800">
+                          ${order.amount.toFixed(2)}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
