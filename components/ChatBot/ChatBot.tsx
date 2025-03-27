@@ -16,6 +16,7 @@ const ChatBot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -86,7 +87,10 @@ const ChatBot: React.FC = () => {
             className="absolute bottom-16 right-0 w-96 bg-white rounded-lg shadow-xl border border-gray-200"
           >
             <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="text-lg font-semibold">Chat with AI Assistant</h3>
+              <div>
+                <h3 className="text-lg font-semibold">Chat with AI Assistant</h3>
+                <p className="text-sm text-gray-500">LumièreSkin AI Assistant</p>
+              </div>
               <button
                 onClick={() => setIsOpen(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -153,9 +157,28 @@ const ChatBot: React.FC = () => {
 
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 flex items-center justify-center"
+        className="w-14 h-14 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 flex items-center justify-center relative"
       >
         <MessageSquare size={24} />
+        {!isOpen && showTooltip && (
+          <div className="absolute bottom-full right-0 mb-2 w-64 bg-white rounded-lg shadow-lg p-3 text-sm text-gray-700">
+            <div className="flex justify-between items-start mb-2">
+              <div className="flex-1 text-center">
+                <p className="font-semibold">LumièreSkin AI Assistant</p>
+              </div>
+              <div 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowTooltip(false);
+                }}
+                className="text-gray-500 hover:text-gray-700 cursor-pointer ml-2"
+              >
+                <X size={16} />
+              </div>
+            </div>
+            <p>Click to chat with our AI assistant for product recommendations and skincare advice</p>
+          </div>
+        )}
       </button>
     </div>
   );
