@@ -44,10 +44,10 @@ const BlogDetail: FC<BlogDetailProps> = async ({ params }) => {
           </h1>
           <div className="flex items-center mb-6">
             <div className="flex-shrink-0">
-              <Link href={`/doctors/${blog.doctor_id._id}`}>
+              <Link href={`/profile/${blog.user_id._id}`}>
                 <span className="sr-only">
                   {blog.author ||
-                    `${blog.doctor_id.first_name} ${blog.doctor_id.last_name}`}
+                    `${blog.user_id.first_name} ${blog.user_id.last_name}`}
                 </span>
                 <img
                   className="h-12 w-12 rounded-full"
@@ -59,11 +59,11 @@ const BlogDetail: FC<BlogDetailProps> = async ({ params }) => {
             <div className="ml-4">
               <p className="text-lg font-medium text-gray-900">
                 <Link
-                  href={`/doctors/${blog.doctor_id._id}`}
+                  href={`/profile/${blog.user_id._id}`}
                   className="hover:underline"
                 >
                   {blog.author ||
-                    `${blog.doctor_id.first_name} ${blog.doctor_id.last_name}`}
+                    `${blog.user_id.first_name} ${blog.user_id.last_name}`}
                 </Link>
               </p>
               <div className="flex space-x-2 text-sm text-gray-500">

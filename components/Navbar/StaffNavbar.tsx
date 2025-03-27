@@ -105,12 +105,6 @@ const StaffNavbar: FC = () => {
                   Check Orders
                 </Link>
                 <Link
-                  href="/staff/schedule"
-                  className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
-                >
-                  Check Schedule
-                </Link>
-                <Link
                   href="/staff/reviews"
                   className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
                 >

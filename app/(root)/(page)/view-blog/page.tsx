@@ -100,7 +100,7 @@ const ViewBlog: FC = () => {
                 <div className="absolute bottom-6 right-6 text-sm text-gray-600 opacity-0 transition-opacity duration-400 ease-in-out group-hover:opacity-100">
                   <span>
                     {blog.author ||
-                      `${blog.doctor_id.first_name} ${blog.doctor_id.last_name}`}
+                      `${blog.user_id.first_name} ${blog.user_id.last_name}`}
                   </span>{" "}
                   •{" "}
                   <time dateTime={blog.created_at}>
