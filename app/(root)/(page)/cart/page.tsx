@@ -184,6 +184,7 @@ const CartPage = () => {
         amount: amountInVND,
       };
       const orderResponse = await createOrder(orderData);
+      console.log("Order Response:", orderResponse);
 
       // Create order details
       const orderDetailData = {
@@ -197,15 +198,14 @@ const CartPage = () => {
       await createOrderDetail(orderDetailData);
 
       // Create payment link with PayOS
-      const paymentResponse = await createPayment(orderResponse._id);
+      const paymentResponse = await createPayment(
+        orderResponse._id,
+        amountInVND,
+        `Thanh toán đơn hàng ${orderResponse._id}`
+      );
       console.log("Payment Response:", paymentResponse);
 
       if (paymentResponse.checkoutUrl) {
-        // Store orderCode in localStorage for verification
-        localStorage.setItem(
-          "lastOrderCode",
-          paymentResponse.orderCode.toString()
-        );
         // Redirect to PayOS checkout page
         window.location.href = paymentResponse.checkoutUrl;
       } else {

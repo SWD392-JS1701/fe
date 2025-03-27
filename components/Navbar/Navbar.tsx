@@ -293,12 +293,6 @@ const Navbar: FC = () => {
                       My Profile
                     </Link>
                     <Link
-                      href="/rewards"
-                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
-                    >
-                      My Rewards
-                    </Link>
-                    <Link
                       href="/my-bookings"
                       className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4 relative"
                     >
@@ -308,18 +302,6 @@ const Navbar: FC = () => {
                           {bookingCount}
                         </span>
                       )}
-                    </Link>
-                    <Link
-                      href="/routine"
-                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
-                    >
-                      My Routine Steps
-                    </Link>
-                    <Link
-                      href="/shop-routine"
-                      className="block py-2 text-md text-gray-800 hover:bg-gray-200 px-4"
-                    >
-                      Shop My Routine
                     </Link>
                     <Link
                       href="/skin-type-quiz"
