@@ -6,11 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/lib/redux/store";
-import {
-  updateQuantity,
-  removeFromCart,
-  clearCart,
-} from "@/lib/redux/cartSlice";
+import { updateQuantity, removeFromCart } from "@/lib/redux/cartSlice";
 
 import {
   Select,
@@ -24,6 +20,7 @@ import Swal from "sweetalert2";
 
 import { Promotion } from "@/app/types/promotion";
 import { createOrder, createOrderDetail } from "@/app/services/orderService";
+import { createPayment } from "@/app/services/paymentService";
 import { getPromotedProductByProductIdController } from "@/app/controller/promotionController";
 import { getUserById } from "@/app/services/userService";
 import { useSession } from "next-auth/react";
@@ -172,40 +169,50 @@ const CartPage = () => {
 
     setLoading(true);
     try {
-      const paymentData = {
+      // Convert USD to VND (approximate rate) and ensure it's an integer
+      const amountInVND = Math.round(totalCost * 100);
+      console.log("Amount in USD:", totalCost);
+      console.log("Amount in VND:", amountInVND);
+
+      // Create order first
+      const orderData = {
         user_Id: session.user.id,
         user_fullname: userInfo.fullname,
         user_telephone: userInfo.telephone,
         user_address: userInfo.address,
-        amount: totalCost,
+        amount: amountInVND,
       };
-      const paymentResponse = await createOrder(paymentData);
+      const orderResponse = await createOrder(orderData);
+
+      // Create order details
       const orderDetailData = {
-        order_Id: paymentResponse._id,
+        order_Id: orderResponse._id,
         product_List: cartItems.map((item) => ({
           name: item.name,
           product_Id: item.id,
           quantity: item.quantity,
         })),
       };
-
       await createOrderDetail(orderDetailData);
 
-      dispatch(clearCart());
-      Swal.fire({
-        icon: "success",
-        title: "Success!",
-        text: "Order placed successfully! Payment processed.",
-        showConfirmButton: false,
-        timer: 1500,
-      });
-    } catch (error: any) {
+      // Create payment link with PayOS
+      const paymentResponse = await createPayment(orderResponse._id);
+      console.log("Payment Response:", paymentResponse);
+
+      if (paymentResponse.checkoutUrl) {
+        // Redirect to PayOS checkout page
+        window.location.href = paymentResponse.checkoutUrl;
+      } else {
+        throw new Error("Failed to create payment link");
+      }
+    } catch (error) {
       Swal.fire({
         icon: "error",
         title: "Error!",
         text:
-          error.message ||
-          "Failed to place order or process payment. Please try again.",
+          error instanceof Error
+            ? error.message
+            : "Failed to process checkout. Please try again.",
         showConfirmButton: true,
       });
     } finally {
