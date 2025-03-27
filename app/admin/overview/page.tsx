@@ -238,7 +238,7 @@ const AdminPage = () => {
             {/* Total All Stock Product Section */}
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-bold mb-4">Product Stock</h2>
-              <div className="space-y-4">
+              <div className="space-y-4 max-h-[650px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                 {productStock.map((product, index) => (
                   <div key={index} className="flex justify-between">
                     <p>{product.name}</p>
