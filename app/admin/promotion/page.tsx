@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { toast } from "react-hot-toast";
-import Swal from "sweetalert2";
 import Link from "next/link";
+import { toast } from "react-hot-toast";
+
+import { Pencil, Trash2 } from "lucide-react";
+import Swal from "sweetalert2";
 
 import {
   getAllPromotionsController,
@@ -165,47 +167,96 @@ const PromotionPage = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {promotions.map((promotion) => (
-            <div
-              key={promotion._id}
-              className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200"
-            >
-              <Link href={`/admin/promotion/${promotion._id}`}>
-                <div className="cursor-pointer">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                    {promotion.title}
-                  </h3>
-                  <p className="text-gray-600 mb-4">{promotion.description}</p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Discount:</span>{" "}
-                    {promotion.discount_percentage}%
-                  </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Date:</span>{" "}
-                    {new Date(promotion.start_date).toLocaleDateString()} to{" "}
-                    {new Date(promotion.end_date).toLocaleDateString()}
-                  </p>
-                </div>
-              </Link>
-              <div className="flex gap-2 mt-4">
-                <button
-                  onClick={() => handleEditPromotion(promotion)}
-                  className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-200"
-                  disabled={loading}
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDeletePromotion(promotion._id)}
-                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200"
-                  disabled={loading}
-                >
-                  Delete
-                </button>
-              </div>
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-xl font-semibold text-gray-800">
+                Promotion Management ({promotions.length} promotions)
+              </h1>
+              <p className="text-sm text-gray-500">
+                All promotions ({promotions.length} items)
+              </p>
             </div>
-          ))}
+          </div>
+
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50 text-gray-600 text-sm">
+                  <th className="p-3">Title</th>
+                  <th className="p-3">Description</th>
+                  <th className="p-3">Discount</th>
+                  <th className="p-3">Start Date</th>
+                  <th className="p-3">End Date</th>
+                  <th className="p-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {promotions.map((promotion) => (
+                  <tr key={promotion._id} className="border-t hover:bg-gray-50">
+                    <td className="p-3">
+                      <Link href={`/admin/promotion/${promotion._id}`}>
+                        <p className="text-gray-800 font-medium hover:text-blue-600">
+                          {promotion.title}
+                        </p>
+                      </Link>
+                    </td>
+                    <td className="p-3">
+                      <p className="text-gray-800">{promotion.description}</p>
+                    </td>
+                    <td className="p-3">
+                      <p className="text-gray-800">
+                        {promotion.discount_percentage}%
+                      </p>
+                    </td>
+                    <td className="p-3">
+                      <p className="text-gray-800">
+                        {new Date(promotion.start_date).toLocaleDateString(
+                          "en-GB",
+                          {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "2-digit",
+                          }
+                        )}
+                      </p>
+                    </td>
+                    <td className="p-3">
+                      <p className="text-gray-800">
+                        {new Date(promotion.end_date).toLocaleDateString(
+                          "en-GB",
+                          {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "2-digit",
+                          }
+                        )}
+                      </p>
+                    </td>
+                    <td className="p-3">
+                      <div className="flex justify-center items-center space-x-2">
+                        <button
+                          onClick={() => handleEditPromotion(promotion)}
+                          className="text-blue-600 hover:text-blue-800"
+                          aria-label="Edit promotion"
+                        >
+                          <Pencil size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeletePromotion(promotion._id)}
+                          className="text-red-600 hover:text-red-800"
+                          aria-label="Delete promotion"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 

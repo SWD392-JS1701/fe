@@ -14,7 +14,6 @@ interface FormData {
 }
 
 const SignUpForm = () => {
-  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     name: "",
     first_name: "",
@@ -25,6 +24,8 @@ const SignUpForm = () => {
     phone: "",
     address: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -82,10 +83,8 @@ const SignUpForm = () => {
         formData.last_name,
         formData.phone,
         formData.address
-        // No role parameter - will use default role for new users
       );
 
-      // Redirect or show success message
       window.location.href = "/sign-in";
     } catch (error: any) {
       setSubmitError(error.message || "Registration failed. Please try again.");
@@ -184,18 +183,24 @@ const SignUpForm = () => {
         )}
       </div>
 
-      <div>
+      <div className="relative">
         <label className="block text-gray-700 font-medium mb-2">
           Confirm Password
         </label>
         <input
-          type="password"
+          type={showConfirmPassword ? "text" : "password"}
           name="confirmPassword"
           value={formData.confirmPassword}
           onChange={handleChange}
           className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-purple-500"
           placeholder="Confirm your password"
         />
+        <div
+          className="absolute inset-y-0 right-0 top-8 pr-3 flex items-center cursor-pointer"
+          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+        >
+          {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+        </div>
         {errors.confirmPassword && (
           <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
         )}
