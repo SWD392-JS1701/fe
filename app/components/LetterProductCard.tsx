@@ -8,6 +8,7 @@ import { RootState } from "@/lib/redux/store";
 import { addToCart, updateQuantity } from "@/lib/redux/cartSlice";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import { formatVND } from "@/app/utils/format";
 
 interface LetterProductCardProps {
   product: Product;
@@ -89,7 +90,7 @@ const LetterProductCard: React.FC<LetterProductCardProps> = ({ product }) => {
 
           <div className="flex items-center justify-between mt-4">
             <span className="font-cursive text-xl text-[#4a3e36]">
-              ${product.price.toFixed(2)}
+              {formatVND(product.price)}
             </span>
 
             <button

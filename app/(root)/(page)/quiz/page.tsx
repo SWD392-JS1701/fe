@@ -40,7 +40,7 @@ const staggerContainer = {
 };
 
 // Animated section component
-const AnimatedSection = ({ children, className = "" }) => (
+const AnimatedSection = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <motion.div
     initial="hidden"
     whileInView="visible"
@@ -53,7 +53,7 @@ const AnimatedSection = ({ children, className = "" }) => (
 );
 
 // Animated routine step component
-const AnimatedRoutineStep = ({ children, className = "" }) => (
+const AnimatedRoutineStep = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <motion.div
     initial="hidden"
     whileInView="visible"
