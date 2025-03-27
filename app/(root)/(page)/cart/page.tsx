@@ -24,6 +24,7 @@ import { createPayment } from "@/app/services/paymentService";
 import { getPromotedProductByProductIdController } from "@/app/controller/promotionController";
 import { getUserById } from "@/app/services/userService";
 import { useSession } from "next-auth/react";
+import { formatVND } from "@/app/utils/format";
 
 const CartPage = () => {
   const dispatch = useDispatch();
@@ -242,7 +243,7 @@ const CartPage = () => {
               Items {totalItems}
             </span>
             <span className="font-semibold text-lg">
-              ${totalPrice.toFixed(2)}
+              {formatVND(totalPrice)}
             </span>
           </div>
           <div>
@@ -255,7 +256,7 @@ const CartPage = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="standard">
-                  Standard shipping - $10.00
+                  Standard shipping - {formatVND(shippingCost)}
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -297,11 +298,16 @@ const CartPage = () => {
                 Applied Promotion: {selectedPromotion.title} -{" "}
                 {selectedPromotion.discount_percentage}% off
               </p>
-              <p className="text-lg font-bold">
-                Discounted Total: ${discountedTotal.toFixed(2)}
-              </p>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Discount</span>
+                <span>-{formatVND(totalPrice - discountedTotal)}</span>
+              </div>
             </div>
           )}
+          <div className="flex justify-between items-center font-bold text-lg">
+            <span>Total</span>
+            <span>{formatVND(discountedTotal)}</span>
+          </div>
         </div>
       );
     }
@@ -402,7 +408,7 @@ const CartPage = () => {
                   <div className="flex justify-between">
                     <p className="text-xl font-bold">{item.name}</p>
                     <p className="text-xl font-bold">
-                      ${item.price.toFixed(2)}
+                      {formatVND(item.price)}
                     </p>
                   </div>
 
@@ -476,7 +482,7 @@ const CartPage = () => {
           <div className="border-t mt-8">
             <div className="flex font-bold justify-between py-6 text-lg uppercase">
               <span>Total cost</span>
-              <span>${totalCost.toFixed(2)}</span>
+              <span>{formatVND(totalCost)}</span>
             </div>
             <Button
               onClick={

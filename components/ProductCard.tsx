@@ -9,6 +9,7 @@ import { RootState } from "@/lib/redux/store";
 import { addToCart, updateQuantity } from "@/lib/redux/cartSlice";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import { formatVND } from "@/app/utils/format";
 
 interface ProductCardProps {
   product: Product;
@@ -85,9 +86,11 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
 
           <div>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-2xl font-bold text-black">
-                ${product.price.toFixed(2)}
-              </span>
+              <div className="mt-2">
+                <p className="text-lg font-semibold text-gray-900">
+                  {formatVND(product.price)}
+                </p>
+              </div>
               <div className="flex items-center">
                 
                 <span className="text-yellow-500 text-2xl font-semibold">

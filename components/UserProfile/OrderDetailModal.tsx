@@ -19,6 +19,7 @@ import {
 import { Order, OrderDetail } from "@/app/types/order";
 import { getOrderDetailsByOrderId } from "@/app/services/orderService";
 import { Loader2 } from "lucide-react";
+import { formatVND } from "@/app/utils/format";
 
 interface OrderDetailModalProps {
   isOpen: boolean;
@@ -138,7 +139,7 @@ const OrderDetailModal: FC<OrderDetailModalProps> = ({
 
           <div className="flex justify-between items-center">
             <p className="text-gray-600">Total Amount:</p>
-            <p className="font-medium text-lg">${order.amount.toFixed(2)}</p>
+            <p className="font-medium text-lg">{formatVND(order.amount)}</p>
           </div>
 
           <div className="mt-4">

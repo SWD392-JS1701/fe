@@ -5,6 +5,7 @@ import NavbarWrapper from "@/components/Navbar/NavbarWrapper";
 
 import Footer from "@/components/Footer";
 import QuizPromo from "@/components/QuizPromo";
+import ChatBot from "@/components/ChatBot/ChatBot";
 
 export default async function page() {
   return (
@@ -20,6 +21,8 @@ export default async function page() {
       <About />
 
       <Footer />
+
+      <ChatBot />
     </div>
   );
 }

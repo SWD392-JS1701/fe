@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { formatVND } from "@/app/utils/format";
 
 import {
   getOrders,
@@ -197,8 +198,8 @@ const StaffOrdersPage = () => {
                       {new Date(order.createdAt).toLocaleString()}
                     </p>
                     <p>
-                      <span className="font-medium">Total Amount:</span> $
-                      {order.amount.toFixed(2)}
+                      <span className="font-medium">Total Amount:</span>{" "}
+                      {formatVND(order.amount)}
                     </p>
                   </div>
                 </div>
@@ -335,7 +336,7 @@ const StaffOrdersPage = () => {
                       {order.user_Id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${order.amount.toFixed(2)}
+                      {formatVND(order.amount)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span

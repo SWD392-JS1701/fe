@@ -13,6 +13,7 @@ import {
   fetchAllOrderDetails,
 } from "@/app/controller/orderController";
 import { fetchAllProducts } from "@/app/controller/productController";
+import { formatVND } from "@/app/utils/format";
 
 const AdminPage = () => {
   const [loading, setLoading] = useState(true);
@@ -145,7 +146,7 @@ const AdminPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-gray-500 text-sm">Total Revenue</h2>
-            <p className="text-2xl font-bold">${totalRevenue.toFixed(2)}</p>
+            <p className="text-2xl font-bold">{formatVND(totalRevenue)}</p>
             <p className="text-green-500 text-sm">
               ↑ {((successOrders / totalOrders) * 100).toFixed(1)}%
             </p>
@@ -215,7 +216,7 @@ const AdminPage = () => {
                   {recentTransactions.map((order) => (
                     <tr key={order._id} className="border-b">
                       <td className="py-4">{order._id.slice(-6)}</td>
-                      <td>${order.amount.toFixed(2)}</td>
+                      <td>{formatVND(order.amount)}</td>
                       <td
                         className={
                           order.status === 1

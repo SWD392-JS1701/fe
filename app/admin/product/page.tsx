@@ -12,6 +12,7 @@ import { getAllProducts, deleteProduct } from "@/app/services/productService";
 import ProductDrawer from "@/components/ManageProduct/ProductDrawer";
 import EditProductModal from "@/components/ManageProduct/ProductEditModal";
 import ProductAddModal from "@/components/ManageProduct/ProductAddModal";
+import { formatVND } from "@/app/utils/format";
 
 const ProductsPage: FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -240,7 +241,7 @@ const ProductsPage: FC = () => {
                     </div>
                   </td>
                   <td className="p-3">
-                    <p className="text-gray-800">${product.price.toFixed(2)}</p>
+                    <p className="text-gray-800">{formatVND(product.price)}</p>
                   </td>
                   <td className="p-3">
                     <p className="text-gray-800">

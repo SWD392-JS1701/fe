@@ -3,6 +3,7 @@ import Image from "next/image";
 import { X } from "lucide-react";
 import { Product } from "@/app/types/product";
 import { motion } from "framer-motion";
+import { formatVND } from "@/app/utils/format";
 
 interface ProductDrawerProps {
   product: Product;
@@ -84,7 +85,7 @@ const ProductDrawer: FC<ProductDrawerProps> = ({ product, onClose }) => {
               <div className="flex justify-between">
                 <span className="text-gray-600">Price</span>
                 <span className="text-gray-800">
-                  ${product.price.toFixed(2)}
+                  {formatVND(product.price)}
                 </span>
               </div>
               <div className="flex justify-between">
