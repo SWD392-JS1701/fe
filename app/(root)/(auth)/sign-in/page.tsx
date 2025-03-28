@@ -89,7 +89,7 @@ const SignIn: FC = () => {
 
       <div className="max-w-md w-full mx-auto bg-white p-8 rounded-lg shadow-lg">
         <h2 className="text-3xl font-bold text-center text-purple-800 mb-6">
-          Login to GlowUp
+          LOGIN
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
