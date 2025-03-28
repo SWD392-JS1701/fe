@@ -198,16 +198,18 @@ const CartPage = () => {
       await createOrderDetail(orderDetailData);
 
       // Create payment link with PayOS
-      const paymentResponse = await createPayment(
+      console.log("Creating payment with order ID:", orderResponse._id);
+      const { payment, status } = await createPayment(
         orderResponse._id,
         amountInVND,
         `Thanh toán đơn hàng ${orderResponse._id}`
       );
-      console.log("Payment Response:", paymentResponse);
+      console.log("Payment Response:", payment);
+      console.log("Initial Payment Status:", status);
 
-      if (paymentResponse.checkoutUrl) {
+      if (payment.checkoutUrl) {
         // Redirect to PayOS checkout page
-        window.location.href = paymentResponse.checkoutUrl;
+        window.location.href = payment.checkoutUrl;
       } else {
         throw new Error("Failed to create payment link");
       }

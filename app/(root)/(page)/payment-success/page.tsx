@@ -1,144 +1,129 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { useDispatch } from "react-redux";
-import { clearCart } from "@/lib/redux/cartSlice";
-import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { checkPayment, getPaymentStatus } from "@/app/services/paymentService";
+import { Button } from "@/components/ui/button";
+import Swal from "sweetalert2";
 
-const PaymentSuccessPage = () => {
+export default function PaymentSuccessPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const dispatch = useDispatch();
-  const [status, setStatus] = useState<"loading" | "success" | "error">(
-    "loading"
-  );
-  const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY = 2000; // 2 seconds
 
-  useEffect(() => {
-    const checkPaymentStatus = async () => {
+  const verifyPayment = async () => {
+    try {
+      const orderId = searchParams.get("orderId");
+      const orderCode = searchParams.get("orderCode");
+
+      if (!orderId || !orderCode) {
+        throw new Error("Missing orderId or orderCode in URL parameters");
+      }
+
+      console.log(
+        "Checking payment for order:",
+        orderId,
+        "orderCode:",
+        orderCode
+      );
+
+      // First try to get status directly from PayOS
       try {
-        // Get parameters from URL
-        const orderId = searchParams.get("orderId");
-        const paymentStatus = searchParams.get("status");
-        const orderCode = searchParams.get("orderCode");
-        const cancel = searchParams.get("cancel");
+        const payosStatus = await getPaymentStatus(parseInt(orderCode));
+        console.log("PayOS Status:", payosStatus);
 
-        console.log("Payment URL Parameters:", {
-          orderId,
-          paymentStatus,
-          orderCode,
-          cancel,
+        if (payosStatus.status === "PAID") {
+          // Update our database with the PAID status
+          await checkPayment(orderId, parseInt(orderCode));
+
+          await Swal.fire({
+            icon: "success",
+            title: "Payment Successful!",
+            text: "Your order has been confirmed.",
+            confirmButtonText: "Continue Shopping",
+          });
+          router.push("/");
+          return;
+        }
+      } catch (payosError) {
+        console.error("Error getting PayOS status:", payosError);
+      }
+
+      // If PayOS status check fails or isn't PAID, check our database
+      const dbStatus = await checkPayment(orderId, parseInt(orderCode));
+      console.log("Database Status:", dbStatus);
+
+      if (dbStatus.status === "PAID") {
+        await Swal.fire({
+          icon: "success",
+          title: "Payment Successful!",
+          text: "Your order has been confirmed.",
+          confirmButtonText: "Continue Shopping",
         });
-
-        if (!orderId || !orderCode) {
-          setStatus("error");
-          setError("Missing required payment information");
-          return;
-        }
-
-        if (cancel === "true") {
-          setStatus("error");
-          setError("Payment was cancelled");
-          return;
-        }
-
-        if (paymentStatus === "PAID") {
-          setStatus("success");
-          dispatch(clearCart());
-        } else {
-          setStatus("error");
-          setError("Payment was not completed successfully. Please try again.");
-        }
-      } catch (error) {
-        console.error("Payment verification error:", error);
-        setStatus("error");
-        setError(
-          error instanceof Error
-            ? error.message
-            : "An error occurred while checking payment status"
+        router.push("/");
+      } else if (dbStatus.status === "PENDING" && retryCount < MAX_RETRIES) {
+        // Retry after delay
+        setRetryCount((prev) => prev + 1);
+        setTimeout(() => {
+          verifyPayment();
+        }, RETRY_DELAY);
+      } else {
+        throw new Error(
+          `Payment verification failed. Status: ${dbStatus.status}`
         );
       }
-    };
+    } catch (error) {
+      console.error("Payment verification error:", error);
 
-    checkPaymentStatus();
-  }, [searchParams, dispatch]);
+      if (retryCount < MAX_RETRIES) {
+        // Retry after delay
+        setRetryCount((prev) => prev + 1);
+        setTimeout(() => {
+          verifyPayment();
+        }, RETRY_DELAY);
+      } else {
+        await Swal.fire({
+          icon: "error",
+          title: "Payment Verification Failed",
+          text: "We couldn't verify your payment status. Please check your order status in your account or contact support.",
+          confirmButtonText: "Check Orders",
+        });
+        router.push("/orders");
+      }
+    } finally {
+      if (retryCount >= MAX_RETRIES) {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    verifyPayment();
+  }, [router, searchParams]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+        <p className="mt-4 text-xl font-semibold">
+          Verifying your payment...{" "}
+          {retryCount > 0 ? `(Attempt ${retryCount}/${MAX_RETRIES})` : ""}
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-        {status === "loading" && (
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-            <p className="mt-4 text-xl font-semibold">Verifying payment...</p>
-          </div>
-        )}
-
-        {status === "success" && (
-          <div className="text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-              <svg
-                className="w-8 h-8 text-green-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M5 13l4 4L19 7"
-                ></path>
-              </svg>
-            </div>
-            <h2 className="mt-6 text-2xl font-bold text-gray-900">
-              Payment Successful!
-            </h2>
-            <p className="mt-2 text-gray-600">Thank you for your purchase.</p>
-            <div className="mt-6 space-y-3">
-              <Link
-                href="/"
-                className="block w-full bg-gray-200 text-gray-800 px-6 py-3 rounded-md font-semibold hover:bg-gray-300 transition-colors"
-              >
-                Continue Shopping
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {status === "error" && (
-          <div className="text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-              <svg
-                className="w-8 h-8 text-red-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                ></path>
-              </svg>
-            </div>
-            <h2 className="mt-6 text-2xl font-bold text-gray-900">
-              Payment Failed
-            </h2>
-            <p className="mt-2 text-red-600">{error}</p>
-            <div className="mt-6 space-y-3">
-              <Link
-                href="/"
-                className="block w-full bg-gray-200 text-gray-800 px-6 py-3 rounded-md font-semibold hover:bg-gray-300 transition-colors"
-              >
-                Continue Shopping
-              </Link>
-            </div>
-          </div>
-        )}
-      </div>
+    <div className="min-h-screen flex flex-col items-center justify-center">
+      <Button
+        onClick={() => router.push("/orders")}
+        className="mt-4 bg-green-500 hover:bg-green-600 text-white"
+      >
+        View Orders
+      </Button>
     </div>
   );
-};
-
-export default PaymentSuccessPage;
+}
