@@ -13,11 +13,26 @@ import {
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
-import { toast } from "react-hot-toast";
 
 import { Doctor } from "../../../types/doctor";
 import { fetchAllDoctors } from "@/app/controller/doctorController";
 import BookingModal from "@/components/BookingModal";
+
+interface RawDoctor {
+  _id: string;
+  user_Id: string;
+  certification?: string;
+  schedule?: string;
+  description?: string;
+  __v?: number;
+  name?: string;
+  yearsOfExperience?: number;
+  availability?: string;
+  specialties?: string[];
+  rating?: number;
+  reviews?: number;
+  contactNumber?: string;
+}
 
 const BookingPage: FC = () => {
   const { data: session } = useSession();
@@ -39,7 +54,7 @@ const BookingPage: FC = () => {
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const mapDoctor = (doctor: any): Doctor => {
+  const mapDoctor = (doctor: RawDoctor): Doctor => {
     let availability = "Morning";
     if (doctor.schedule) {
       if (doctor.schedule.includes("9 AM")) {
@@ -52,9 +67,9 @@ const BookingPage: FC = () => {
     return {
       _id: doctor._id,
       user_Id: doctor.user_Id,
-      certification: doctor.certification,
-      schedule: doctor.schedule,
-      description: doctor.description,
+      certification: doctor.certification || "Not specified",
+      schedule: doctor.schedule || "Not specified",
+      description: doctor.description || "No description available",
       __v: doctor.__v,
       name: doctor.name || `Dr. ${doctor.user_Id}`,
       yearsOfExperience: doctor.yearsOfExperience || 10,
@@ -71,15 +86,14 @@ const BookingPage: FC = () => {
       try {
         setLoading(true);
         setError(null);
-
         const apiDoctors = await fetchAllDoctors();
-
         const mappedDoctors: Doctor[] = apiDoctors.map(mapDoctor);
-
         setDoctors(mappedDoctors);
         setFilteredDoctors(mappedDoctors);
-      } catch (err: any) {
-        setError(err.message || "Failed to load doctors.");
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Unknown error";
+        setError(errorMessage || "Failed to load doctors.");
       } finally {
         setLoading(false);
       }
@@ -115,16 +129,16 @@ const BookingPage: FC = () => {
   const handleBookAppointment = (doctor: Doctor) => {
     if (!session) {
       Swal.fire({
-        title: 'Login Required',
-        text: 'Please login to book an appointment',
-        icon: 'warning',
+        title: "Login Required",
+        text: "Please login to book an appointment",
+        icon: "warning",
         showCancelButton: true,
-        confirmButtonText: 'Login',
-        cancelButtonText: 'Cancel',
-        confirmButtonColor: '#3085d6',
+        confirmButtonText: "Login",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#3085d6",
       }).then((result) => {
         if (result.isConfirmed) {
-          router.push('/sign-in');
+          router.push("/sign-in");
         }
       });
       return;
@@ -139,7 +153,7 @@ const BookingPage: FC = () => {
     setSelectedDoctor(null);
   };
 
-  const handleModalConfirm = (selectedSlot: { date: string; time: string }) => {
+  const handleModalConfirm = () => {
     setIsModalOpen(false);
   };
 
@@ -346,15 +360,13 @@ const BookingPage: FC = () => {
                 <button
                   onClick={() => handleBookAppointment(doctor)}
                   className={`px-4 py-2 rounded-md transition-all duration-200 ${
-                    !session 
-                      ? 'bg-gray-300 text-gray-500'
-                      : 'bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow-md hover:shadow-lg'
+                    !session
+                      ? "bg-gray-300 text-gray-500"
+                      : "bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow-md hover:shadow-lg"
                   }`}
                   disabled={!session}
                 >
-                  {!session 
-                    ? 'Login to Book'
-                    : 'Book Appointment'}
+                  {!session ? "Login to Book" : "Book Appointment"}
                 </button>
               </div>
             </div>

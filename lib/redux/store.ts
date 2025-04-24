@@ -1,5 +1,4 @@
 import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { getUserFromToken } from "@/lib/redux/auth";
 import cartReducer from "./cartSlice";
 import bookingReducer from "./bookingSlice";
 

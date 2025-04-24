@@ -25,6 +25,7 @@ import { getPromotedProductByProductIdController } from "@/app/controller/promot
 import { getUserById } from "@/app/services/userService";
 import { useSession } from "next-auth/react";
 import { formatVND } from "@/app/utils/format";
+import Image from "next/image";
 
 const CartPage = () => {
   const dispatch = useDispatch();
@@ -398,7 +399,7 @@ const CartPage = () => {
               >
                 {/* Product Image */}
                 <div className="w-1/4">
-                  <img
+                  <Image
                     src={item.image_url}
                     alt={item.name}
                     className="w-full h-auto object-cover"
@@ -409,9 +410,7 @@ const CartPage = () => {
                 <div className="w-3/4 pl-4 flex flex-col justify-between">
                   <div className="flex justify-between">
                     <p className="text-xl font-bold">{item.name}</p>
-                    <p className="text-xl font-bold">
-                      {formatVND(item.price)}
-                    </p>
+                    <p className="text-xl font-bold">{formatVND(item.price)}</p>
                   </div>
 
                   {/* Quantity & Remove Button */}

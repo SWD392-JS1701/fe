@@ -56,9 +56,7 @@ const ScheduleSlot: FC<ScheduleSlotProps> = ({ slot }) => {
           </p>
         </div>
       ) : (
-        <p className="text-gray-400 text-sm italic mt-2 flex-1">
-          No schedule
-        </p>
+        <p className="text-gray-400 text-sm italic mt-2 flex-1">No schedule</p>
       )}
     </div>
   );
@@ -66,7 +64,9 @@ const ScheduleSlot: FC<ScheduleSlotProps> = ({ slot }) => {
 
 const SchedulePage: FC = () => {
   const { data: session } = useSession();
-  const [schedule, setSchedule] = useState<DaySchedule[]>(initialSchedule as DaySchedule[]);
+  const [schedule, setSchedule] = useState<DaySchedule[]>(
+    initialSchedule as DaySchedule[]
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentDoctor, setCurrentDoctor] = useState<Doctor | null>(null);
@@ -99,22 +99,26 @@ const SchedulePage: FC = () => {
 
         // Create a mapping of day names to their schedules
         const scheduleMap = new Map(
-          doctorSchedules.map(schedule => [schedule.dayOfWeek.toLowerCase(), schedule])
+          doctorSchedules.map((schedule) => [
+            schedule.dayOfWeek.toLowerCase(),
+            schedule,
+          ])
         );
 
         // Transform the schedule to start from today
-        const transformedSchedule = currentWeekDates.map((date, index) => {
-          const dayName = format(date, 'EEEE');
-          const existingSchedule = scheduleMap.get(dayName.toLowerCase()) as Schedule | undefined;
+        const transformedSchedule = currentWeekDates.map((date) => {
+          const dayName = format(date, "EEEE");
+          const existingSchedule = scheduleMap.get(dayName.toLowerCase()) as
+            | Schedule
+            | undefined;
 
           return {
-            _id: existingSchedule?._id || '',
+            _id: existingSchedule?._id || "",
             day: dayName,
-            slots: initialSchedule[0].slots.map(slot => {
-              const [startTime, endTime] = slot.time.split(' - ');
-              const matchingSlot = existingSchedule?.slots?.find(s => 
-                s.startTime === startTime && 
-                s.endTime === endTime
+            slots: initialSchedule[0].slots.map((slot) => {
+              const [startTime, endTime] = slot.time.split(" - ");
+              const matchingSlot = existingSchedule?.slots?.find(
+                (s) => s.startTime === startTime && s.endTime === endTime
               );
 
               return {
@@ -124,9 +128,9 @@ const SchedulePage: FC = () => {
                 doctorName: matchingSlot?.doctorName || null,
                 specialization: matchingSlot?.specialization || null,
                 status: matchingSlot?.status || "available",
-                date: date
+                date: date,
               };
-            })
+            }),
           };
         });
 
@@ -136,14 +140,16 @@ const SchedulePage: FC = () => {
           Swal.fire({
             icon: "info",
             title: "No Schedule Found",
-            text: "You don't have any scheduled appointments yet.",
+            text: "You do not have any scheduled appointments yet.",
             showConfirmButton: false,
             timer: 1500,
           });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
         console.error("Error fetching data:", error);
-        setError(error.message || "Failed to load data. Please try again.");
+        setError(errorMessage || "Failed to load data. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -198,22 +204,26 @@ const SchedulePage: FC = () => {
           {schedule.map((day, index) => {
             const isToday = index === 0;
             const date = currentWeekDates[index];
-            
+
             return (
-              <div 
-                key={day.day} 
+              <div
+                key={day.day}
                 className={`border-r last:border-r-0 pb-2 ${
-                  isToday ? 'bg-blue-50' : ''
+                  isToday ? "bg-blue-50" : ""
                 }`}
               >
-                <div className={`text-lg font-semibold text-center mb-3 py-2 sticky top-0 ${
-                  isToday ? 'bg-blue-100' : 'bg-gray-50'
-                }`}>
+                <div
+                  className={`text-lg font-semibold text-center mb-3 py-2 sticky top-0 ${
+                    isToday ? "bg-blue-100" : "bg-gray-50"
+                  }`}
+                >
                   <div>{day.day}</div>
-                  <div className={`text-sm ${
-                    isToday ? 'text-blue-600 font-medium' : 'text-gray-600'
-                  }`}>
-                    {date && format(date, 'MMM dd, yyyy')}
+                  <div
+                    className={`text-sm ${
+                      isToday ? "text-blue-600 font-medium" : "text-gray-600"
+                    }`}
+                  >
+                    {date && format(date, "MMM dd, yyyy")}
                   </div>
                 </div>
                 <div className="space-y-3 px-2">

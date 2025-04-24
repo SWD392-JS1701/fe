@@ -119,7 +119,7 @@ const ShopPage = () => {
             </span>
             {searchParams.get("search") && (
               <span className="text-lg font-normal ml-2">
-                for "{searchParams.get("search")}"
+                for &quot;{searchParams.get("search")}&quot;
               </span>
             )}
           </h1>

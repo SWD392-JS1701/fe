@@ -51,11 +51,15 @@ const ChangePasswordPage = () => {
           showConfirmButton: false,
           timer: 1500,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred";
         Swal.fire({
           icon: "error",
           title: "Failed to reset password",
-          text: error.message || "Please try again.",
+          text: errorMessage || "Please try again.",
           showConfirmButton: false,
           timer: 1500,
         });

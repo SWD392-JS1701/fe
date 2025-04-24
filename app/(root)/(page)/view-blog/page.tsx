@@ -4,6 +4,7 @@ import React, { useState, useEffect, FC } from "react";
 import Link from "next/link";
 import { getBlogs } from "@/app/services/blogService";
 import { Blog } from "@/app/types/blog";
+import Image from "next/image";
 
 const ViewBlog: FC = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
@@ -70,7 +71,7 @@ const ViewBlog: FC = () => {
               >
                 {/* Hình ảnh */}
                 <div className="relative h-72 w-full transition-transform duration-400 ease-in-out group-hover:-translate-y-10">
-                  <img
+                  <Image
                     className="h-full w-full object-cover"
                     src="https://images.unsplash.com/photo-1496128858413-b36217c2ce36?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1679&q=80"
                     alt={blog.title}

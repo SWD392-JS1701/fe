@@ -107,7 +107,7 @@ const EmployeePage = () => {
     }
   };
 
-  const handleBlockUser = async (userId: string) => {
+  const handleBlockUser = async () => {
     // try {
     //   await updateExistingUser(userId, { status: "blocked" });
     //   setUsers((prevUsers) =>

@@ -10,6 +10,7 @@ import { Product } from "@/app/types/product";
 import { Rating } from "@/app/types/rating";
 import { getProductById } from "@/app/services/productService";
 import { getRatingsByProduct } from "@/app/services/ratingService";
+import Image from "next/image";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -90,7 +91,7 @@ const ProductDetail = () => {
           {/* Left Section - Product Image */}
           <div className="md:w-1/2">
             <div className="h-[600px] rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-              <img
+              <Image
                 className="w-full h-full object-cover rounded-xl"
                 src={product.image_url}
                 alt={product.name}

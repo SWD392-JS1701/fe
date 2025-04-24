@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { checkPayment, getPaymentStatus } from "@/app/services/paymentService";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ export default function PaymentSuccessPage() {
   const MAX_RETRIES = 3;
   const RETRY_DELAY = 2000; // 2 seconds
 
-  const verifyPayment = async () => {
+  const verifyPayment = useCallback(async () => {
     try {
       const orderId = searchParams.get("orderId");
       const orderCode = searchParams.get("orderCode");
@@ -98,11 +98,11 @@ export default function PaymentSuccessPage() {
         setIsLoading(false);
       }
     }
-  };
+  }, [router, searchParams, retryCount]);
 
   useEffect(() => {
     verifyPayment();
-  }, [router, searchParams]);
+  }, [verifyPayment]);
 
   if (isLoading) {
     return (

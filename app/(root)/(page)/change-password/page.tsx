@@ -52,11 +52,13 @@ const ChangePasswordPage = () => {
           timer: 1500,
         });
         router.push("/sign-in");
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
         Swal.fire({
           icon: "error",
           title: "Failed to reset password",
-          text: error.message || "Please try again.",
+          text: errorMessage || "Please try again.",
           showConfirmButton: false,
           timer: 1500,
         });

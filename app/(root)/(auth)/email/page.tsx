@@ -31,11 +31,13 @@ const EmailPage: FC = () => {
           timer: 1500,
         });
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
       Swal.fire({
         icon: "error",
         title: "Failed to send email",
-        text: error.message,
+        text: errorMessage,
         showConfirmButton: false,
         timer: 1500,
       });

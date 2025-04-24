@@ -71,10 +71,12 @@ const SignIn: FC = () => {
       if (result?.error) {
         setError(result.error);
       }
-    } catch (err: any) {
-      setError(
-        err.message || "An error occurred during login. Please try again."
-      );
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "An error occurred during login. Please try again.";
+      setError(errorMessage);
     } finally {
       setLoading(false);
       setIsSubmitting(false);
@@ -191,7 +193,7 @@ const SignIn: FC = () => {
 
           <div className="text-center mt-4">
             <p className="text-gray-600">
-              Don't have an account?{" "}
+              Do not have an account?{" "}
               <Link
                 href="/sign-up"
                 className="text-purple-600 hover:text-purple-800"

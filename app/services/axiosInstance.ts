@@ -60,7 +60,7 @@ axiosInstance.interceptors.response.use(
         toast.error("Invalid request. Please check your data.");
         break;
       case 403:
-        toast.error("You don't have permission to perform this action.");
+        toast.error("You do not have permission to perform this action.");
         break;
       case 404:
         toast.error("Resource not found.");

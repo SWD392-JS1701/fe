@@ -9,6 +9,7 @@ import { addToCart, updateQuantity } from "@/lib/redux/cartSlice";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { formatVND } from "@/app/utils/format";
+import Image from "next/image";
 
 interface LetterProductCardProps {
   product: Product;
@@ -72,7 +73,7 @@ const LetterProductCard: React.FC<LetterProductCardProps> = ({ product }) => {
         }}
       >
         <div className="relative overflow-hidden rounded-md mb-4 aspect-square">
-          <img
+          <Image
             src={product.image_url}
             alt={product.name}
             className="object-cover w-full h-full transform hover:scale-105 transition-transform duration-300"
